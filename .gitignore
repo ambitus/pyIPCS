@@ -1,0 +1,12 @@
+*.pyc
+logs/*
+.vscode/*
+*.csv
+Pipfile
+Pipfile.lock
+.env
+venv/*
+*.whl
+src/pyipcs.egg-info/*
+build/*
+src/tests/settings.json
