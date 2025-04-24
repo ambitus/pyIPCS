@@ -1,0 +1,4 @@
+* text         git-encoding=utf-8 zos-working-tree-encoding=utf-8 working-tree-encoding=utf-8 eol=lf
+*.txt          git-encoding=utf-8 zos-working-tree-encoding=iso8859-1 working-tree-encoding=utf-8 eol=lf
+.gitattributes git-encoding=utf-8 zos-working-tree-encoding=iso8859-1 working-tree-encoding=utf-8 eol=lf
+.gitignore     git-encoding=utf-8 zos-working-tree-encoding=iso8859-1 working-tree-encoding=utf-8 eol=lf

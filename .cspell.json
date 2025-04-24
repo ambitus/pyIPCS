@@ -1,0 +1,31 @@
+{
+    "dictionaries": [
+        "cspell-babble",
+        "cspell-ipcs_zos",
+        "cspell-other_words",
+        "cspell-python",
+        "cspell-shorthands"
+    ],
+    "dictionaryDefinitions": [
+        {
+            "name": "cspell-babble",
+            "path": ".cspell/cspell-babble.txt"
+        },
+        {
+            "name": "cspell-ipcs_zos",
+            "path": ".cspell/cspell-ipcs_zos.txt"
+        },
+        {
+            "name": "cspell-other_words",
+            "path": ".cspell/cspell-other_words.txt"
+        },
+        {
+            "name": "cspell-python",
+            "path": ".cspell/cspell-python.txt"
+        },
+        {
+            "name": "cspell-shorthands",
+            "path": ".cspell/cspell-shorthands.txt"
+        }
+    ]
+}
