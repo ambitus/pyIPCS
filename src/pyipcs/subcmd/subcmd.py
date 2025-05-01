@@ -30,9 +30,8 @@ class Subcmd:
             File containing subcommand output.
             `None` if `outfile` parameter in constructor was set to `False`
             or if file was deleted with `pyipcs.Subcmd.delete_file()` method.
-        output (str|None):
-            String containing subcommand output.
-            `None` if `outfile` parameter in constructor was set to `True`.
+        output (str):
+            Returns string containing the entire subcommand output.
         keep_file (bool):
             If `True` preserves subcommand output file after program execution.
             If `False` deletes subcommand output file after program execution.
@@ -196,7 +195,7 @@ class Subcmd:
         self.__session_instance_directory = None
         self.__subcmd_output_directory = None
         self.__outfile = None
-        self.__output = None
+        self.__string_output = None
 
         # If outfile parameter is True create directories and store filename in `outfile` attribute
         if outfile:
@@ -242,7 +241,7 @@ class Subcmd:
             # ============================================
             subcmd_response = run_ipcs_subcmd(session, self.subcmd)
             self.__rc = subcmd_response["rc"]
-            self.__output = subcmd_response["output"]
+            self.__string_output = subcmd_response["output"]
 
         # ============================
         # Log Created Subcmd Object
@@ -268,8 +267,8 @@ class Subcmd:
         return self.__str__()
 
     def __getitem__(self, key):
-        if self.output is not None:
-            return self.output[key]
+        if self.__string_output is not None:
+            return self.__string_output[key]
         if self.outfile is None:
             raise RuntimeError("Attempt to reference deleted subcommand output file")
         with (
@@ -283,8 +282,8 @@ class Subcmd:
             return mmap_obj[key : key + 1].decode(self._encoding)
 
     def __len__(self) -> int:
-        if self.output is not None:
-            return len(self.output)
+        if self.__string_output is not None:
+            return len(self.__string_output)
         if self.outfile is None:
             raise RuntimeError("Attempt to reference deleted subcommand output file")
         with (
@@ -321,10 +320,10 @@ class Subcmd:
                 f"Argument 'end' must be of type int, but got {type(start)}"
             )
 
-        if self.output is not None:
+        if self.__string_output is not None:
             if end is None:
-                return self.output.find(substring, start)
-            return self.output.find(substring, start, end)
+                return self.__string_output.find(substring, start)
+            return self.__string_output.find(substring, start, end)
         if self.outfile is None:
             raise RuntimeError("Attempt to reference deleted subcommand output file")
         with (
@@ -363,10 +362,10 @@ class Subcmd:
                 f"Argument 'end' must be of type int, but got {type(start)}"
             )
 
-        if self.output is not None:
+        if self.__string_output is not None:
             if end is None:
-                return self.output.rfind(substring, start)
-            return self.output.rfind(substring, start, end)
+                return self.__string_output.rfind(substring, start)
+            return self.__string_output.rfind(substring, start, end)
         if self.outfile is None:
             raise RuntimeError("Attempt to reference deleted subcommand output file")
         with (
@@ -734,7 +733,7 @@ class Subcmd:
         """
         Attribute output
         """
-        return self.__output
+        return self[:]
 
     @property
     def keep_file(self) -> bool:
