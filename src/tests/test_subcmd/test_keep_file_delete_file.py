@@ -187,7 +187,6 @@ def check_delete_file(test_session, dump_set: bool):
         try:
             subcmd = Subcmd(test_session, test_subcmd, outfile=True)
             assert isinstance(subcmd.outfile, str)
-            assert subcmd.output is None
 
             # =======================================
             # Check if file exists

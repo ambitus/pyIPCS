@@ -59,7 +59,7 @@ def test_no_parameter_outfile():
         "rc": 0,
         "data": {},
         "outfile": subcmd.outfile,
-        "output": None,
+        "output": "TEST OUTPUT",
     }
 
 

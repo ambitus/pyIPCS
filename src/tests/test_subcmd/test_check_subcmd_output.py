@@ -171,7 +171,7 @@ def check_subcmd_output_file(test_session, mock_subcmds):
             assert isinstance(subcmd_file.rc, int)
             assert not subcmd_file.data
 
-            assert subcmd_file.output is None
+            assert subcmd_file.output == mock_subcmd.output
 
             assert subcmd_file[0] == mock_subcmd[0]
             assert subcmd_file[:] == mock_subcmd[:]

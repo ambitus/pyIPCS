@@ -1073,7 +1073,7 @@ __Bases:__ *object*
 
 - __subcmd__ *(str)*: IPCS subcommand that was ran
 - __outfile__ *(str|None)*: File containing subcommand output. `None` if `outfile` parameter in constructor was set to `False` or if file was deleted with `pyipcs.Subcmd.delete_file()` method.
-- __output__ *(str|None)*: String containing subcommand output. `None` if `outfile` parameter in constructor was set to `True`.
+- __output__ *(str)*: Returns string containing the entire subcommand output.
 - __keep_file__ *(bool)*: If `True` preserves subcommand output file after program execution. If `False` deletes subcommand output file after program execution. Editable by user.
 - __rc__ *(int)*: Return code from running subcommand.
 - __data__ *(dict)*: Editable by user to store additional info about a IPCS subcommand. Initially empty.
