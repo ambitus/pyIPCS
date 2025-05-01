@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from ..hex_obj import Hex
 from ..subcmd import Subcmd
+from .hex_util import is_hex
 
 if TYPE_CHECKING:
     from ..session import IpcsSession
@@ -184,6 +185,11 @@ def addr_key(session: IpcsSession, storage_addr: str | int | Hex) -> int | None:
 
     key = list_display.output[list_display.output.find("KEY(") + len("KEY(")]
 
+    # Check if KEY(..) contains valid hex
+    # If not return None
+    if not is_hex(key):
+        return None
+
     return int(key, 16)
 
 
@@ -218,5 +224,10 @@ def addr_fetch_protected(
         return None
 
     fetch = list_display.output[list_display.output.find("KEY(") + len("KEY(") + 1]
+
+    # Check if KEY(..) contains valid hex
+    # If not return None
+    if not is_hex(fetch):
+        return None
 
     return Hex(fetch).check_bit(0)
