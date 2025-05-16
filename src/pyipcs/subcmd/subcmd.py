@@ -5,10 +5,12 @@ Subcmd Object
 from __future__ import annotations
 from typing import TYPE_CHECKING
 import os
-import json
+import textwrap
+from pprint import pformat
 import mmap
 import re
 import warnings
+import copy
 from ..hex_obj import Hex
 from ..error_handling import SessionNotActiveError
 from .subcmd_shell import run_ipcs_subcmd, run_ipcs_subcmd_outfile
@@ -260,11 +262,59 @@ class Subcmd:
             },
         )
 
+    def __pyipcs_json__(self) -> dict:
+        """
+        Convert Subcmd object for JSON format
+
+        Returns:
+            dict: Dictionary representing Subcmd object
+            ```
+                'subcmd' (str)
+                'outfile' (str|None)
+                'output' (str)
+                'keep_file' (bool)
+                'rc' (int)
+                'data' (dict)
+            ```
+        """
+        return {
+            "subcmd": copy.deepcopy(self.subcmd),
+            "outfile": copy.deepcopy(self.outfile),
+            "output": copy.deepcopy(self.output),
+            "keep_file": copy.deepcopy(self.keep_file),
+            "rc": copy.deepcopy(self.rc),
+            "data": copy.deepcopy(self.data),
+        }
+
     def __str__(self) -> str:
-        return json.dumps(self._to_json(), indent=4)
+        return (
+            f"Subcmd(subcmd:'{self.subcmd}',"
+            + " outfile:"
+            + (f"{self.outfile}," if self.outfile is None else f"'{self.outfile}',")
+            + f" rc:{self.rc})"
+        )
 
     def __repr__(self) -> str:
-        return self.__str__()
+        repr_output_title = "output"
+        repr_output = pformat(self.output[:500])
+        if len(self) > 500:
+            repr_output_title = "output(First 500 chars)"
+            repr_output += " [continued...]"
+        return (
+            "Subcmd("
+            + f"\n  subcmd:\n    '{self.subcmd}'"
+            + "\n  outfile:"
+            + (
+                f"\n    {self.outfile}"
+                if self.outfile is None
+                else f"\n    '{self.outfile}'"
+            )
+            + f"\n  rc:\n    {self.rc}"
+            + f"\n  keep_file:\n    {self.keep_file}"
+            + f"\n  {repr_output_title}:\n{textwrap.indent(repr_output, '    ')}"
+            + f"\n  data:\n{textwrap.indent(pformat(self.data), '    ')}"
+            + "\n)"
+        )
 
     def __getitem__(self, key):
         if self.__string_output is not None:
@@ -783,53 +833,6 @@ class Subcmd:
         Directory where subcommand output files are stored
         """
         return self.__subcmd_output_directory
-
-    def _to_json(self) -> dict:
-        """
-        Converts Subcmd object attributes into dictionary.
-        pyipcs.Hex keys and values are replaced with strings.
-
-        Returns:
-            dict: Subcmd object dictionary
-                where pyipcs.Hex keys and values are replaced with strings
-            ```
-                'subcmd' (str)
-                'outfile' (str|None)
-                'output' (str|None)
-                'rc' (int)
-                'data' (dict)
-            ```
-        """
-
-        subcommand_json = {
-            "subcmd": self.subcmd,
-            "outfile": self.outfile,
-            "output": self.output,
-            "rc": self.rc,
-        }
-
-        def data_to_json(data):
-            # pylint: disable=duplicate-code
-            if isinstance(data, dict):
-                return {
-                    data_to_json(key): data_to_json(value)
-                    for key, value in data.items()
-                }
-            if isinstance(data, list):
-                return [data_to_json(item) for item in data]
-            if isinstance(data, (str, int, float, bool, type(None))):
-                return data
-            if isinstance(data, Hex):
-                return data.to_str()
-            raise TypeError(
-                "data dictionary attribute contains invalid json type "
-                + f"- contains type '{type(data)}'"
-            )
-            # pylint: enable=duplicate-code
-
-        subcommand_json["data"] = data_to_json(self.data)
-
-        return subcommand_json
 
     def __del__(self):
         if hasattr(self, "outfile") and self.outfile is not None and not self.keep_file:

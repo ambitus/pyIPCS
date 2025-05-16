@@ -38,9 +38,7 @@ tso "ex  \'{ipcs_subcmd_exec}\'  \'parm1(\'\'{ipcs_subcmd}\'\')\'";
 """
 
 
-def construct_ipcs_shell_script(
-    session: IpcsSession, ipcs_subcmd: str
-) -> str:
+def construct_ipcs_shell_script(session: IpcsSession, ipcs_subcmd: str) -> str:
     """
     Construct string for IPCS command shell script from template.
 
