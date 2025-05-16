@@ -58,9 +58,7 @@ def tso_cmd(
     # Create Dict to fill out string template
     # =========================================
 
-    shell_strings = {
-        "tso_command": tso_command.strip()
-    }
+    shell_strings = {"tso_command": tso_command.strip()}
 
     # =======================================================
     # If there are allocations add them to template strings

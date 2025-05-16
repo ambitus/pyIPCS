@@ -387,9 +387,7 @@ class IpcsSession:
         )
 
         # Run BLSCDDIR EXEC to create DDIR
-        tso_cmd(
-            f"%blscddir dsn({ddir})", allocations=self._allocations
-        )
+        tso_cmd(f"%blscddir dsn({ddir})", allocations=self._allocations)
 
     def create_temp_ddir(self) -> str:
         """
