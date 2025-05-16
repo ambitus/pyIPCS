@@ -1,7 +1,6 @@
 # Contributing To pyIPCS
 
-- __[Getting Started](#getting-started)__
-- __[Creating a Fork of pyIPCS](#creating-a-fork-of-pyipcs)__
+- __[Setting Up Your Development Environment](#setting-up-your-development-environment)__
 - __[How to Submit Your Code Changes](#how-to-submit-your-code-changes)__
 - __[Branch Naming Conventions](#branch-naming-conventions)__
 - __[Running and Creating Tests](#running-and-creating-tests)__
@@ -15,27 +14,23 @@
 ---
 ---
 
-## [Getting Started](./GETTING_STARTED.md)
+## Setting Up Your Development Environment
 
 - __[Back to Top](#contributing-to-pyipcs)__
 
 ---
 
-- Make sure you have followed the prerequisite and install steps in [Getting Started](./GETTING_STARTED.md) before contributing
-
----
----
-
-## Creating a Fork of pyIPCS
-
-- __[Back to Top](#contributing-to-pyipcs)__
-
----
-
-- *In order to contribute code to pyIPCS, you must create a fork of the repository*
-- __[Fork a repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo?tool=cli)__
-  - *Has options for forking with Mac, Windows, and Linux*
-  - *Has options for forking with GitHub CLI, Desktop, and Web browser*
+- __Create a Fork of pyIPCS__
+  - __[Fork a repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo?tool=cli)__
+    - *Has options for forking with Mac, Windows, and Linux*
+    - *Has options for forking with GitHub CLI, Desktop, and Web browser*
+- __[Getting Started](./GETTING_STARTED.md)__
+  - Make sure you have followed the prerequisite and install steps in Getting Started
+- __Run pyIPCS Devlopment Setup Script__
+  - Create a Python virtual enviroment (Optional)
+  - pyIPCS Development Setup script: `dev/setup.sh`
+    - Make script executable and run script
+- __Within your fork open up a [Development Branch](#development-branch-naming-conventions) to begin devlopment__
 
 ---
 ---
@@ -48,10 +43,6 @@
 
 - __*All contributions must be accompanied by a [Developer Certification of Origin (DCO) signoff](https://github.com/openmainframeproject/tsc/blob/master/process/contribution_guidelines.md#developer-certificate-of-origin).*__
   - __*You can include this automatically when you commit a change to your local git repository using `git commit -s`.*__
-
-<br>
-
-- __*The below steps will guide you through submission of your code changes from your [Development Branch](#development-branch-naming-conventions) on your fork, to to the appropriate [Version Branch](#pyipcs-version-branch-naming-conventions) in the main repository*__
 
 <br>
 
@@ -69,13 +60,13 @@ git checkout <development-branch>
 git fetch upstream
 ```
 
-- Rebase onto the target version branch from the main repository
+- Rebase onto the develop branch
 
 ```bash
-git rebase upstream/<version-branch>
+git rebase upstream/develop
 ```
 
-- Open a pull request from that branch to the appropriate __[Version Branch](#pyipcs-version-branch-naming-conventions)__ in the main repository
+- Open a pull request from that branch to the develop branch in the main repository
 
 ---
 ---
@@ -93,10 +84,10 @@ git rebase upstream/<version-branch>
 - `doc/...` *(Branch where non-code related updates are being made)*
 - `exp/...` *(Throwaway branch for experimentation of new tools and functionality)*
 
-### pyIPCS Version Branch Naming Conventions
+### pyIPCS Stable and Latest Builds Branches
 
-- `main` *(Current version of pyIPCS)*
-- `release/...` *(Branch for development of new versions of pyIPCS)*
+- `main` *(Stable - Current version of pyIPCS)*
+- `develop/...` *(Latest - Branch for development of new versions of pyIPCS)*
 
 ---
 ---
@@ -108,20 +99,11 @@ git rebase upstream/<version-branch>
 ---
 
 - __How to run tests: [Tests README](./src/tests/README.md)__
-
-<br>
-
 - __[pytest Documentation](https://docs.pytest.org/en/stable/contents.html)__
-
-<br>
-
 - __While creating tests, please refer to the following files for various settings, fixtures, and helpful mock Subcmd functions/objects to use in your tests:__
   - __`src/tests/conftest.py`__
   - __`src/tests/mock_subcmd.py`__
   - __`src/tests/mock_subcmd_jcl.py`__
-
-<br>
-
 - __pyIPCS tests are located in the [src/tests](./src/tests/) folder__
 
 ---
