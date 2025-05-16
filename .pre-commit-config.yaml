@@ -1,0 +1,22 @@
+repos:
+    
+  - repo: local
+
+    hooks:
+
+      - id: pylint
+        name: Pylint
+        entry: pylint --fail-under=10.0 --rcfile=.pylintrc
+        language: system
+        types: [python]
+        files: ^src/
+        stages: [pre-commit]
+
+      - id: dco-check
+        name: Check DCO Signoff
+        entry: python3 dev/pre-commit/dco_check.py
+        language: system
+        stages: [commit-msg]
+        always_run: true
+
+  
