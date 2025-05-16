@@ -4,19 +4,19 @@
 
 ## Description
 
-- *Details for this feature/issue/update...why is this necessary?*
+Details for this feature/issue/update...why is this necessary?
 
 ## Implementation
 
-- *How was this feature/issue/update implemented?*
+How was this feature/issue/update implemented?
 
 ## Related Issues
 
-- *Include any issues related to this PR and their links*
+Include any issues related to this PR and their links
 
 ## Were There Tests Added?
 
-- *List tests that were added for your feature/issue/update*
+List tests that were added for your feature/issue/update
 
 ---
 
