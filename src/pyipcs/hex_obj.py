@@ -3,6 +3,7 @@ pyIPCS Hex Object
 """
 
 from collections.abc import Iterable
+import copy
 
 
 class Hex:
@@ -128,6 +129,15 @@ class Hex:
         # Insert sign back into value
         if not all(c == "0" for c in self.__value):
             self.__value = sign + self.__value
+
+    def __pyipcs_json__(self) -> str:
+        """
+        Convert Hex object for JSON format
+
+        Returns:
+            str
+        """
+        return copy.deepcopy(self.to_str())
 
     # ==============================
     # Get sign and unsigned values

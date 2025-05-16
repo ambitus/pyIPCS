@@ -4,7 +4,9 @@ Dump Object
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
-import json
+import textwrap
+from pprint import pformat
+import copy
 from .hex_obj import Hex
 from .util import is_dump, dump_header_data
 from .error_handling import (
@@ -33,8 +35,6 @@ class Dump:
     Can create a Dump object using `pyipcs.IpcsSession.init_dump()`
 
     Attributes:
-        session (pyipcs.Session):
-            IPCS Session.
         dsname (str):
             Dump dataset name.
         ddir (str|None):
@@ -308,11 +308,35 @@ class Dump:
             extra={"dsname": self.dsname, "ddir": self.ddir},
         )
 
+    def __pyipcs_json__(self) -> dict:
+        """
+        Convert Dump object for JSON format
+
+        Returns:
+            dict: Dictionary representing Dump object
+            ```
+                'dsname' (str)
+                'ddir' (str)
+                'data' (dict)
+            ```
+        """
+        return {
+            "dsname": copy.deepcopy(self.dsname),
+            "ddir": copy.deepcopy(self.ddir),
+            "data": copy.deepcopy(self.data),
+        }
+
     def __str__(self) -> str:
-        return json.dumps(self._to_json(), indent=4)
+        return f"Dump(dsname:'{self.dsname}', ddir:'{self.ddir}')"
 
     def __repr__(self) -> str:
-        return self.__str__()
+        return (
+            "Dump("
+            + f"\n  dsname:\n    '{self.dsname}'"
+            + f"\n  ddir:\n    '{self.ddir}'"
+            + f"\n  data:\n{textwrap.indent(pformat(self.data), '    ')}"
+            + "\n)"
+        )
 
     def asid_to_jobname(self, asid: Hex | str | int) -> str:
         """
@@ -401,46 +425,3 @@ class Dump:
         Attribute ddir
         """
         return self.__ddir
-
-    def _to_json(self) -> dict:
-        """
-        Converts Dump object attributes into dictionary.
-
-        pyipcs.Hex keys and values are replaced with strings.
-
-        Returns:
-            dict:
-                Dump object dict where pyipcs.Hex keys and values are replaced with strings
-            ```
-                'dsname' (str):
-                    z/OS dump dataset name that IPCS subcommand was ran against.
-                'ddir' (str|None):
-                    Dump directory used to initialize z/OS dump.
-                'data' (dict):
-                    `data` dictionary from Dump object
-            ```
-        """
-        dump_json = {"dsname": self.dsname, "ddir": self.ddir}
-
-        def data_to_json(data):
-            # pylint: disable=duplicate-code
-            if isinstance(data, dict):
-                return {
-                    data_to_json(key): data_to_json(value)
-                    for key, value in data.items()
-                }
-            if isinstance(data, list):
-                return [data_to_json(item) for item in data]
-            if isinstance(data, (str, int, float, bool, type(None))):
-                return data
-            if isinstance(data, Hex):
-                return data.to_str()
-            raise TypeError(
-                "data dictionary attribute contains invalid json type "
-                + f"- contains type '{type(data)}'"
-            )
-            # pylint: enable=duplicate-code
-
-        dump_json["data"] = data_to_json(self.data)
-
-        return dump_json

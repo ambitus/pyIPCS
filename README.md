@@ -13,6 +13,7 @@
   - __[Creating Custom Subcmd Objects](#creating-custom-subcmd-objects)__
   - __[SetDef Custom Subcmd Object](#setdef-custom-subcmd-object)__
   - __[Util Functions](#util-functions)__
+  - __[Converting pyIPCS Objects to JSON](#converting-pyipcs-objects-to-json)__
   - __[pyIPCS Logging](#pyipcs-logging)__
 
 ---
@@ -1376,10 +1377,11 @@ __Bases:__ *pyipcs.Subcmd*
 - __[addr_key](#pyipcsutiladdr_keysession-storage_addr)__
 - __[addr_fetch_protected](#pyipcsutiladdr_fetch_protectedsession-storage_addr)__
 - __[is_hex](#pyipcsutilis_hexhex_str)__
+- __[IpcsJsonEncoder](#class-pyipcsutilipcsjsonencoder)__
 
 ---
 
-### How To Import Util Functions
+### How To Import Util Functionality
 
 ```python
 from pyipcs.util import *
@@ -1565,6 +1567,82 @@ from pyipcs.util import *
 #### Returns
 
 - __*bool*__: `True` if string is hex, `False` if not
+
+---
+
+### *class* pyipcs.util.IpcsJsonEncoder()
+
+__Bases:__ *json.JSONEncoder*
+
+- __[Back To Util Functions](#util-functions)__
+
+#### Description
+
+- Custom pyIPCS JSON Encoder.
+- Can be specified in the `cls` parameter of `json.dump` and `json.dumps` functions to convert `Hex`, `Dump`, and `Subcmd` objects to JSON.
+
+---
+---
+
+## Converting pyIPCS Objects to JSON
+
+- __[Back to Top](#pyipcs-readme)__
+
+---
+
+- pyIPCS objects can be converted to JSON using the [IpcsJsonEncoder](#class-pyipcsutilipcsjsonencoder) object from the `util` library.
+
+<br>
+
+- __Examples:__
+
+```python
+import json
+from pyipcs import Hex, IpcsSession, Subcmd
+from pyipcs.util import IpcsJsonEncoder
+
+# Setup
+dsname = ...
+session = IpcsSession()
+dump = session.init_dump(dsname)
+subcmd = Subcmd(session, "STATUS REGISTERS")
+
+# Convert Hex, Dump, and Subcmd objects to JSON strings
+hex_json = json.dumps( { Hex("1"): Hex("2") }, cls=IpcsJsonEncoder)
+dump_json = json.dumps(dump, cls=IpcsJsonEncoder)
+subcmd_json = json.dumps(subcmd, cls=IpcsJsonEncoder)
+
+# Write Subcmd JSON to file
+with open("output.json", "w") as f:
+    json.dump(subcmd, f, cls=IpcsJsonEncoder)
+```
+
+- `Hex` object keys and values get converted to a string representation for JSON
+
+<br>
+
+- `Dump` JSON:
+
+```python
+{
+  "dsname" (str)
+  "ddir" (str)
+  "data" (dict)
+}
+```
+
+- `Subcmd` JSON
+
+```python
+{
+  "subcmd" (str)
+  "outfile" (str|None)
+  "output" (str),
+  "keep_file" (bool)
+  "rc" (int)
+  "data" (dict)
+}
+```
 
 ---
 ---

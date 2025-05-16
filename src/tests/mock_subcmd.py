@@ -72,9 +72,7 @@ class MockIpcsSession:
 # ================================================================
 
 
-def run_ipcs_subcmd(
-    session: MockIpcsSession, ipcs_subcmd: str
-) -> dict:
+def run_ipcs_subcmd(session: MockIpcsSession, ipcs_subcmd: str) -> dict:
     """
     Mock Function
     """
@@ -157,6 +155,4 @@ class MockSubcmd(Subcmd):
             with patch(
                 "pyipcs.subcmd.subcmd.run_ipcs_subcmd_outfile", run_ipcs_subcmd_outfile
             ):
-                super().__init__(
-                    mock_session, mock_subcmd, outfile, keep_file
-                )
+                super().__init__(mock_session, mock_subcmd, outfile, keep_file)
