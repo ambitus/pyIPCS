@@ -14,7 +14,8 @@ from ..subcmd import Subcmd, SetDef
 from ..pyipcs_logging import PyIPCSLogger
 from ..error_handling import InvalidReturnCodeError, SessionNotActiveError
 from .tso_cmd import tso_cmd, hrecall
-from .exec_contents import IPCSCMD, PYIPEVAL
+
+from .exec_contents import IPCSRUN, PYIPEVAL
 
 
 class IpcsSession:
@@ -780,7 +781,8 @@ class IpcsSession:
 
         Name for EXEC that runs IPCS subcommands
         """
-        return "IPCSCMD"
+        # return "IPCSCMD"
+        return "IPCSRUN"
 
     @property
     def _evaluate_exec_name(self) -> str:
@@ -848,7 +850,8 @@ class IpcsSession:
             # PYIPCS.EXEC
             datasets.write(
                 f"{self._temporary_exec_dsname}({self._ipcs_subcmd_exec_name})",
-                content=IPCSCMD,
+                # content=IPCSCMD,
+                content=IPCSRUN,
             )
             # PYIPCS.SYSEXEC
             datasets.write(
