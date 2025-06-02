@@ -3,16 +3,24 @@ pyIPCS Temporary SYEXEC EXECs
 """
 
 # CLIST to run IPCS Subcommands
-IPCSCMD = """PROC 0 PARM1()
+IPCSRUN = """PROC 0 SUBCMD()
 
 IPCS NOPARM                 /* ENTER THE IPCS SUBCOMMAND */
                             /* TO START AN IPCS SESSION */
 IF &LASTCC>8 THEN EXIT CODE(&MAXCC)
-WRITE PYIPCS_SUBCMD_START                     
-&PARM1
+
+WRITE ___IPCS_SUBCMD___
+WRITE &SUBCMD
+WRITE ___IPCS_SUBCMD___
+
+WRITE ___SUBCMD_START___
+&SUBCMD
 SET &RC = &LASTCC
-WRITE PYIPCS_SUBCMD_RETURN_CODE
-WRITE &RC                                                 
+WRITE ___SUBCMD_END___
+
+WRITE ___SUBCMD_RC_START___
+WRITE &RC
+WRITE ___SUBCMD_RC_END___
 """
 
 # REXX to run evaluate
