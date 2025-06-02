@@ -86,7 +86,7 @@ def check_open_close(test_session):
     # ===============================
     # Check if temporary execs exist
     # ===============================
-    assert "IPCSCMD" in datasets.list_members(
+    assert "IPCSRUN" in datasets.list_members(
         f"{test_session.hlq}.PYIPCS.EXEC",
     )
     assert "PYIPEVAL" in datasets.list_members(

@@ -31,8 +31,8 @@ export SYSEXEC={temporary_sysexec_dsname}{other_sysexec_datasets}
 {allocation_exports}
 
 # Executes temporary IPCS subcommand exec
-# IPCS subcommand exec excutes IPCS subcommand in parm1
-tso "ex  \'{ipcs_subcmd_exec}\'  \'parm1(\'\'{ipcs_subcmd}\'\')\'";
+# IPCS subcommand exec excutes IPCS subcommand in subcmd
+tso "ex  \'{ipcs_subcmd_exec}\'  \'subcmd(\'\'{ipcs_subcmd}\'\')\'";
 
 )
 """
@@ -135,37 +135,28 @@ def run_ipcs_subcmd(session: IpcsSession, ipcs_subcmd: str) -> dict:
     # Parse out subcommand output and return code
     # ===============================================
 
-    # Return code is written the line after PYIPCS_SUBCMD_RETURN_CODE
-    # Subommand output is written between lines PYIPCS_SUBCMD_START and PYIPCS_SUBCMD_RETURN_CODE
-    subcommand_index = shell_output.find("PYIPCS_SUBCMD_START")
-    return_code_index = shell_output.rfind("PYIPCS_SUBCMD_RETURN_CODE")
+    # Return code is written the line after ___SUBCMD_RC_START___
+    # Subommand output is written between lines ___SUBCMD_START___ and ___SUBCMD_END___
+    subcmd_start_index = shell_output.find("___SUBCMD_START___")
+    return_code_index = shell_output.rfind("___SUBCMD_RC_START___")
 
-    if subcommand_index == -1 and return_code_index == -1:
-        raise RuntimeError(
-            "Failed To Find Subcommand Output "
-            + "And Return Code In IPCS Subcommand Shell Script Output\n"
-            + f"\nIPCS Subcommand: {ipcs_subcmd}\n"
-            + f"Shell Output:\n\n {shell_output}\n"
-        )
+    if return_code_index != -1:
+        subcmd_end_index = shell_output.rfind("___SUBCMD_END___", 0, return_code_index)
+    else:
+        subcmd_end_index = -1
 
-    if return_code_index == -1:
+    if subcmd_start_index == -1 or subcmd_end_index == -1 or return_code_index == -1:
         raise RuntimeError(
-            "Failed To Find Return Code In IPCS Subcommand Shell Script Output\n"
+            "Failed To Parse Subcommand Output"
+            +" or Return Code In IPCS Subcommand Shell Script Output\n"
             + f"\nIPCS Subcommand: {ipcs_subcmd}\n"
             + f"\nShell Output:\n\n {shell_output}\n"
-        )
-
-    if subcommand_index == -1:
-        raise RuntimeError(
-            "Failed To Find Subcommand Output In IPCS Subcommand Shell Script Output\n"
-            + f"\nIPCS Subcommand: {ipcs_subcmd}\n"
-            + f"Shell Output:\n\n {shell_output}\n"
         )
 
     return {
         "rc": int(shell_output[return_code_index:].splitlines()[1]),
         "output": shell_output[
-            subcommand_index + len("PYIPCS_SUBCMD_START\n") : return_code_index - 1
+            subcmd_start_index + len("___SUBCMD_START___\n") : (subcmd_end_index - 1)
         ],
     }
 
@@ -258,41 +249,33 @@ def run_ipcs_subcmd_outfile(
                     + f"\nError output: \n\n{process.stderr.read().decode()}\n"
                 )
 
+        # ====================================================
         # Format output and move into subcommand output file
-        outfile_obj_tmp.seek(0)
+        # ====================================================
+
+        # Written Label Checks
         found_subcmd_start = False
-        # Search for PYIPCS_SUBCMD_START and break
+        found_subcmd_end = False
+        found_return_code = False
+
+        outfile_obj_tmp.seek(0)
+
+        # Search for ___SUBCMD_START___ and break
         # The next line will be the start of the output
         for line in outfile_obj_tmp:
-            if "PYIPCS_SUBCMD_START" in line:
+            if "___SUBCMD_START___" in line:
                 found_subcmd_start = True
                 break
 
-        # If we didn't find the subcommand output, delete files and raise error
-        if not found_subcmd_start:
-            outfile_obj_tmp.seek(0)
-            shell_output = outfile_obj_tmp.read()
-            os.remove(filepath)
-            os.remove(tmp_filepath)
-            os.rmdir(tmp_dirpath)
-            raise RuntimeError(
-                "Failed To Find Subcommand Output In IPCS Subcommand Shell Script Output\n"
-                + f"\nIPCS Subcommand: {ipcs_subcmd}\n"
-                + f"\nShell Output:\n\n {shell_output}\n"
-            )
-
-        # Store lines in subcommand output file until you hit PYIPCS_SUBCMD_RETURN_CODE
-        # If next line is PYIPCS_SUBCMD_RETURN_CODE - remove endline character
-        # The next line would then be the return code
-        found_return_code = False
-        subcmd_output_line = outfile_obj_tmp.readline()
-        # If subcmd_output line is PYIPCS_SUBCMD_RETURN_CODE the output is empty do nothing
-        if "PYIPCS_SUBCMD_RETURN_CODE" in subcmd_output_line:
-            found_return_code = True
-        else:
+        # Store lines in subcommand output file until you hit ___SUBCMD_END___
+        # If next line is ___SUBCMD_END___ - remove endline character from final output line
+        # The next line after that would then be ___SUBCMD_RC_START___, then the return code
+        if found_subcmd_start:
+            # Start reading subcmd output
+            subcmd_output_line = outfile_obj_tmp.readline()
             for line in outfile_obj_tmp:
-                if "PYIPCS_SUBCMD_RETURN_CODE" in line:
-                    found_return_code = True
+                if "___SUBCMD_END___" in line:
+                    found_subcmd_end = True
                     if subcmd_output_line[-1] == "\n":
                         outfile_obj.write(subcmd_output_line[:-1])
                     else:
@@ -301,15 +284,23 @@ def run_ipcs_subcmd_outfile(
                 outfile_obj.write(subcmd_output_line)
                 subcmd_output_line = line
 
-        # If we didn't find the return code, delete files and raise error
-        if not found_return_code:
+        # Start reading return code
+        if found_subcmd_end:
+            for line in outfile_obj_tmp:
+                if "___SUBCMD_RC_START___" in line:
+                    found_return_code = True
+                    break
+
+        # If we failed to parse something, delete files and raise error
+        if not found_subcmd_start or not found_subcmd_end or not found_return_code:
             outfile_obj_tmp.seek(0)
             shell_output = outfile_obj_tmp.read()
             os.remove(filepath)
             os.remove(tmp_filepath)
             os.rmdir(tmp_dirpath)
             raise RuntimeError(
-                "Failed To Find Return Code In IPCS Subcommand Shell Script Output\n"
+                "Failed To Parse Subcommand Output"
+                +" or Return Code In IPCS Subcommand Shell Script Output\n"
                 + f"\nIPCS Subcommand: {ipcs_subcmd}\n"
                 + f"\nShell Output:\n\n {shell_output}\n"
             )
@@ -320,5 +311,4 @@ def run_ipcs_subcmd_outfile(
     # Remove temp file and directory before returning
     os.remove(tmp_filepath)
     os.rmdir(tmp_dirpath)
-
     return {"rc": rc, "filepath": filepath}
