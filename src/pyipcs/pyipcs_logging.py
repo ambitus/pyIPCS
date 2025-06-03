@@ -1,5 +1,5 @@
 """
-PyIPCSLogger Object
+IpcsLogger Object
 """
 
 from __future__ import annotations
@@ -110,15 +110,15 @@ class ExcludeLogLevelsFilter(logging.Filter):
 
 
 # ======================
-# PyIPCSLogger Object
+# IpcsLogger Object
 # ======================
 
 
-class PyIPCSLogger:
+class IpcsLogger:
     """
     Logging Object for pyIPCS
 
-    Attribute `logger` of the IpcsSession object is of type `pyipcs.PyIPCSLogger`
+    Attribute `logger` of the IpcsSession object is of type `pyipcs.IpcsLogger`
     and manages logging for the pyIPCS session.
 
     Attributes:
@@ -148,7 +148,7 @@ class PyIPCSLogger:
 
     def __init__(self):
         """
-        Constructor for PyIPCSLogger object
+        Constructor for IpcsLogger object
 
         Creates Logger objects
 
@@ -235,7 +235,7 @@ class PyIPCSLogger:
 
         # If the log level is:
         #   Higher priority than NO_LOG
-        #   The PyIPCSLogger is open for logging
+        #   The IpcsLogger is open for logging
         #   The instance json does not exist
         # Then create instance json
         if (
@@ -337,7 +337,7 @@ class PyIPCSLogger:
         self, message, category, filename, lineno, file=None, line=None
     ):
         """
-        Custom showwarning for PyIPCSLogger
+        Custom showwarning for IpcsLogger
         """
 
         log_record_data = {
@@ -357,7 +357,7 @@ class PyIPCSLogger:
 
     def _custom_excepthook(self, exc_type, exc_value, exc_traceback):
         """
-        Custom excepthook for PyIPCSLogger
+        Custom excepthook for IpcsLogger
         """
 
         # Exclude KeyboardInterrupt

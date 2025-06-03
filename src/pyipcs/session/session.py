@@ -11,7 +11,7 @@ from zoautil_py import exceptions
 from ..hex_obj import Hex
 from ..dump import Dump
 from ..subcmd import Subcmd, SetDef
-from ..pyipcs_logging import PyIPCSLogger
+from ..pyipcs_logging import IpcsLogger
 from ..error_handling import InvalidReturnCodeError, SessionNotActiveError
 from .tso_cmd import tso_cmd, hrecall
 
@@ -36,7 +36,7 @@ class IpcsSession:
             `True` if IPCS session is active, `False` if not active.
         ddir (str|None):
             DDIR that IPCS will use to run subcommands. `None` if session is not active.
-        logger (pyipcs.PyIPCSLogger):
+        logger (pyipcs.IpcsLogger):
             Manages logging for the pyIPCS session.
 
     Methods:
@@ -168,7 +168,7 @@ class IpcsSession:
         # Attribute userid is managed by the property
 
         # Set attribute logger
-        self.__logger = PyIPCSLogger()
+        self.__logger = IpcsLogger()
 
         # Attribute hlq
         if hlq is None:
@@ -724,7 +724,7 @@ class IpcsSession:
         return self.__ddir
 
     @property
-    def logger(self) -> PyIPCSLogger:
+    def logger(self) -> IpcsLogger:
         """
         Attribute logger
         """
