@@ -626,7 +626,7 @@ __Bases:__ *object*
 - __directory__ *(str)*: File system directory where IPCS session directories and files will be placed. These include subcommand output files and other logs.
 - __active__ *(bool)*: `True` if IPCS session is active, `False` if not active.
 - __ddir__ *(str|None)*: DDIR that IPCS will use to run subcommands. `None` if session is not active.
-- __logger__ *(pyipcs.PyIPCSLogger)*: Manages logging for the pyIPCS session.
+- __logger__ *(pyipcs.IpcsLogger)*: Manages logging for the pyIPCS session.
 
 ---
 
@@ -1651,7 +1651,7 @@ with open("output.json", "w") as f:
 
 - __[Back to Top](#pyipcs-readme)__
 - __[Logging Introduction](#logging-introduction)__
-- __[PyIPCSLogger Object](#pyipcslogger-object)__
+- __[IpcsLogger Object](#ipcslogger-object)__
 
 ---
 
@@ -1677,7 +1677,7 @@ with open("output.json", "w") as f:
   - *Between calls of `pyipcs.IpcsSession.open()` and `pyipcs.IpcsSession.close()`*
 <br>
 
-- pyIPCS Logging is managed by the PyIPCSLogger object, which is stored in the attribute `pyipcs.IpcsSession.logger`
+- pyIPCS Logging is managed by the IpcsLogger object, which is stored in the attribute `pyipcs.IpcsSession.logger`
 <br>
 
 - __*All pyIPCS log records are outputted in JSON format*__
@@ -1835,21 +1835,21 @@ session.close()
 
 ---
 
-### PyIPCSLogger Object
+### IpcsLogger Object
 
 - __[Back to pyIPCS Logging](#pyipcs-logging)__
-- __[PyIPCSLogger Methods](#pyipcslogger-methods)__
+- __[IpcsLogger Methods](#ipcslogger-methods)__
 
 ---
 
-### *class* pyipcs.PyIPCSLogger
+### *class* pyipcs.IpcsLogger
 
 __Bases:__ *object*
 
 #### Description
 
 - Logging Object for pyIPCS
-- Attribute `logger` of the IpcsSession object is of type `pyipcs.PyIPCSLogger` and manages logging for the pyIPCS session.
+- Attribute `logger` of the IpcsSession object is of type `pyipcs.IpcsLogger` and manages logging for the pyIPCS session.
 
 #### Attributes
 
@@ -1857,20 +1857,20 @@ __Bases:__ *object*
 
 ---
 
-### PyIPCSLogger Methods
+### IpcsLogger Methods
 
-- __[Back to PyIPCSLogger Object](#pyipcslogger-object)__
-- __[get_console_level](#pyipcsloggerget_console_level)__
-- __[get_directory_level](#pyipcsloggerget_directory_level)__
-- __[set_console_level](#pyipcsloggerset_console_levelnew_level)__
-- __[set_directory_level](#pyipcsloggerset_directory_levelnew_level)__
-- __[log](#pyipcsloggerloglevel-message-extra)__
+- __[Back to IpcsLogger Object](#ipcslogger-object)__
+- __[get_console_level](#ipcsloggerget_console_level)__
+- __[get_directory_level](#ipcsloggerget_directory_level)__
+- __[set_console_level](#ipcsloggerset_console_levelnew_level)__
+- __[set_directory_level](#ipcsloggerset_directory_levelnew_level)__
+- __[log](#ipcsloggerloglevel-message-extra)__
 
 ---
 
-### PyIPCSLogger.get_console_level()
+### IpcsLogger.get_console_level()
 
-- __[Back To PyIPCSLogger Methods](#pyipcslogger-methods)__
+- __[Back To IpcsLogger Methods](#ipcslogger-methods)__
 
 #### Description
 
@@ -1882,9 +1882,9 @@ __Bases:__ *object*
 
 ---
 
-### PyIPCSLogger.get_directory_level()
+### IpcsLogger.get_directory_level()
 
-- __[Back To PyIPCSLogger Methods](#pyipcslogger-methods)__
+- __[Back To IpcsLogger Methods](#ipcslogger-methods)__
 
 #### Description
 
@@ -1896,9 +1896,9 @@ __Bases:__ *object*
 
 ---
 
-### PyIPCSLogger.set_console_level(*new_level*)
+### IpcsLogger.set_console_level(*new_level*)
 
-- __[Back To PyIPCSLogger Methods](#pyipcslogger-methods)__
+- __[Back To IpcsLogger Methods](#ipcslogger-methods)__
 
 #### Description
 
@@ -1914,9 +1914,9 @@ __Bases:__ *object*
 
 ---
 
-### PyIPCSLogger.set_directory_level(*new_level*)
+### IpcsLogger.set_directory_level(*new_level*)
 
-- __[Back To PyIPCSLogger Methods](#pyipcslogger-methods)__
+- __[Back To IpcsLogger Methods](#ipcslogger-methods)__
 
 #### Description
 
@@ -1932,9 +1932,9 @@ __Bases:__ *object*
 
 ---
 
-### PyIPCSLogger.log(*level*, *message*, *extra*)
+### IpcsLogger.log(*level*, *message*, *extra*)
 
-- __[Back To PyIPCSLogger Methods](#pyipcslogger-methods)__
+- __[Back To IpcsLogger Methods](#ipcslogger-methods)__
 
 #### Description
 
