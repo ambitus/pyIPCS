@@ -27,7 +27,7 @@ from ..conftest import NO_TEST_DUMPS, TEST_HLQ
 def test_session_default_records(opened_session):
     """
     Object:
-        PyIPCSLogger
+        IpcsLogger
     Description:
         Test with `SESSION` log level and default session log records.
     """
@@ -96,7 +96,7 @@ def test_session_default_records(opened_session):
 def test_dump_default_records(opened_session, single_test_dump):
     """
     Object:
-        PyIPCSLogger
+        IpcsLogger
     Description:
         Test with `DUMP` log level and default dump log records.
     """
@@ -228,7 +228,7 @@ def test_dump_default_records(opened_session, single_test_dump):
 def test_subcmd_default_records(opened_session, single_test_dump):
     """
     Object:
-        PyIPCSLogger
+        IpcsLogger
     Description:
         Test with `SUBCMD` log level and default subcmd log records.
     """
@@ -303,7 +303,7 @@ def test_subcmd_default_records(opened_session, single_test_dump):
 def test_log_method(opened_session):
     """
     Object:
-        PyIPCSLogger
+        IpcsLogger
     Description:
         Test the `log` method
     """
