@@ -26,10 +26,12 @@
     - *Has options for forking with GitHub CLI, Desktop, and Web browser*
 - __[Getting Started](./GETTING_STARTED.md)__
   - Make sure you have followed the prerequisite and install steps in Getting Started
-- __Run pyIPCS Devlopment Setup Script__
+- __Run pyIPCS Devlopment Setup Scripts__
   - Create a Python virtual enviroment (Optional)
-  - pyIPCS Development Setup script: `dev/setup.sh`
-    - Make script executable and run script
+  - __*Make setup scripts executable and run scripts*__
+    - pyIPCS Install Dependencies Setup script: `./dev/install_setup.sh`
+    - DCO Setup script: `./dev/dco_setup.sh "Your Name" "your_public_github@email.com"`
+    - Add pyIPCS Upstream Setup script: `./dev/upstream_setup.sh`
 - __Within your fork open up a [Development Branch](#development-branch-naming-conventions) to begin devlopment__
 
 ---
