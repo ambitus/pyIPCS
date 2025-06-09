@@ -18,7 +18,7 @@ if [[ -z "$name" || -z "$email" ]]; then
   echo "     git config --local user.name \"Your Name\""
   echo "     git config --local user.email \"you@example.com\""
   echo "Or Run:"
-  echo "     ./dev_scripts/dco_setup.sh"
+  echo "     ./dev/dco_setup.sh \"Your Name\" \"you@example.com\""
   exit 0
 fi
 
