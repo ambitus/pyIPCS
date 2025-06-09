@@ -33,15 +33,3 @@ echo "Pre-Commit Setup"
 echo "--------------------------------"
 
 "$DIR/pre-commit_setup.sh"
-
-echo "--------------------------------"
-echo "DCO Setup"
-echo "--------------------------------"
-
-"$DIR/dco_setup.sh"
-
-echo "--------------------------------"
-echo "pyIPCS Upstream Setup"
-echo "--------------------------------"
-
-"$DIR/add_upstream_setup.sh"
