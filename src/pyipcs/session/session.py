@@ -13,7 +13,7 @@ from ..dump import Dump
 from ..subcmd import Subcmd, SetDef
 from ..pyipcs_logging import IpcsLogger
 from ..error_handling import InvalidReturnCodeError, SessionNotActiveError
-from .tso_cmd import tso_cmd, hrecall
+from ..tso_shell import tsocmd, hrecall
 
 from .exec_contents import IPCSRUN, PYIPEVAL
 
@@ -388,7 +388,7 @@ class IpcsSession:
         )
 
         # Run BLSCDDIR EXEC to create DDIR
-        tso_cmd(f"%blscddir dsn({ddir})", allocations=self._allocations)
+        tsocmd(f"%blscddir dsn({ddir})", allocations=self._allocations)
 
     def create_temp_ddir(self) -> str:
         """
@@ -781,7 +781,6 @@ class IpcsSession:
 
         Name for EXEC that runs IPCS subcommands
         """
-        # return "IPCSCMD"
         return "IPCSRUN"
 
     @property
@@ -821,7 +820,7 @@ class IpcsSession:
         # If DDIR still exists delete
         # ==================================
         if datasets.list_vsam_datasets(ddir):
-            tso_cmd(
+            tsocmd(
                 f"DELETE '{ddir}'",
                 allocations={},
             )
@@ -850,7 +849,6 @@ class IpcsSession:
             # PYIPCS.EXEC
             datasets.write(
                 f"{self._temporary_exec_dsname}({self._ipcs_subcmd_exec_name})",
-                # content=IPCSCMD,
                 content=IPCSRUN,
             )
             # PYIPCS.SYSEXEC

@@ -6,43 +6,21 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import os
 import subprocess
+import copy
+from ..tso_shell import tsocmd, construct_tso_shell_script, CalledTsoProcessError
 
 if TYPE_CHECKING:
     from ..session import IpcsSession
 
-IPCS_SHELL_SCRIPT = """
-# pyIPCS Shell Script
-# Shell Script to run an IPCS Subcommand with specified TSO Allocations
 
-# Use parenthesis around shell commands to create a subshell
-(
-
-# List all DD names in TSOALLOC 
-export TSOALLOC=IPCSDDIR:SYSEXEC{dd_names};
-
-# Must include IPCSDDIR to set DDIR
-export IPCSDDIR={ddir};
-
-# Must include SYSEXEC to include pyIPCS SYSEXEC execs
-export SYSEXEC={temporary_sysexec_dsname}{other_sysexec_datasets}
-
-# Rest of TSO/E allocation specifications export statements
-# Specifications are strings or concatenation of datasets separated by colon
-{allocation_exports}
-
-# Executes temporary IPCS subcommand exec
-# IPCS subcommand exec excutes IPCS subcommand in subcmd
-tso "ex  \'{ipcs_subcmd_exec}\'  \'subcmd(\'\'{ipcs_subcmd}\'\')\'";
-
-)
-"""
+IPCS_EX_SUBCMD = """ex \'{ipcs_subcmd_exec}\' \'subcmd(\'\'{ipcs_subcmd}\'\')\'"""
 
 
 def construct_ipcs_shell_script(session: IpcsSession, ipcs_subcmd: str) -> str:
     """
     Construct string for IPCS command shell script from template.
 
-    IPCS_SHELL_SCRIPT template.
+    IPCS_EX_SUBCMD template.
 
     Args:
         session (pyipcs.IpcsSession)
@@ -51,52 +29,40 @@ def construct_ipcs_shell_script(session: IpcsSession, ipcs_subcmd: str) -> str:
         str: constructed string for IPCS subcommand shell script
     """
     # ===================================================================
-    # Create and fill dict to unpack for IPCS_SHELL_SCRIPT template
+    # Create and fill dict to unpack for IPCS_EX_SUBCMD template
     # ===================================================================
 
     shell_strings = {
-        "ddir": session.ddir,
-        "temporary_sysexec_dsname": session._temporary_sysexec_dsname,
         "ipcs_subcmd_exec": f"{session._temporary_exec_dsname}({session._ipcs_subcmd_exec_name})",
         "ipcs_subcmd": ipcs_subcmd.strip().replace("'", "''''"),
     }
 
     # Parse allocations for shell script separating SYSEXEC datasets
-    shell_strings["dd_names"] = ""
-    shell_strings["allocation_exports"] = ""
-    shell_strings["other_sysexec_datasets"] = ""
+    return IPCS_EX_SUBCMD.format(**shell_strings)
 
-    # If dict is empty do nothing
-    if session._allocations:
-        for dd_name, specification in session._allocations.items():
-            # Special condition for SYSEXEC
-            if dd_name == "SYSEXEC":
-                shell_strings["other_sysexec_datasets"] += ":"
-                shell_strings["other_sysexec_datasets"] += ":".join(specification)
-                # Skip other conditions to next DD name
-                continue
-            # If DD name is not SYSEXEC add to TSOALLOC
-            shell_strings["dd_names"] += f":{dd_name}"
+def construct_allocations(session: IpcsSession) -> dict[str, str | list[str]]:
+    """
+    Construct allocations for running the IPCS subcommand
 
-            # Specifications for TSO Allocations can be strings
-            # or a concatenation of datasets in a list
-            # Concatenation of lists converted to string of datasets separated by colons
-            if isinstance(specification, str):
-                shell_strings[
-                    "allocation_exports"
-                ] += f'export {dd_name}="{specification}";\n'
-            elif isinstance(specification, list):
-                specification_string = ":".join(specification)
-                shell_strings[
-                    "allocation_exports"
-                ] += f"export {dd_name}={specification_string};\n"
-            else:
-                raise TypeError(
-                    f"DD name {dd_name} specification "
-                    + f"must be of type str or list, got {type(specification)}"
-                )
+    Args:
+        session (pyipcs.IpcsSession)
+    Returns:
+        str: constructed string for IPCS subcommand shell script
+    """
 
-    return IPCS_SHELL_SCRIPT.format(**shell_strings)
+    allocations_copy = copy.deepcopy(session.get_allocations())
+
+    allocations_copy["IPCSDDIR"] = [session.ddir]
+    allocations_copy["SYSEXEC"] = [session._temporary_sysexec_dsname]
+
+    if "SYSEXEC" in session.get_allocations():
+        allocations_sysexec = copy.deepcopy(session.get_allocations()["SYSEXEC"])
+        if isinstance(allocations_sysexec, str):
+            allocations_copy["SYSEXEC"].append(allocations_sysexec)
+        else:
+            allocations_copy["SYSEXEC"].extend(allocations_sysexec)
+
+    return allocations_copy
 
 
 def run_ipcs_subcmd(session: IpcsSession, ipcs_subcmd: str) -> dict:
@@ -114,22 +80,14 @@ def run_ipcs_subcmd(session: IpcsSession, ipcs_subcmd: str) -> dict:
         ```
     """
     # =========================================================
-    # Fill out IPCS_SHELL_SCRIPT template and run IPCS command
+    # Fill out IPCS_EX_SUBCMD template and run IPCS command
     # =========================================================
-    try:
-        shell_output = subprocess.check_output(
-            construct_ipcs_shell_script(session, ipcs_subcmd),
-            shell=True,
-            encoding="ISO-8859-1",
-            stderr=subprocess.STDOUT,
-        )
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError(
-            "Subprocess Error - Calling IPCS Subcommand CLIST\n"
-            + f"\nIPCS Subcommand: {ipcs_subcmd}\n"
-            + f"\nReturn Code: {e.returncode}\n"
-            + f"\nError output:\n\n {e.output}\n"
-        ) from e
+
+    shell_output = tsocmd(
+        construct_ipcs_shell_script(session, ipcs_subcmd),
+        construct_allocations(session),
+        omvs=True
+    )["output"]
 
     # ===============================================
     # Parse out subcommand output and return code
@@ -148,7 +106,7 @@ def run_ipcs_subcmd(session: IpcsSession, ipcs_subcmd: str) -> dict:
     if subcmd_start_index == -1 or subcmd_end_index == -1 or return_code_index == -1:
         raise RuntimeError(
             "Failed To Parse Subcommand Output"
-            +" or Return Code In IPCS Subcommand Shell Script Output\n"
+            + " or Return Code In IPCS Subcommand Shell Script Output\n"
             + f"\nIPCS Subcommand: {ipcs_subcmd}\n"
             + f"\nShell Output:\n\n {shell_output}\n"
         )
@@ -165,7 +123,6 @@ def run_ipcs_subcmd_outfile(
     session: IpcsSession,
     ipcs_subcmd: str,
     filepath: str,
-    encoding: str = "cp1047",
 ) -> dict:
     """
     Run IPCS Subcommand Shell Script and save output to a file.
@@ -190,6 +147,8 @@ def run_ipcs_subcmd_outfile(
     # ===========================================
     # Create File and if exists create copy file
     # ===========================================
+
+    encoding = "cp1047"
 
     # Split filepath (path/to/my/dir/myfile.txt) into:
     #   Path to the directory (path/to/my/dir/)
@@ -223,6 +182,12 @@ def run_ipcs_subcmd_outfile(
     # Format output and move into subcommand output file
     # ===============================================================
 
+    shell_script = construct_tso_shell_script(
+        tso_command=construct_ipcs_shell_script(session, ipcs_subcmd),
+        allocations=construct_allocations(session),
+        omvs = True
+    )
+
     with (
         open(filepath, "w", encoding=encoding) as outfile_obj,
         open(tmp_filepath, "w+", encoding=encoding) as outfile_obj_tmp,
@@ -230,7 +195,7 @@ def run_ipcs_subcmd_outfile(
         # Run IPCS Subcommand
         # Place unformatted IPCS subcommand CLIST output into tmp file
         with subprocess.Popen(
-            construct_ipcs_shell_script(session, ipcs_subcmd),
+            shell_script,
             shell=True,
             stdout=outfile_obj_tmp,
             stderr=subprocess.PIPE,
@@ -238,15 +203,13 @@ def run_ipcs_subcmd_outfile(
         ) as process:
             process.wait()
             if process.returncode != 0:
-                os.remove(filepath)
                 os.remove(tmp_filepath)
                 os.rmdir(tmp_dirpath)
-                raise RuntimeError(
-                    "Subprocess Error - Calling IPCS Subcommand CLIST For Outfile\n"
-                    + f"\nIPCS Subcommand: {ipcs_subcmd}\n"
-                    + f"\nWriting To Tmp File:{tmp_filepath}"
-                    + f"\nReturn Code: {process.returncode}\n"
-                    + f"\nError output: \n\n{process.stderr.read().decode()}\n"
+                raise CalledTsoProcessError(
+                    construct_ipcs_shell_script(session, ipcs_subcmd),
+                    0,
+                    process.returncode,
+                    process.stderr.read() if process.stderr is not None else None,
                 )
 
         # ====================================================
@@ -300,7 +263,7 @@ def run_ipcs_subcmd_outfile(
             os.rmdir(tmp_dirpath)
             raise RuntimeError(
                 "Failed To Parse Subcommand Output"
-                +" or Return Code In IPCS Subcommand Shell Script Output\n"
+                + " or Return Code In IPCS Subcommand Shell Script Output\n"
                 + f"\nIPCS Subcommand: {ipcs_subcmd}\n"
                 + f"\nShell Output:\n\n {shell_output}\n"
             )
