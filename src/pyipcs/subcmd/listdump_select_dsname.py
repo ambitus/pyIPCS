@@ -21,21 +21,21 @@ class ListdumpSelectDsname(Subcmd):
     Attributes:
         data (dict):
         ```
-            'storage_areas' (dict):
+            'storage_areas' (list[dict]):
                 Info about storage areas included in the dump.
-                    Hex(ASID) (dict)
-                        'total_bytes' (pyipcs.Hex|None) :
-                            Total number of bytes dumped for ASID in hex.
-                            None if total_bytes for ASID is not defined in 'LISTDUMP'.
-                            Does not include dataspace or sumdump bytes.
-                        'sumdump' (pyipcs.Hex):
-                            Number of SUMMARY DUMP Data bytes dumped in hex.
-                        'dataspaces' (dict):
-                            {
-                                str(Dataspace Name)
-                                :
-                                Hex(Number of bytes dumped for dataspace in hex)
-                            }
+                    'asid' (pyipcs.Hex)
+                    'total_bytes' (pyipcs.Hex|None) :
+                        Total number of bytes dumped for ASID in hex.
+                        None if total_bytes for ASID is not defined in 'LISTDUMP'.
+                        Does not include dataspace or sumdump bytes.
+                    'sumdump' (pyipcs.Hex):
+                        Number of SUMMARY DUMP Data bytes dumped in hex.
+                    'dataspaces' (dict):
+                        {
+                            str(Dataspace Name)
+                            :
+                            Hex(Number of bytes dumped for dataspace in hex)
+                        }
         ```
 
     Methods:
@@ -87,7 +87,7 @@ class ListdumpSelectDsname(Subcmd):
             keep_file=keep_file,
         )
 
-        self.data["storage_areas"] = {}
+        self.data["storage_areas"] = []
 
         # =================================================================
         # Get data about storage areas from various summaries in LISTDUMP
@@ -121,34 +121,36 @@ class ListdumpSelectDsname(Subcmd):
                 asid_end = storage_summary_line.find("')", asid_start)
                 asid = Hex(storage_summary_line[asid_start:asid_end].replace("_", ""))
 
-                # Add standard ASID key value pair if it is not in data
-                if asid not in self.data["storage_areas"]:
-                    self.data["storage_areas"][asid] = {}
-                    self.data["storage_areas"][asid]["total_bytes"] = None
-                    self.data["storage_areas"][asid]["sumdump"] = Hex("0")
-                    self.data["storage_areas"][asid]["dataspaces"] = {}
+                # Add standard ASID dictionary if it is not in data
+                if not any(area["asid"] == asid for area in self.data["storage_areas"]):
+                    self.data["storage_areas"].append({
+                        "asid": asid,
+                        "total_bytes": None,
+                        "sumdump": Hex("0"),
+                        "dataspaces": {},
+                    })
 
-                # Get DSPNAME if it is included
-                if "DSPNAME" in storage_summary_line:
-                    dspname_start = storage_summary_line.find("DSPNAME(") + len(
-                        "DSPNAME("
-                    )
-                    dspname_end = storage_summary_line.find(")", dspname_start)
-                    dspname = storage_summary_line[dspname_start:dspname_end].replace(
-                        "_", ""
-                    )
-
-                    self.data["storage_areas"][asid]["dataspaces"][
-                        dspname
-                    ] = bytes_described
-
-                # If this is SUMMARY DUMP bytes
-                elif "SUMDUMP" in storage_summary_line:
-                    self.data["storage_areas"][asid]["sumdump"] = bytes_described
-
-                # Else just regular ASID total_bytes
-                else:
-                    self.data["storage_areas"][asid]["total_bytes"] = bytes_described
+                for area in self.data["storage_areas"]:
+                    if area["asid"] == asid:
+                        # Get DSPNAME if it is included
+                        if "DSPNAME" in storage_summary_line:
+                            dspname_start = storage_summary_line.find("DSPNAME(") + len(
+                                "DSPNAME("
+                            )
+                            dspname_end = storage_summary_line.find(")", dspname_start)
+                            dspname = storage_summary_line[dspname_start:dspname_end].replace(
+                                "_", ""
+                            )
+                            area["dataspaces"][
+                                dspname
+                            ] = bytes_described
+                        # If this is SUMMARY DUMP bytes
+                        elif "SUMDUMP" in storage_summary_line:
+                            area["sumdump"] = bytes_described
+                        # Else just regular ASID total_bytes
+                        else:
+                            area["total_bytes"] = bytes_described
+                        break
 
             # Repeat find and loop
             storage_summary_index = self.find(

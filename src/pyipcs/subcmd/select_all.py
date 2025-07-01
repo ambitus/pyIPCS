@@ -22,9 +22,13 @@ class SelectAll(Subcmd):
             Keys are the hex ASIDs on the system and values are a dictionary
             containing the string jobname and ASCB address.
         ```
-                pyipcs.Hex(ASID) (dict):
-                        'jobname' (str)
-                        'ascb_addr' (pyipcs.Hex)
+            'asids_all' (list[dict]):
+                Info about all asids on the system at the time of the dump.
+                Keys are the hex ASIDs on the system and values are a dictionary
+                containing the string jobname and ASCB address:
+                    'asid' (pyipcs.Hex)
+                    'jobname' (str)
+                    'ascb_addr' (pyipcs.Hex)
         ```
 
     Methods:
@@ -77,6 +81,8 @@ class SelectAll(Subcmd):
             self.find("ASID JOBNAME  ASCBADDR  SELECTION CRITERIA") :
         ].splitlines()[2:]
 
+        self.data["asids_all"] = []
+
         # Parse ASID line into values
         for asid_line in asid_lines:
             asid, jobname, ascb_addr, _ = asid_line.split()
@@ -84,7 +90,8 @@ class SelectAll(Subcmd):
             asid = Hex(asid)
             ascb_addr = Hex(ascb_addr)
 
-            self.data[asid] = {
+            self.data["asids_all"].append({
+                "asid": asid,
                 "jobname": jobname,
                 "ascb_addr": ascb_addr,
-            }
+            })
