@@ -4,6 +4,19 @@ Custom pyIPCS Exceptions and Warnings
 
 import warnings
 
+class ArgumentTypeError(TypeError):
+    """
+    Raised when an argument is not of the expected type.
+    """
+    def __init__(self, arg_name, arg, expected):
+        if isinstance(expected, tuple):
+            expected_str = ', '.join(t.__name__ for t in expected)
+        else:
+            expected_str = expected.__name__
+        actual_str = type(arg).__name__
+        message = f"Argument '{arg_name}' must be of type {expected_str}, got {actual_str}"
+        super().__init__(message)
+
 
 class InvalidReturnCodeError(Exception):
     """
