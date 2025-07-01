@@ -611,10 +611,10 @@ __Bases:__ *object*
 
 #### Args
 
-- __hlq__ *(str|None)*: __Optional__. High level qualifier used for temporary z/OS MVS datasets for pyIPCS temporary EXECs and DDIRs. By default `None` is specified which will set the high level qualifier as your userid.
+- __hlq__ *(str|None)*: __Optional__. High level qualifier where opened pyIPCS session is or will be under. pyIPCS session includes z/OS MVS datasets for pyIPCS EXECs and DDIRs. High level qualifier has a max length of 16 characters excluding `'.'`. By default is `None` which will set the high level qualifier as your userid.
 <br>
 
-- __directory__ *(str|None)*: __Optional__. File system directory where IPCS session directories and files will be placed. By default `None` is specified which will set the directory as the current working directory of executed file.
+- __directory__ *(str|None)*: __Optional__. File system directory where IPCS session directories and files will be placed. By default is `None` which will set the directory as the current working directory of executed file.
 <br>
 
 - __allocations__ *(dict[str,str|list[str]])*: __Optional__. Dictionary of allocations where keys are DD names and values are string data set allocation requests or lists of cataloged datasets. The default allocations are dataset SYS1.PARMLIB for DD name IPCSPARM and dataset SYS1.SBLSCLI0 for DD name SYSPROC.
@@ -622,7 +622,7 @@ __Bases:__ *object*
 #### Attributes
 
 - __userid__ *(str)*: z/OS system userid for current user.
-- __hlq__ *(str)*: High level qualifier used for temporary z/OS MVS datasets for pyIPCS EXECs and DDIRs.
+- __hlq__ *(str)*: High level qualifier where opened pyIPCS session is or will be under. pyIPCS session includes z/OS MVS datasets for pyIPCS EXECs and DDIRs.
 - __directory__ *(str)*: File system directory where IPCS session directories and files will be placed. These include subcommand output files and other logs.
 - __active__ *(bool)*: `True` if IPCS session is active, `False` if not active.
 - __ddir__ *(str|None)*: DDIR that IPCS will use to run subcommands. `None` if session is not active.
@@ -639,7 +639,7 @@ __Bases:__ *object*
 - __[set_allocation](#ipcssessionset_allocationdd_name-specification)__
 - __[update_allocations](#ipcssessionupdate_allocationsnew_allocations-clear_old_allocations)__
 - __[create_ddir](#ipcssessioncreate_ddirddir)__
-- __[create_temp_ddir](#ipcssessioncreate_temp_ddir)__
+- __[create_session_ddir](#ipcssessioncreate_session_ddir)__
 - __[set_ddir](#ipcssessionset_ddirddir)__
 - __[get_defaults](#ipcssessionget_defaults)__
 - __[set_defaults](#ipcssessionset_defaultsconfirm-dsname-nodsname-asid-dspname-other)__
@@ -751,17 +751,17 @@ __Bases:__ *object*
 
 ---
 
-### IpcsSession.create_temp_ddir()
+### IpcsSession.create_session_ddir()
 
 - __[Back to IpcsSession Methods](#ipcssession-methods)__
 
 #### Description
 
-- Create temporary dump directory. Will be deleted on session close.
+- Create pyIPCS session dump directory. Will be deleted on session close.
 
 #### Returns
 
-- __*str*__: Temporary DDIR dataset name
+- __*str*__: pyIPCS session DDIR dataset name
 
 ---
 

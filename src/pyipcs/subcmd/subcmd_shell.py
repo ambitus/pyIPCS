@@ -33,7 +33,7 @@ def construct_ipcs_shell_script(session: IpcsSession, ipcs_subcmd: str) -> str:
     # ===================================================================
 
     shell_strings = {
-        "ipcs_subcmd_exec": f"{session._temporary_exec_dsname}({session._ipcs_subcmd_exec_name})",
+        "ipcs_subcmd_exec": session._ipcsexec_execs["IPCSRUN"],
         "ipcs_subcmd": ipcs_subcmd.strip().replace("'", "''''"),
     }
 
@@ -53,8 +53,10 @@ def construct_allocations(session: IpcsSession) -> dict[str, str | list[str]]:
     allocations_copy = copy.deepcopy(session.get_allocations())
 
     allocations_copy["IPCSDDIR"] = [session.ddir]
-    allocations_copy["SYSEXEC"] = [session._temporary_sysexec_dsname]
+    allocations_copy["IPCSEXEC"] = [session._ipcsexec_dsname]
+    allocations_copy["SYSEXEC"] = [session._sysexec_dsname]
 
+    # Add in SYSEXEC from user allocations
     if "SYSEXEC" in session.get_allocations():
         allocations_sysexec = copy.deepcopy(session.get_allocations()["SYSEXEC"])
         if isinstance(allocations_sysexec, str):
@@ -94,7 +96,7 @@ def run_ipcs_subcmd(session: IpcsSession, ipcs_subcmd: str) -> dict:
     # ===============================================
 
     # Return code is written the line after ___SUBCMD_RC_START___
-    # Subommand output is written between lines ___SUBCMD_START___ and ___SUBCMD_END___
+    # Subcommand output is written between lines ___SUBCMD_START___ and ___SUBCMD_END___
     subcmd_start_index = shell_output.find("___SUBCMD_START___")
     return_code_index = shell_output.rfind("___SUBCMD_RC_START___")
 

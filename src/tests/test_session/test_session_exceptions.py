@@ -36,8 +36,6 @@ def test_double_open():
     session2 = IpcsSession()
     session2.update_allocations(TEST_ALLOCATIONS)
     try:
-        with pytest.raises(Exception):
-            session2.open()
         with pytest.warns(UserWarning):
             session.open()
     finally:
@@ -70,7 +68,7 @@ def test_not_open_funcs():
     with pytest.raises(Exception):
         session.dsname_in_ddir("TEST.DSNAME")
     with pytest.raises(Exception):
-        session.create_temp_ddir()
+        session.create_session_ddir()
     with pytest.raises(Exception):
         session.get_defaults()
     with pytest.raises(Exception):
