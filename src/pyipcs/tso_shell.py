@@ -41,10 +41,12 @@ def construct_tso_shell_script(
             Optional. Dictionary of allocations where keys are DD names
             and values are string data set allocation requests or lists of cataloged datasets.
         omvs (bool):
-            If `True` uses the tso `'-o'` flag to issue a command through the OMVS interface.
-            If `False` uses the tso `'-t'` flag to issue a command through a TSO/E service routine.
-            The `'-t'` flag will set up a mini TSO/E environment in a new address space.
-            The `'-t'` flag can be used to issue authorized TSO/E commands.
+            Optional.
+            If `True` uses the `tso` shell command to issue a command through the OMVS interface.
+            If `False` uses the `tsocmd` shell command 
+            to issue a command through a TSO/E service routine.
+            The `tso` shell command will set up a mini TSO/E environment in a new address space.
+            The `tsocmd` shell command can be used to issue authorized TSO/E commands.
     Returns:
         str: constructed string for TSO command shell script
     """
@@ -208,25 +210,18 @@ def tsocmd(
         "output": completed_process.stdout,
     }
 
-def hrecall(
-    dsname: str,
-    allocations: dict[str, str | list[str]] = {},
-):
+def recall(dsname: str):
     """
-    Use HRECALL TSO command to recall migrated dataset
+    Use automatic recall to attempt to recall dataset
 
     Args:
         dsname (str):
             Dataset name for dataset you want to recall
-        allocations (dict[str,str|list[str]]):
-            Optional. Dictionary of allocations where keys are DD names
-                and values are string data set allocation requests or lists of cataloged datasets.
-                Default is an empty dictionary.
     Returns:
         None
     """
     tsocmd(
-        f"HRECALL '{dsname}' WAIT EXTENDRC",
-        allocations=allocations,
+        "TIME",
+        allocations={"IPCSALOC": dsname},
         check=False,
     )
