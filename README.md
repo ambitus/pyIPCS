@@ -968,15 +968,15 @@ __Bases:__ *object*
   - `'ipl_date_local'` *(str)*: Included in 'data' dictionary if CSA is dumped. Obtained from `IPLDATA` subcommand.
   - `'ipl_time_local'` *(str)*: Included in 'data' dictionary if CSA is dumped. Obtained from `IPLDATA` subcommand.
   - `'asids_dumped'` *(list[pyipcs.Hex])*: list of ASIDs that were dumped. Obtained from `CBF RTCT` subcommand.
-  - `'asids_all'` *(dict)*: Info about all asids on the system at the time of the dump. Keys are the hex ASIDs on the system and values are a dictionary containing the string jobname and ASCB address. Obtained from `SELECT ALL` subcommand.
-  - `pyipcs.Hex(ASID)` *(dict)*:
+  - `'asids_all'` *(list[dict])*: Info about all asids on the system at the time of the dump. Dictionaries contain the hex ASID on the system, the string jobname, and the ASCB address. Obtained from `SELECT ALL` subcommand:
+    - `'asid'` (pyipcs.Hex)
     - `'jobname'` *(str)*
     - `'ascb_addr'` *(pyipcs.Hex)*
-  - `'storage_areas'` *(dict)*: Info about dumped storage areas. Obtained from `LISTDUMP` subcommand with parameters `DSNAME` and `SELECT`.
-    - `pyipcs.Hex(ASID)` *(dict)*
-      - `'total_bytes'` *(pyipcs.Hex|None)* : Total number of bytes dumped for ASID in hex. `None` if total_bytes for ASID is not defined in `LISTDUMP`.
-      - `'sumdump'` *(pyipcs.Hex)*: Number of SUMMARY DUMP Data bytes dumped in hex.
-      - `'dataspaces'` *(dict)*:`{ str(Dataspace Name) : pyipcs.Hex(Number of bytes dumped for dataspace in hex) }`
+  - `'storage_areas'` *(list[dict])*: Info about dumped storage areas. Obtained from `LISTDUMP` subcommand with parameters `DSNAME` and `SELECT`:
+    - `'asid'` (pyipcs.Hex)
+    - `'total_bytes'` *(pyipcs.Hex|None)* : Total number of bytes dumped for ASID in hex. `None` if total_bytes for ASID is not defined in `LISTDUMP`.
+    - `'sumdump'` *(pyipcs.Hex)*: Number of SUMMARY DUMP Data bytes dumped in hex.
+    - `'dataspaces'` *(dict)*:`{ str(Dataspace Name) : pyipcs.Hex(Number of bytes dumped for dataspace in hex) }`
 
 ---
 
