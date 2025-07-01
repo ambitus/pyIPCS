@@ -91,28 +91,28 @@ class Dump:
                 'asids_dumped' (list[pyipcs.Hex]):
                     list of ASIDs that were dumped.
                     Obtained from 'CBF RTCT' subcommand.
-                'asids_all' (dict):
+                'asids_all' (list[dict]):
                     Info about all asids on the system at the time of the dump.
                     Keys are the hex ASIDs on the system and values are a dictionary
                     containing the string jobname and ASCB address.
-                    Obtained from 'SELECT ALL' subcommand.
-                        pyipcs.Hex(ASID) (dict):
-                                'jobname' (str)
-                                'ascb_addr' (pyipcs.Hex)
-                'storage_areas' (dict):
+                    Obtained from 'SELECT ALL' subcommand:
+                        'asid' (pyipcs.Hex)
+                        'jobname' (str)
+                        'ascb_addr' (pyipcs.Hex)
+                'storage_areas' (list[dict]):
                     Info about dumped storage areas.
-                    Obtained from 'LISTDUMP' subcommand with parameters 'DSNAME' and 'SELECT'.
-                        pyipcs.Hex(ASID) (dict)
-                            'total_bytes' (pyipcs.Hex|None) :
-                                Total number of bytes dumped for ASID in hex.
-                                None if total_bytes for ASID is not defined in 'LISTDUMP'.
-                            'sumdump' (pyipcs.Hex):
-                                Number of SUMMARY DUMP Data bytes dumped in hex.
-                            'dataspaces' (dict):
-                                {
-                                    str(Dataspace Name) :
-                                    pyipcs.Hex(Number of bytes dumped for dataspace in hex)
-                                }
+                    Obtained from 'LISTDUMP' subcommand with parameters 'DSNAME' and 'SELECT':
+                        'asid' (pyipcs.Hex)
+                        'total_bytes' (pyipcs.Hex|None) :
+                            Total number of bytes dumped for ASID in hex.
+                            None if total_bytes for ASID is not defined in 'LISTDUMP'.
+                        'sumdump' (pyipcs.Hex):
+                            Number of SUMMARY DUMP Data bytes dumped in hex.
+                        'dataspaces' (dict):
+                            {
+                                str(Dataspace Name) :
+                                pyipcs.Hex(Number of bytes dumped for dataspace in hex)
+                            }
         ```
     Methods:
     ```
@@ -289,7 +289,7 @@ class Dump:
             raise InvalidReturnCodeError(
                 select_all.subcmd, select_all.output, select_all.rc, 0
             )
-        self.data["asids_all"] = select_all.data
+        self.data["asids_all"] = select_all.data["asids_all"]
 
         # Include LISTDUMP SELECT DSNAME data
         listdump_select_dsname = ListdumpSelectDsname(session, self.dsname)
@@ -360,8 +360,9 @@ class Dump:
         if isinstance(asid, (int, str)):
             asid = Hex(asid)
 
-        if asid in self.data["asids_all"]:
-            return self.data["asids_all"][asid]["jobname"]
+        for asid_dict in self.data["asids_all"]:
+            if asid_dict["asid"] == asid:
+                return asid_dict["jobname"]
         return None
 
     def jobname_to_asid(self, jobname: str) -> Hex:
@@ -381,9 +382,9 @@ class Dump:
             )
 
         asid_list = []
-        for asid, asid_dict in self.data["asids_all"].items():
+        for asid_dict in self.data["asids_all"]:
             if asid_dict["jobname"] == jobname:
-                asid_list.append(asid)
+                asid_list.append(asid_dict["asid"])
         return asid_list
 
     def asid_to_ascb_addr(self, asid: Hex | str | int) -> str:
@@ -408,8 +409,9 @@ class Dump:
         if isinstance(asid, (int, str)):
             asid = Hex(asid)
 
-        if asid in self.data["asids_all"]:
-            return self.data["asids_all"][asid]["ascb_addr"]
+        for asid_dict in self.data["asids_all"]:
+            if asid_dict["asid"] == asid:
+                return asid_dict["ascb_addr"]
         return None
 
     @property
