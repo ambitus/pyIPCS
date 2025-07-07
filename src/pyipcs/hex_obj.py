@@ -137,7 +137,10 @@ class Hex:
         Returns:
             str
         """
-        return copy.deepcopy(self.to_str())
+        return {
+            "__ipcs_type__": "Hex",
+            "value": copy.deepcopy(self.to_str()),
+        }
 
     # ==============================
     # Get sign and unsigned values
@@ -331,7 +334,7 @@ class Hex:
         return self.to_str()
 
     def __repr__(self) -> str:
-        return self.__str__()
+        return f"Hex(\'{self.to_str()}\')"
 
     def __hash__(self) -> int:
         return hash(self.to_int())

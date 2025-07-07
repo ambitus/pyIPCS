@@ -278,6 +278,7 @@ class Subcmd:
             ```
         """
         return {
+            "__ipcs_type__": "Subcmd",
             "subcmd": copy.deepcopy(self.subcmd),
             "outfile": copy.deepcopy(self.outfile),
             "output": copy.deepcopy(self.output),
@@ -302,12 +303,12 @@ class Subcmd:
             repr_output += " [continued...]"
         return (
             "Subcmd("
-            + f"\n  subcmd:\n    '{self.subcmd}'"
+            + f"\n  subcmd:\n    \'{self.subcmd}\'"
             + "\n  outfile:"
             + (
                 f"\n    {self.outfile}"
                 if self.outfile is None
-                else f"\n    '{self.outfile}'"
+                else f"\n    \'{self.outfile}\'"
             )
             + f"\n  rc:\n    {self.rc}"
             + f"\n  keep_file:\n    {self.keep_file}"
