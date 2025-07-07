@@ -117,15 +117,15 @@ def test_hex_to_str():
     assert str(Hex("-A")) == "-A"
     assert str(Hex("-00A")) == "-00A"
 
-    assert repr(Hex("4")) == "4"
-    assert repr(Hex("004")) == "004"
-    assert repr(Hex("-4")) == "-4"
-    assert repr(Hex("-004")) == "-004"
+    assert repr(Hex("4")) == "Hex(\'4\')"
+    assert repr(Hex("004")) == "Hex(\'004\')"
+    assert repr(Hex("-4")) == "Hex(\'-4\')"
+    assert repr(Hex("-004")) == "Hex(\'-004\')"
 
-    assert repr(Hex("A")) == "A"
-    assert repr(Hex("00A")) == "00A"
-    assert repr(Hex("-A")) == "-A"
-    assert repr(Hex("-00A")) == "-00A"
+    assert repr(Hex("A")) == "Hex(\'A\')"
+    assert repr(Hex("00A")) == "Hex(\'00A\')"
+    assert repr(Hex("-A")) == "Hex(\'-A\')"
+    assert repr(Hex("-00A")) == "Hex(\'-00A\')"
 
 
 def test_hex_to_char_str():

@@ -321,19 +321,20 @@ class Dump:
             ```
         """
         return {
+            "__ipcs_type__": "Dump",
             "dsname": copy.deepcopy(self.dsname),
             "ddir": copy.deepcopy(self.ddir),
             "data": copy.deepcopy(self.data),
         }
 
     def __str__(self) -> str:
-        return f"Dump(dsname:'{self.dsname}', ddir:'{self.ddir}')"
+        return f"Dump(dsname:\'{self.dsname}\', ddir:\'{self.ddir}\')"
 
     def __repr__(self) -> str:
         return (
             "Dump("
-            + f"\n  dsname:\n    '{self.dsname}'"
-            + f"\n  ddir:\n    '{self.ddir}'"
+            + f"\n  dsname:\n    \'{self.dsname}\'"
+            + f"\n  ddir:\n    \'{self.ddir}\'"
             + f"\n  data:\n{textwrap.indent(pformat(self.data), '    ')}"
             + "\n)"
         )
