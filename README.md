@@ -170,6 +170,7 @@ session.close()
 ### [User Guide](./USER_GUIDE.md)
 
 - __To get the most out of pyIPCS, we strongly recommend checking out the User Guide.__
+
 <br>
 
 - __The User Guide provides:__
@@ -611,7 +612,7 @@ __Bases:__ *object*
 
 #### Args
 
-- __hlq__ *(str|None)*: __Optional__. High level qualifier where opened pyIPCS session is or will be under. pyIPCS session includes z/OS MVS datasets for pyIPCS EXECs and DDIRs. High level qualifier has a max length of 16 characters excluding `'.'`. By default is `None` which will set the high level qualifier as your userid.
+- __hlq__ *(str|None)*: __Optional__. High level qualifier where opened pyIPCS session is or will be under. pyIPCS session includes z/OS MVS datasets for pyIPCS EXECs and DDIRs. High level qualifier has a max length of 16 characters. By default is `None` which will set the high level qualifier as your userid.
 <br>
 
 - __directory__ *(str|None)*: __Optional__. File system directory where IPCS session directories and files will be placed. By default is `None` which will set the directory as the current working directory of executed file.

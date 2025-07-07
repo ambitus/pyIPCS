@@ -176,9 +176,9 @@ class IpcsSession:
         self.__logger = IpcsLogger()
         # Attribute hlq
         self.__hlq = self.userid if hlq is None else hlq
-        if len(self.hlq.replace(".", "")) > 16:
+        if len(self.hlq) > 16:
             raise ValueError(
-                "Argument 'hlq' must have a length of 16 characters or less, excluding '.'"
+                "Argument 'hlq' must have a length of 16 characters or less"
             )
         # Attribute directory
         self.__directory = os.getcwd() if directory is None else directory
@@ -202,9 +202,9 @@ class IpcsSession:
 
         # Generate session id until you find one that does not exist
         # Session HLQ is dependent on the id
-        self.__session_id = "".join(random.choices("0123456789", k=7))
+        self.__session_id = "".join(random.choices("0123456789", k=5))
         while datasets_recall_exists(self._session_hlq):
-            self.__session_id = "".join(random.choices("0123456789", k=7))
+            self.__session_id = "".join(random.choices("0123456789", k=5))
 
         # Mark the time the session was opened
         self.__time_opened = datetime.now().strftime("%Y-%m-%d_%H-%M-%S-%f")
@@ -213,14 +213,14 @@ class IpcsSession:
         self.logger._open_logging(self)
 
         # Create Initial Session DDIR
-        init_ddir = f"{self._session_hlq}.INITDDIR.DDIR"
+        init_ddir = f"{self._session_hlq}.INIT.DDIR"
         self.create_ddir(init_ddir)
         # Create session datasets
         try:
             self.__create_session_datasets(init_ddir)
         except exceptions.DatasetWriteException:
             self._delete_ddir(init_ddir)
-        # Set initddir
+        # Set init ddir
         self.set_ddir(init_ddir)
 
 
@@ -382,10 +382,10 @@ class IpcsSession:
             raise SessionNotActiveError()
 
         # Generate a DDIR with a DDIR id until one that does not exist is found
-        ddir_id = "".join(random.choices("0123456789", k=7))
+        ddir_id = "".join(random.choices("0123456789", k=5))
         session_ddir = f"{self._session_hlq}.D{ddir_id}.DDIR"
         while datasets_recall_exists(session_ddir):
-            ddir_id = "".join(random.choices("0123456789", k=7))
+            ddir_id = "".join(random.choices("0123456789", k=5))
             session_ddir = f"{self._session_hlq}.D{ddir_id}.DDIR"
 
         # Create the DDIR
