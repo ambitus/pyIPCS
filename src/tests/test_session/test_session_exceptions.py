@@ -14,6 +14,9 @@ Tests:
 
     test_allocation_execeptions():
         Test allocation TypeErrors
+
+    test_hlq_error():
+        Test hlq ValueError when longer than 16 chars
 ```
 """
 
@@ -131,3 +134,14 @@ def test_allocation_execeptions():
             {"TESTDD": ["TEST.DATA.SET1", "TEST.DATA.SET2"]},
             clear_old_allocations=0,
         )
+
+
+def test_hlq_error():
+    """
+    Object:
+        IpcsSession
+    Description:
+        Test hlq ValueError when longer than 16 chars
+    """
+    with pytest.raises(ValueError):
+        IpcsSession(hlq="XXXXX.XXXXX.XXXXX")
