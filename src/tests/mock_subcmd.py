@@ -72,7 +72,7 @@ class MockIpcsSession:
 # ================================================================
 
 
-def run_ipcs_subcmd(session: MockIpcsSession, ipcs_subcmd: str) -> dict:
+def run_ipcs_subcmd(session: MockIpcsSession, ipcs_subcmd: str, auth: bool) -> dict:
     """
     Mock Function
     """
@@ -83,6 +83,7 @@ def run_ipcs_subcmd_outfile(
     session: MockIpcsSession,
     ipcs_subcmd: str,
     filepath: str,
+    auth: bool,
     encoding: str = "cp1047",
 ) -> dict:
     """
@@ -119,6 +120,7 @@ class MockSubcmd(Subcmd):
         mock_directory: str | None = None,
         outfile: bool = False,
         keep_file: bool = False,
+        auth: bool = False,
     ):
         """
         Constructor for MockSubcmd object

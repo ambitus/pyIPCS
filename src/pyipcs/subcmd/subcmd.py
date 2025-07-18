@@ -50,6 +50,7 @@ class Subcmd:
             subcmd: str,
             outfile: bool = False,
             keep_file: bool = False,
+            auth: bool = False,
         ) -> None:
             Constructor for Subcmd Object
 
@@ -116,6 +117,7 @@ class Subcmd:
         subcmd: str,
         outfile: bool = False,
         keep_file: bool = False,
+        auth: bool = False,
     ) -> None:
         """
         Constructor for Subcmd Object
@@ -136,6 +138,9 @@ class Subcmd:
             keep_file (bool):
                 Optional. If `True` preserves subcommand output file after program execution.
                 If `False` deletes subcommand output file after program execution.
+                Default is `False`.
+            auth (bool):
+                Optional. If `True`, subcommand will be run from an authorized environment. 
                 Default is `False`.
         Returns:
             None
@@ -231,7 +236,7 @@ class Subcmd:
             # Run the subcommand
             # ============================================
             subcmd_response = run_ipcs_subcmd_outfile(
-                session, self.subcmd, self.outfile
+                session, self.subcmd, self.outfile, auth
             )
             self.__rc = subcmd_response["rc"]
             self.__outfile = subcmd_response["filepath"]
@@ -241,7 +246,7 @@ class Subcmd:
             # ============================================
             # Run the subcommand
             # ============================================
-            subcmd_response = run_ipcs_subcmd(session, self.subcmd)
+            subcmd_response = run_ipcs_subcmd(session, self.subcmd, auth)
             self.__rc = subcmd_response["rc"]
             self.__string_output = subcmd_response["output"]
 

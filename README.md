@@ -1056,7 +1056,7 @@ __Bases:__ *object*
 
 ---
 
-### *class* pyipcs.Subcmd(*session*, *subcmd*, *outfile*, *keep_file*)
+### *class* pyipcs.Subcmd(*session*, *subcmd*, *outfile*, *keep_file*, *auth*)
 
 __Bases:__ *object*
 
@@ -1070,6 +1070,8 @@ __Bases:__ *object*
 - __subcmd__ *(str)*: IPCS subcommand to run.
 - __outfile__ *(bool)*: __Optional__. If `True`, will create and store output in directory `[pyipcs.IpcsSession.directory]/pyipcs_session/[time of session open]/subcmd_output/`. File would then be specified in `outfile` attribute of Subcmd object. If `False`, stores output in string specified in `output` attribute of Subcmd object. Default is `False`.
 - __keep_file__ *(bool)*: __Optional__. If `True` preserves subcommand output file after program execution. If `False` deletes subcommand output file after program execution. Default is `False`.
+- __auth__ *(bool)*: __Optional__. If `True`, subcommand will be run from an authorized environment. Default is `False`.
+
 
 #### Attributes
 
