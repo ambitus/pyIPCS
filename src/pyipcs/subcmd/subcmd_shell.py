@@ -67,13 +67,14 @@ def construct_allocations(session: IpcsSession) -> dict[str, str | list[str]]:
     return allocations_copy
 
 
-def run_ipcs_subcmd(session: IpcsSession, ipcs_subcmd: str) -> dict:
+def run_ipcs_subcmd(session: IpcsSession, ipcs_subcmd: str, auth: bool) -> dict:
     """
     Run IPCS Subcommand Shell Script and save output to a string.
 
     Args:
         session (pyipcs.IpcsSession)
         ipcs_subcmd (str)
+        auth (bool): indicates whether the subcommand will be run from an authorized environment
     Returns:
         dict: Dictionary of return code from IPCS subcommand and IPCS subcommand output
         ```
@@ -88,7 +89,7 @@ def run_ipcs_subcmd(session: IpcsSession, ipcs_subcmd: str) -> dict:
     shell_output = tsocmd(
         construct_ipcs_shell_script(session, ipcs_subcmd),
         construct_allocations(session),
-        omvs=True
+        omvs= not auth
     )["output"]
 
     # ===============================================
@@ -125,6 +126,7 @@ def run_ipcs_subcmd_outfile(
     session: IpcsSession,
     ipcs_subcmd: str,
     filepath: str,
+    auth: bool,
 ) -> dict:
     """
     Run IPCS Subcommand Shell Script and save output to a file.
@@ -137,8 +139,7 @@ def run_ipcs_subcmd_outfile(
         filepath (str):
             Filepath for IPCS subcommand output file.
             If filepath is a duplicate will add `'(1)'`,`'(2)'`, etc. for copy.
-        encoding (str):
-            Optional. Encoding for subcommand output file. Default is `'cp1047'`.
+        auth (bool): indicates whether the subcommand will be run from an authorized environment
     Returns:
         dict: Dictionary of return code from IPCS subcommand and IPCS subcommand output filepath
         ```
@@ -187,7 +188,7 @@ def run_ipcs_subcmd_outfile(
     shell_script = construct_tso_shell_script(
         tso_command=construct_ipcs_shell_script(session, ipcs_subcmd),
         allocations=construct_allocations(session),
-        omvs = True
+        omvs = not auth
     )
 
     with (
