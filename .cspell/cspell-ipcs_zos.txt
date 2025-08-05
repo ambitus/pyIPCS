@@ -5,6 +5,7 @@ ASID
 asids
 BLSCDDIR
 CLIST
+DATACLAS
 dataspace
 dataspaces
 DDIR
@@ -17,6 +18,7 @@ IPCS
 IPCSALOC
 IPCSDDIR
 IPCSEVAL
+ipcsexec
 IPCSPARM
 IPCSRUN
 IPLDATA
@@ -24,6 +26,8 @@ jobname
 LASTCC
 LISTDUMP
 MAXCC
+MGMTCLAS
+NDXCISZ
 NOCONFIRM
 NOPARM
 OMVS
@@ -38,6 +42,7 @@ sdwa
 SETDEF
 sliptrap
 srec
+STORCLAS
 Subcmd
 SUBCMDS
 sumdump
