@@ -639,8 +639,9 @@ __Bases:__ *object*
 - __[get_allocations](#ipcssessionget_allocations)__
 - __[set_allocation](#ipcssessionset_allocationdd_name-specification)__
 - __[update_allocations](#ipcssessionupdate_allocationsnew_allocations-clear_old_allocations)__
-- __[create_ddir](#ipcssessioncreate_ddirddir)__
-- __[create_session_ddir](#ipcssessioncreate_session_ddir)__
+- __[ddir_defaults](#ipcssessionddir_defaultskwargs)__
+- __[create_ddir](#ipcssessioncreate_ddirddir-kwargs)__
+- __[create_session_ddir](#ipcssessioncreate_session_ddirkwargs)__
 - __[set_ddir](#ipcssessionset_ddirddir)__
 - __[get_defaults](#ipcssessionget_defaults)__
 - __[set_defaults](#ipcssessionset_defaultsconfirm-dsname-nodsname-asid-dspname-other)__
@@ -734,17 +735,53 @@ __Bases:__ *object*
 
 ---
 
-### IpcsSession.create_ddir(*ddir*)
+### IpcsSession.ddir_defaults(***kwargs*)
 
 - __[Back to IpcsSession Methods](#ipcssession-methods)__
 
 #### Description
 
-- Create dump directory.
+- Returns default parameters for dump directory creation.
+- Input arguments to edit defaults.
+- Returns `BLSCDDIR` CLIST parameters where keys are `BLSCDDIR` parameters and the values are `BLSCDDIR` parameter values.
+- [BLSCDDIR Documentation](https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory)
 
 #### Args
 
-- __ddir__ *(str)*: Dump directory that will be created
+- __dataclas__ *(str)*: __Optional__. Specifies the data class for the new directory. If you omit this parameter, there is no data class specified for the new directory.
+- __mgmtclas__ *(str)*: __Optional__. Specifies the management class for the new directory. If you omit this parameter, there is no management class specified for the new directory.
+- __ndxcisz__ *(int)*: __Optional__. Specifies the control interval size for the index portion of the new directory. If you omit this parameter, the IBM-supplied default is 4096 bytes.
+- __records__ *(int)*: __Optional__. Specifies the number of records you want the directory to accommodate. If you omit this parameter, the IBM-supplied default is 5000; your installation's default might vary.
+- __storclas__ *(str)*: __Optional__. Specifies the storage class for the new directory. If you omit this parameter, there is no storage class specified for the new directory.
+- __volume__ *(str)*: __Optional__. Specifies the VSAM volume on which the directory should reside. If you omit DATACLAS, MGMTCLAS, STORCLAS, and VOLUME, the IBM-supplied default is VSAM01. Otherwise, there is no IBM-supplied default.
+- __blscddir_params__ *(str)*: __Optional__. String of `BLSCDDIR` parameters. Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
+
+#### Returns
+
+- __*dict*__: Keys are `BLSCDDIR` parameters and the values are `BLSCDDIR` parameter values.
+
+---
+
+### IpcsSession.create_ddir(*ddir*, ***kwargs*)
+
+- __[Back to IpcsSession Methods](#ipcssession-methods)__
+
+#### Description
+
+- Create dump directory. Uses `BLSCDDIR` CLIST to create DDIR.
+- Adding additional keyword arguments will override pyIPCS DDIR defaults.
+- [BLSCDDIR Documentation](https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory)
+
+#### Args
+
+- __ddir__ *(str)*: Dump directory that will be created.
+- __dataclas__ *(str)*: __Optional__.
+- __mgmtclas__ *(str)*: __Optional__.
+- __ndxcisz__ *(int)*: __Optional__.
+- __records__ *(int)*: __Optional__.
+- __storclas__ *(str)*: __Optional__.
+- __volume__ *(str)*: __Optional__.
+- __blscddir_params__ *(str)*: __Optional__. String of `BLSCDDIR` parameters. Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
 
 #### Returns
 
@@ -752,13 +789,25 @@ __Bases:__ *object*
 
 ---
 
-### IpcsSession.create_session_ddir()
+### IpcsSession.create_session_ddir(***kwargs*)
 
 - __[Back to IpcsSession Methods](#ipcssession-methods)__
 
 #### Description
 
 - Create pyIPCS session dump directory. Will be deleted on session close.
+- Adding additional keyword arguments will override pyIPCS DDIR defaults.
+- [BLSCDDIR Documentation](https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory)
+
+#### Args
+
+- __dataclas__ *(str)*: __Optional__.
+- __mgmtclas__ *(str)*: __Optional__.
+- __ndxcisz__ *(int)*: __Optional__.
+- __records__ *(int)*: __Optional__.
+- __storclas__ *(str)*: __Optional__.
+- __volume__ *(str)*: __Optional__.
+- __blscddir_params__ *(str)*: __Optional__. String of `BLSCDDIR` parameters. Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
 
 #### Returns
 

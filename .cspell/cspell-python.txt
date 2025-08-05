@@ -1,5 +1,6 @@
 conftest
 docstrings
+kwargs
 pylint
 pytest
 subshell
