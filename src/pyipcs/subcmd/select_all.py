@@ -85,7 +85,11 @@ class SelectAll(Subcmd):
 
         # Parse ASID line into values
         for asid_line in asid_lines:
-            asid, jobname, ascb_addr, _ = asid_line.split()
+            asid = asid_line[1:5].strip()
+            jobname = asid_line[6:14].strip()
+            ascb_addr = asid_line[15:24].strip()
+            if len(jobname) == 0:
+                jobname = None
 
             asid = Hex(asid)
             ascb_addr = Hex(ascb_addr)
