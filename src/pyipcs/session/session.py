@@ -71,11 +71,15 @@ class IpcsSession:
         ) -> None:
             Update multiple TSO allocations.
 
-        create_ddir(ddir: str) -> None:
-            Create dump directory.
+        ddir_defaults(**kwargs) -> dict:
+            Returns default parameters for dump directory creation. 
+            Input arguments to edit defaults.
+        
+        create_ddir(ddir: str, **kwargs) -> None:
+            Create dump directory. Uses `BLSCDDIR` CLIST to create DDIR.
 
-        create_temp_ddir() -> str:
-            Create temporary dump directory. Will be deleted on session close.
+        create_session_ddir(**kwargs) -> str:
+            Create pyIPCS session dump directory. Will be deleted on session close.
 
         set_ddir(ddir: str) -> None:
             Set `ddir` as the current dump directory for the session.
@@ -185,6 +189,8 @@ class IpcsSession:
         # Set allocations
         self.__allocations = {}
         self.update_allocations(allocations)
+        # Set empty DDIR defaults
+        self.__ddir_defaults = {}
 
     def open(self) -> None:
         """
@@ -346,18 +352,131 @@ class IpcsSession:
         for dd_name, specification in new_allocations.items():
             self.set_allocation(dd_name, specification)
 
-    def create_ddir(self, ddir: str) -> None:
+    def ddir_defaults(self, **kwargs) -> dict:
         """
-        Create dump directory.
+        Returns default parameters for dump directory creation. 
+        Input arguments to edit defaults.
+        Returns `BLSCDDIR` CLIST parameters
+        where keys are `BLSCDDIR` parameters and the values are `BLSCDDIR` parameter values.
+
+        https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory
+
+        Args:
+            dataclas (str):
+                Optional.
+                Specifies the data class for the new directory. 
+                If you omit this parameter, there is no data class specified for the new directory.
+            mgmtclas (str):
+                Optional.
+                Specifies the management class for the new directory. 
+                If you omit this parameter, 
+                there is no management class specified for the new directory.
+            ndxcisz (int):
+                Optional.
+                Specifies the control interval size for the index portion of the new directory. 
+                If you omit this parameter, the IBM-supplied default is 4096 bytes.
+            records (int):
+                Optional.
+                Specifies the number of records you want the directory to accommodate. 
+                If you omit this parameter, the IBM-supplied default is 5000; 
+                your installation's default might vary.
+            storclas (str):
+                Optional.
+                Specifies the storage class for the new directory. 
+                If you omit this parameter, 
+                there is no storage class specified for the new directory.
+            volume (str):
+                Optional.
+                Specifies the VSAM volume on which the directory should reside. 
+                If you omit DATACLAS, MGMTCLAS, STORCLAS, and VOLUME, 
+                the IBM-supplied default is VSAM01. 
+                Otherwise, there is no IBM-supplied default.
+            blscddir_params (str):
+                Optional.
+                String of `BLSCDDIR` parameters.
+                Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
+        Returns:
+            dict: Keys are `BLSCDDIR` parameters and the values are `BLSCDDIR` parameter values.
+        """
+        # Add ddir default if it was specified
+        def set_ddir_default(param_name: str, param_type: type):
+            if param_name in kwargs:
+                if not isinstance(kwargs[param_name], param_type):
+                    raise ArgumentTypeError(param_name, kwargs[param_name], param_type)
+                self.__ddir_defaults[param_name] = kwargs[param_name]
+
+        set_ddir_default("dataclas", str)
+        set_ddir_default("mgmtclas", str)
+        set_ddir_default("ndxcisz", int)
+        set_ddir_default("records", int)
+        set_ddir_default("storclas", str)
+        set_ddir_default("volume", str)
+        set_ddir_default("blscddir_params", str)
+        return self._ddir_defaults
+
+    def create_ddir(self, ddir: str, **kwargs) -> None:
+        """
+        Create dump directory. Uses `BLSCDDIR` CLIST to create DDIR.
+        Adding additional keyword arguments will override pyIPCS DDIR defaults.
+
+        https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory
 
         Args:
             ddir (str):
-                Dump directory that will be created
+                Dump directory that will be created.
+            dataclas (str):
+                Optional.
+            mgmtclas (str):
+                Optional.
+            ndxcisz (int):
+                Optional.
+            records (int):
+                Optional.
+            storclas (str):
+                Optional.
+            volume (str):
+                Optional.
+            blscddir_params (str):
+                Optional.
+                String of `BLSCDDIR` parameters.
+                Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
         Returns:
             None
         """
         if not isinstance(ddir, str):
             raise ArgumentTypeError("ddir", ddir, str)
+
+        # ===================================================================
+        # Convert keyword args to BLSCDDIR params
+        # Use keyword args provided otherwise use ddir default if it exists
+        # ===================================================================
+        def blscddir_str_param(param_name: str, param_type: type, param_label: bool = True):
+            param_str = ""
+            if param_name in kwargs:
+                # If argument was specified
+                if not isinstance(kwargs[param_name], param_type):
+                    raise ArgumentTypeError(param_name, kwargs[param_name], param_type)
+                param_str = str(kwargs[param_name])
+            else:
+                # If argument was not specified and there was a default
+                if param_name in self._ddir_defaults:
+                    param_str = str(self._ddir_defaults[param_name])
+            if param_str:
+                if param_label:
+                    param_str = f" {param_name.upper()}({param_str})"
+                else:
+                    # Case only really for blscddir_params
+                    param_str = f" {param_str}"
+            return param_str
+
+        blscddir_params_str = ""
+        blscddir_params_str += blscddir_str_param("dataclas", str)
+        blscddir_params_str += blscddir_str_param("mgmtclas", str)
+        blscddir_params_str += blscddir_str_param("ndxcisz", int)
+        blscddir_params_str += blscddir_str_param("records", int)
+        blscddir_params_str += blscddir_str_param("storclas", str)
+        blscddir_params_str += blscddir_str_param("volume", str)
+        blscddir_params_str += blscddir_str_param("blscddir_params", str, param_label=False)
 
         # Log Create DDIR
         self.logger.log(
@@ -369,12 +488,30 @@ class IpcsSession:
         )
 
         # Run BLSCDDIR EXEC to create DDIR
-        tsocmd(f"%blscddir dsn({ddir})", allocations=self._allocations)
+        tsocmd(f"%BLSCDDIR DSNAME({ddir}){blscddir_params_str}", allocations=self._allocations)
 
-    def create_session_ddir(self) -> str:
+    def create_session_ddir(self, **kwargs) -> str:
         """
         Create pyIPCS session dump directory. Will be deleted on session close.
+        Adding additional keyword arguments will override pyIPCS DDIR defaults.
 
+        Args:
+            dataclas (str):
+                Optional.
+            mgmtclas (str):
+                Optional.
+            ndxcisz (int):
+                Optional.
+            records (int):
+                Optional.
+            storclas (str):
+                Optional.
+            volume (str):
+                Optional.
+            blscddir_params (str):
+                Optional.
+                String of `BLSCDDIR` parameters.
+                Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
         Returns:
             str: pyIPCS session DDIR dataset name
         """
@@ -389,7 +526,7 @@ class IpcsSession:
             session_ddir = f"{self._session_hlq}.D{ddir_id}.DDIR"
 
         # Create the DDIR
-        self.create_ddir(session_ddir)
+        self.create_ddir(session_ddir, **kwargs)
 
         # Attempt to add DDIR to main session dataset for tracking
         datasets_recall_exists(self._session_hlq)
@@ -535,7 +672,7 @@ class IpcsSession:
                 Dump dataset name.
             ddir (str):
                 Optional. Dump directory.
-                If not specified, dump will be initialized under temporary DDIR.
+                If empty, dump will be initialized under temporary DDIR.
             use_cur_ddir (bool):
                 Optional. Use current session DDIR.
                 Will use the IpcsSession attribute `ddir` to initialize the dump under.
@@ -784,6 +921,13 @@ class IpcsSession:
         Protected Attribute _allocations
         """
         return self.__allocations
+
+    @property
+    def _ddir_defaults(self) -> dict:
+        """
+        Protected Attribute _ddir_defaults
+        """
+        return self.__ddir_defaults
 
     @property
     def _time_opened(self) -> str | None:

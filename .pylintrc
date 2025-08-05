@@ -348,7 +348,7 @@ indent-string='    '
 max-line-length=100
 
 # Maximum number of lines in a module.
-max-module-lines=1000
+max-module-lines=1500
 
 # Allow the body of a class to be on the same line as the declaration if body
 # contains single statement.
@@ -445,7 +445,8 @@ disable=raw-checker-failed,
         broad-exception-caught,
         too-many-arguments,
         too-many-instance-attributes,
-        too-many-positional-arguments
+        too-many-positional-arguments,
+        too-many-public-methods
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
