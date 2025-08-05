@@ -283,8 +283,8 @@ def dump_header_data(dsname: str) -> dict:
     # =============================
 
     # Offset x'E0' is decimal 224    224*2= 448
-    header_data["sdrsn"] = hex_header[448:464]
-    header_data["complete_dump"] = header_data["sdrsn"].to_str() == "0000000000000000"
+    header_data["sdrsn"] = hex_header[448:480]
+    header_data["complete_dump"] = header_data["sdrsn"].to_str()=="00000000000000000000000000000000"
 
     # =========================================
     # Do not add below if it is not an SAD
