@@ -847,7 +847,7 @@ __ddir__ *(str)*: Dump directory will be set as the sessions DDIR
 
 ---
 
-### IpcsSession.set_defaults(*confirm*, *dsname*, *nodsname*, *asid*, *dspname*, *other*)
+### IpcsSession.set_defaults(*confirm*, *dsname*, *nodsname*, *asid*, *dspname*, *setdef_params*)
 
 - __[Back to IpcsSession Methods](#ipcssession-methods)__
 
@@ -866,7 +866,7 @@ __ddir__ *(str)*: Dump directory will be set as the sessions DDIR
 - __asid__ *(pyipcs.Hex|str|int|None)*: __Optional__. pyipcs.Hex object or string or int to be used for `ASID` parameter. Default is `None` to not include parameter in subcommand.
 - __dspname__ *(str|None)*: __Optional__.
     String dataspace name to be used for `DSPNAME` parameter. Default is `None` to not include parameter in subcommand.
-- __other__ *(str|None)*: __Optional__. String of other parameters to include in `SETDEF`. Write other parameters as you would in regular IPCS (ex: `'ACTIVE LENGTH(4)'`). Default is `None` to not include in subcommand.
+- __setdef_params__ *(str|None)*: __Optional__. String of `SETDEF` parameters. Write parameters as you would in regular IPCS (ex: `'ACTIVE LENGTH(4)'`). Default is `None` to not include in subcommand.
 
 #### Returns
 
@@ -1378,7 +1378,7 @@ session.close()
 
 ---
 
-### *class* pyipcs.SetDef(*session*, *confirm*, *dsname*, *nodsname*, *asid*, *dspname*, *other*, *outfile*, *keep_file*)
+### *class* pyipcs.SetDef(*session*, *confirm*, *dsname*, *nodsname*, *asid*, *dspname*, *setdef_params*, *outfile*, *keep_file*)
 
 __Bases:__ *pyipcs.Subcmd*
 
@@ -1398,7 +1398,7 @@ __Bases:__ *pyipcs.Subcmd*
 - __nodsname__ *(bool)*: __Optional__. `True` for `NODSNAME` parameter. Default is `False` to not include parameter in subcommand.
 - __asid__ *(pyipcs.Hex|str|int|None)*: __Optional__. pyipcs.Hex object or string or int to be used for `ASID` parameter. Default is `None` to not include parameter in subcommand.
 - __dspname__ *(str|None)*: __Optional__. String dataspace name to be used for `DSPNAME` parameter. Default is `None` to not include parameter in subcommand.
-- __other__ *(str|None)*: __Optional__. String of other parameters to include in `SETDEF`. Write other parameters as you would in regular IPCS (ex: `'ACTIVE LENGTH(4)'`). Default is `None` to not include in subcommand.
+- __setdef_params__ *(str|None)*: __Optional__. String of `SETDEF` parameters. Write parameters as you would in regular IPCS (ex: `'ACTIVE LENGTH(4)'`). Default is `None` to not include in subcommand.
 - __outfile__ *(bool)*: __Optional__.
 - __keep_file__ *(bool)*: __Optional__.
 
