@@ -51,7 +51,7 @@ class SetDef(Subcmd):
             nodsname: bool | None = None,
             asid: Hex | str | int | None = None,
             dspname: str | None = None,
-            other: str | None = None,
+            setdef_params: str | None = None,
             outfile: bool = False,
             keep_file: bool = False,
         ) -> None:
@@ -67,7 +67,7 @@ class SetDef(Subcmd):
         nodsname: bool = False,
         asid: Hex | str | int | None = None,
         dspname: str | None = None,
-        other: str | None = None,
+        setdef_params: str | None = None,
         outfile: bool = False,
         keep_file: bool = False,
     ) -> None:
@@ -97,10 +97,10 @@ class SetDef(Subcmd):
                 Optional.
                 String dataspace name to be used for `DSPNAME` parameter.
                 Default is `None` to not include parameter in subcommand.
-            other (str|None):
+            setdef_params (str|None):
                 Optional.
-                String of other parameters to include in `SETDEF`.
-                Write other parameters as you would in regular IPCS (ex: `'ACTIVE LENGTH(4)'`).
+                String of `SETDEF` parameters. 
+                Write parameters as you would in regular IPCS (ex: `'ACTIVE LENGTH(4)'`). 
                 Default is `None` to not include in subcommand.
             outfile (bool):
                 Optional. If `True` stores output in file
@@ -158,9 +158,9 @@ class SetDef(Subcmd):
         # ===================
         # Other Parameters
         # ===================
-        if isinstance(other, str):
-            other = other.upper().strip()
-            setdef_subcmd += f" {other}"
+        if isinstance(setdef_params, str):
+            setdef_params = setdef_params.upper().strip()
+            setdef_subcmd += f" {setdef_params}"
 
         # ========================
         # Run SETDEF Subcommand
