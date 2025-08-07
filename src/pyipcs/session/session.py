@@ -93,7 +93,7 @@ class IpcsSession:
             nodsname: bool = False,
             asid: Hex | str | int | None = None,
             dspname: str | None = None,
-            other: str | None = None,
+            setdef_params: str | None = None,
         ) -> SetDef:
             Runs SETDEF with LIST parameter and other parameters to set IPCS defaults
 
@@ -601,7 +601,7 @@ class IpcsSession:
         nodsname: bool = False,
         asid: Hex | str | int | None = None,
         dspname: str | None = None,
-        other: str | None = None,
+        setdef_params: str | None = None,
     ) -> SetDef:
         """
         Runs `SETDEF` with `LIST` parameter and other parameters to set IPCS defaults
@@ -632,10 +632,10 @@ class IpcsSession:
                 Optional.
                 String dataspace name to be used for `DSPNAME` parameter.
                 Default is `None` to not include parameter in subcommand.
-            other (str|None):
+            setdef_params (str|None):
                 Optional.
-                String of other parameters to include in `SETDEF`.
-                Write other parameters as you would in regular IPCS (ex: `'ACTIVE LENGTH(4)'`).
+                String of `SETDEF` parameters. 
+                Write parameters as you would in regular IPCS (ex: `'ACTIVE LENGTH(4)'`). 
                 Default is `None` to not include in subcommand.
         Returns:
             pyipcs.SetDef: Custom `SETDEF` Subcmd Object.
@@ -648,7 +648,7 @@ class IpcsSession:
             nodsname=nodsname,
             asid=asid,
             dspname=dspname,
-            other=other,
+            setdef_params=setdef_params,
         )
         if setdef_obj.rc != 0:
             raise InvalidReturnCodeError(
