@@ -81,14 +81,14 @@ cd path/to/pyIPCS
 pip wheel .
 ```
 
-- After executing the above command there should exist a file that looks something like `pyipcs-1.0.0-py3-none-any.whl` within the `/pyIPCS` directory
+- After executing the above command there should exist a file that looks something like `pyipcs-1.1.0-py3-none-any.whl` within the `/pyIPCS` directory
 
 ---
 
 ### 4. Install the pyIPCS Package
 
 ```bash
-pip install --force-reinstall pyipcs-1.0.0-py3-none-any.whl
+pip install --force-reinstall pyipcs-1.1.0-py3-none-any.whl
 ```
 
 ---
