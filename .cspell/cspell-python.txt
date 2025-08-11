@@ -3,5 +3,6 @@ docstrings
 kwargs
 pylint
 pytest
+repr
 subshell
 zoautil
