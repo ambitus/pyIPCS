@@ -19,7 +19,7 @@
 ---
 ---
 
-## pyIPCS Version: `1.0.0`
+## pyIPCS Version: `1.1.0`
 
 - __To check your current pyIPCS version:__
 
