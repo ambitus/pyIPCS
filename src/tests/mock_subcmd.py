@@ -12,7 +12,7 @@ from pyipcs import Subcmd
 # ---
 #   MockSubcmd CAN BE RUN INDEPENDENTLY TO RUN MOCK SUBCOMMANDS
 # ---
-#   MockIpcsLogger AND MockIpcsSession ARE MERELY HELPER OBJECTS
+#   MockIpcsLogger, MockIpcsAllocations, AND MockIpcsSession ARE MERELY HELPER OBJECTS
 # ---
 #   AGAIN MockSubcmd CAN BE RUN WITHOUT CREATING OTHER OBJECTS
 # =======================================================================
@@ -35,6 +35,36 @@ class MockIpcsLogger:
         """
         pass
 
+class MockIpcsAllocations:
+    """
+    Mock pyIPCS IpcsAllocations object
+
+    Used as helper to add needed variables and functions
+    for MockSubcmd to bypass IPCS functionality and inject output into MockSubcmd
+    """
+
+    def get(self):
+        """
+        Mock Method
+        """
+        return {"MOCKDD": "MOCKSPEC"}
+
+    def set(self, dd_name: str, specification: str | list[str], extend: bool = False):
+        """
+        Mock Method
+        """
+        pass
+
+    def update(
+        self,
+        new_allocations: dict[str, str | list[str]],
+        clear: bool = True,
+        extend: bool = False
+    ):
+        """
+        Mock Method
+        """
+        pass
 
 class MockIpcsSession:
     """
@@ -54,7 +84,7 @@ class MockIpcsSession:
         self.logger = MockIpcsLogger()
         self._session_directory_name = "mock_pyipcs_session"
         self._time_opened = "mock_time_opened"
-        self._allocations = {"MOCKDD": "MOCKSPEC"}
+        self.aloc = MockIpcsAllocations()
 
         self.mock_subcmd_output = None
         self.mock_rc = None

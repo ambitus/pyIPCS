@@ -1,3 +1,4 @@
+aloc
 amode
 ASCB
 ascbaddr

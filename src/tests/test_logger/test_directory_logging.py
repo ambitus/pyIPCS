@@ -267,7 +267,7 @@ def test_subcmd_default_records(opened_session, single_test_dump):
         "outfile": False,
         "keep_file": False,
         "ddir": dump.ddir,
-        "allocations": opened_session._allocations,
+        "allocations": opened_session.aloc.get(),
     }
     assert any(
         record_match(all_record, test_record_r_s) for all_record in log_dict["all.log"]
@@ -288,7 +288,7 @@ def test_subcmd_default_records(opened_session, single_test_dump):
         "outfile": subcmd.outfile,
         "keep_file": subcmd.keep_file,
         "ddir": dump.ddir,
-        "allocations": opened_session._allocations,
+        "allocations": opened_session.aloc.get(),
     }
     assert any(
         record_match(all_record, test_record_c_s_o)

@@ -50,14 +50,14 @@ def construct_allocations(session: IpcsSession) -> dict[str, str | list[str]]:
         str: constructed string for IPCS subcommand shell script
     """
 
-    allocations_copy = copy.deepcopy(session.get_allocations())
+    allocations_copy = session.aloc.get()
 
     allocations_copy["IPCSDDIR"] = [session.ddir]
     allocations_copy["IPCSEXEC"] = [session._ipcsexec_dsname]
     allocations_copy["SYSEXEC"] = [session._sysexec_dsname]
 
     # Add in SYSEXEC from user allocations
-    if "SYSEXEC" in session.get_allocations():
+    if "SYSEXEC" in session.aloc.get():
         allocations_sysexec = copy.deepcopy(session.get_allocations()["SYSEXEC"])
         if isinstance(allocations_sysexec, str):
             allocations_copy["SYSEXEC"].append(allocations_sysexec)

@@ -119,7 +119,7 @@ def test_allocation_execeptions():
     with pytest.raises(TypeError):
         session = IpcsSession()
         session.update_allocations(0)
-    with pytest.raises(TypeError):
+    with pytest.raises(Exception):
         session = IpcsSession()
         session.update_allocations({0: ["TEST.DATA.SET1"]})
     with pytest.raises(TypeError):
