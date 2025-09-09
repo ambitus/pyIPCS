@@ -17,6 +17,7 @@ from ..pyipcs_logging import IpcsLogger
 from ..error_handling import InvalidReturnCodeError, SessionNotActiveError, ArgumentTypeError
 from ..tso_shell import tsocmd
 from ..util.zoautil_py_util import datasets_recall_exists
+from .allocations import IpcsAllocations
 from .dataset_content import IPCSRUN, IPCSEVAL, IPACTIVE
 
 class IpcsSession:
@@ -25,97 +26,71 @@ class IpcsSession:
 
     Manages TSO allocations, session EXECs and DDIRs, and controls settings for IPCS Session.
 
-    Attributes:
-        userid (str):
-            z/OS system userid for current user.
-        hlq (str):
-            High level qualifier where opened pyIPCS session is or will be under.
-            pyIPCS session includes z/OS MVS datasets for pyIPCS EXECs and DDIRs.
-        directory (str):
-            File system directory where IPCS session directories and files will be placed.
-            These include subcommand output files and other logs.
-        active (bool):
-            `True` if IPCS session is active, `False` if not active.
-        ddir (str|None):
-            DDIR that IPCS will use to run subcommands. `None` if session is not active.
-        logger (pyipcs.IpcsLogger):
-            Manages logging for the pyIPCS session.
+    Attributes
+    ----------
+    userid : str
+        z/OS system userid for current user.
+    hlq : str
+        High level qualifier where opened pyIPCS session is or will be under.
+        pyIPCS session includes z/OS MVS datasets for pyIPCS EXECs and DDIRs.
+    directory : str
+        File system directory where IPCS session directories and files will be placed.
+        These include subcommand output files and other logs.
+    aloc : pyipcs.IpcsAllocations
+        Manages TSO allocations for your IPCS session.
+    active : bool
+        `True` if IPCS session is active, `False` if not active.
+    ddir : str|None
+        DDIR that IPCS will use to run subcommands. `None` if session is not active.
+    logger : pyipcs.IpcsLogger
+        Manages logging for the pyIPCS session.
 
-    Methods:
-    ```
-        def __init__(
-            hlq: str | None = None,
-            directory: str | None = None,
-            allocations: dict[str, str | list[str]] = {
-                "IPCSPARM": ["SYS1.PARMLIB"],
-                "SYSPROC": ["SYS1.SBLSCLI0"],
-            },
-        ) -> None:
-            Constructor for pyIPCS IpcsSession Object.
-
-        open() -> None:
-            Opens IPCS/TSO Session.
-
-        close() -> None:
-            Closes IPCS/TSO Session.
-
-        get_allocations() -> dict[str, str | list[str]]:
-            Get allocations for your TSO environment.
-
-        set_allocation(dd_name:str, specification:str|list[str]) -> None:
-            Set a TSO allocation.
-
-        update_allocations(
-            new_allocations:dict[str,str|list[str]],
-            clear_old_allocations:bool=True
-        ) -> None:
-            Update multiple TSO allocations.
-
-        ddir_defaults(**kwargs) -> dict:
-            Returns default parameters for dump directory creation. 
-            Input arguments to edit defaults.
-        
-        create_ddir(ddir: str, **kwargs) -> None:
-            Create dump directory. Uses `BLSCDDIR` CLIST to create DDIR.
-
-        create_session_ddir(**kwargs) -> str:
-            Create pyIPCS session dump directory. Will be deleted on session close.
-
-        set_ddir(ddir: str) -> None:
-            Set `ddir` as the current dump directory for the session.
-
-        get_defaults() -> pyipcs.SetDef:
-            Run SETDEF LIST to get IPCS defaults
-
-        set_defaults(
-            confirm: bool | None = None,
-            dsname: str | None = None,
-            nodsname: bool = False,
-            asid: Hex | str | int | None = None,
-            dspname: str | None = None,
-            setdef_params: str | None = None,
-        ) -> SetDef:
-            Runs SETDEF with LIST parameter and other parameters to set IPCS defaults
-
-        init_dump(dsname: str, ddir: str = "", use_cur_ddir: bool = False) -> Dump:
-            Initialize/Set dump `dsname` under dump directory `ddir` and return Dump object.
-            Will set IPCS session DDIR to `ddir`.
-            Will set IPCS default DSNAME to `dsname`
-
-        set_dump(dump: Dump) -> None:
-            Set IPCS session DDIR to Dump object DDIR.
-            Set IPCS default DSNAME to Dump object dataset name.
-
-        dsname_in_ddir(dsname: str) -> bool:
-            Check if dataset a source described in the current session DDIR.
-
-        def evaluate(
-            hex_address: Hex | str | int,
-            dec_offset: int,
-            dec_length: int,
-        ) -> Hex:
-            Read data from dump. Similar to EVALUATE subcommand in REXX.
-    ```
+    Methods
+    -------
+    __init__(
+        hlq=None, 
+        directory=None, 
+        allocations={
+            "IPCSPARM": ["SYS1.PARMLIB"],
+            "SYSPROC": ["SYS1.SBLSCLI0"],
+        }
+    )
+        Constructor for pyIPCS IpcsSession Object.
+    open()
+        Opens IPCS/TSO Session.
+    close()
+        Closes IPCS/TSO Session.
+    ddir_defaults(**kwargs)
+        Returns default parameters for dump directory creation. 
+        Input arguments to edit defaults.
+    create_ddir(ddir, **kwargs)
+        Create dump directory. Uses `BLSCDDIR` CLIST to create DDIR.
+    create_session_ddir(**kwargs)
+        Create pyIPCS session dump directory. Will be deleted on session close.
+    set_ddir(ddir)
+        Set `ddir` as the current dump directory for the session.
+    get_defaults()
+        Run SETDEF LIST to get IPCS defaults
+    set_defaults(
+        confirm=None,
+        dsname=None,
+        nodsname=False,
+        asid=None,
+        dspname=None,
+        setdef_params=None,
+    )
+        Runs SETDEF with LIST parameter and other parameters to set IPCS defaults
+    init_dump(dsname, ddir="", use_cur_ddir=False)
+        Initialize/Set dump `dsname` under dump directory `ddir` and return Dump object.
+        Will set IPCS session DDIR to `ddir`.
+        Will set IPCS default DSNAME to `dsname`
+    set_dump(dump)
+        Set IPCS session DDIR to Dump object DDIR.
+        Set IPCS default DSNAME to Dump object dataset name.
+    dsname_in_ddir(dsname)
+        Check if dataset a source described in the current session DDIR.
+    evaluate(hex_address, dec_offset, dec_length)
+        Read data from dump. Similar to EVALUATE subcommand in REXX.
     """
 
     def __init__(
@@ -142,7 +117,7 @@ class IpcsSession:
             directory (str|None):
                 Optional.
                 File system directory where IPCS session directories and files will be placed.
-                By default is `None`.
+                By default is `None`
                 which will set the directory as the current working directory of executed file.
             allocations (dict[str,str|list[str]]):
                 Optional. Dictionary of allocations where keys are DD names
@@ -186,9 +161,8 @@ class IpcsSession:
             )
         # Attribute directory
         self.__directory = os.getcwd() if directory is None else directory
-        # Set allocations
-        self.__allocations = {}
-        self.update_allocations(allocations)
+        # Set initial allocations
+        self._aloc = IpcsAllocations(allocations)
         # Set empty DDIR defaults
         self.__ddir_defaults = {}
 
@@ -265,7 +239,8 @@ class IpcsSession:
             dict[str,str|list[str]]: Returns dictionary of all allocations where keys are DD names
                 and values are string data set allocation requests or lists of cataloged datasets
         """
-        return self._allocations
+        return self.aloc.get()
+
 
     def set_allocation(self, dd_name: str, specification: str | list[str]) -> None:
         """
@@ -281,42 +256,14 @@ class IpcsSession:
         Returns:
             None
         """
-        if not isinstance(dd_name, str):
-            raise TypeError(
-                f"Argument 'dd_name' must be of type str, but got {type(dd_name)}\n"
-            )
-
-        if not isinstance(specification, str):
-            if not isinstance(specification, list):
-                raise TypeError(
-                    f"Specification for {dd_name} "
-                    + f"must be of type list or str, but got {type(specification)}\n"
-                )
-            if not all(isinstance(dsname, str) for dsname in specification):
-                raise TypeError(
-                    f"Specification for {dd_name} list items should all be of type str\n"
-                )
-
         # Log Set Allocation
         self.logger.log(
             "SESSION",
             "SET ALLOCATION",
             extra={"dd_name": dd_name, "specification": copy.deepcopy(specification)},
         )
+        self.aloc.set(dd_name, specification)
 
-        # Create copy to pass list by value if type(specification) == list
-        specification = copy.deepcopy(specification)
-        self.__allocations[dd_name] = specification
-
-        # If specification is empty remove DD name-specification pair from allocations
-        if (
-            isinstance(self.__allocations[dd_name], str)
-            and self.__allocations[dd_name].strip() == ""
-        ) or (
-            isinstance(self.__allocations[dd_name], list)
-            and self.__allocations[dd_name] == []
-        ):
-            del self.__allocations[dd_name]
 
     def update_allocations(
         self,
@@ -336,21 +283,7 @@ class IpcsSession:
         Returns:
             None
         """
-        if not isinstance(new_allocations, dict):
-            raise TypeError(
-                f"new_allocations must be of type dict, but got {type(new_allocations)}\n"
-            )
-        if not isinstance(clear_old_allocations, bool):
-            raise TypeError(
-                "clear_old_allocations "
-                + f"must be of type bool, but got {type(clear_old_allocations)}\n"
-            )
-
-        if clear_old_allocations:
-            self.__allocations = {}
-
-        for dd_name, specification in new_allocations.items():
-            self.set_allocation(dd_name, specification)
+        self.aloc.update(new_allocations, clear=clear_old_allocations)
 
     def ddir_defaults(self, **kwargs) -> dict:
         """
@@ -488,7 +421,7 @@ class IpcsSession:
         )
 
         # Run BLSCDDIR EXEC to create DDIR
-        tsocmd(f"%BLSCDDIR DSNAME({ddir}){blscddir_params_str}", allocations=self._allocations)
+        tsocmd(f"%BLSCDDIR DSNAME({ddir}){blscddir_params_str}", allocations=self.aloc.get())
 
     def create_session_ddir(self, **kwargs) -> str:
         """
@@ -811,6 +744,13 @@ class IpcsSession:
         return self.__directory
 
     @property
+    def aloc(self) -> IpcsAllocations:
+        """
+        Attribute aloc
+        """
+        return self._aloc
+
+    @property
     def active(self) -> bool:
         """
         Attribute active
@@ -914,13 +854,6 @@ class IpcsSession:
         return {
             "IPCSEVAL": f"{self._sysexec_dsname}(IPCSEVAL)"
         }
-
-    @property
-    def _allocations(self) -> dict:
-        """
-        Protected Attribute _allocations
-        """
-        return self.__allocations
 
     @property
     def _ddir_defaults(self) -> dict:
