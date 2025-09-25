@@ -90,7 +90,7 @@ def test_session_default_records(opened_session):
     finally:
         if not opened_session.active:
             opened_session.open()
-        opened_session._delete_ddir(test_ddir)
+        opened_session.ddir._delete(test_ddir)
 
 
 def test_dump_default_records(opened_session, single_test_dump):
@@ -222,7 +222,7 @@ def test_dump_default_records(opened_session, single_test_dump):
     finally:
         if not opened_session.active:
             opened_session.open()
-        opened_session._delete_ddir(test_ddir)
+        opened_session.ddir._delete(test_ddir)
 
 
 def test_subcmd_default_records(opened_session, single_test_dump):

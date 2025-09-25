@@ -143,7 +143,7 @@ def check_create_ddir(test_session, all_test_dumps):
         # Check test DDIR doesn't exist already and delete it
         # ======================================================
         if datasets.list_vsam_datasets(test_ddir):
-            test_session._delete_ddir(test_ddir)
+            test_session.ddir._delete(test_ddir)
         assert not datasets.list_vsam_datasets(test_ddir)
         # ==============================================
         # Check if create_ddir creates the VSAM dataset
@@ -177,7 +177,7 @@ def check_create_ddir(test_session, all_test_dumps):
     finally:
         if not test_session.active:
             test_session.open()
-        test_session._delete_ddir(test_ddir)
+        test_session.ddir._delete(test_ddir)
 
 
 def check_ddir_dump_constructor(test_session, single_test_dump):
@@ -196,7 +196,7 @@ def check_ddir_dump_constructor(test_session, single_test_dump):
         # Check test DDIR doesn't exist already and delete it
         # ======================================================
         if datasets.list_vsam_datasets(test_ddir):
-            test_session._delete_ddir(test_ddir)
+            test_session.ddir._delete(test_ddir)
         assert not datasets.list_vsam_datasets(test_ddir)
         # ==================================================
         # Check dump is in DDIR after dump object creation
@@ -215,7 +215,7 @@ def check_ddir_dump_constructor(test_session, single_test_dump):
     finally:
         if not test_session.active:
             test_session.open()
-        test_session._delete_ddir(test_ddir)
+        test_session.ddir._delete(test_ddir)
 
 
 def check_use_cur_ddir(test_session, single_test_dump):
@@ -228,12 +228,12 @@ def check_use_cur_ddir(test_session, single_test_dump):
     # ===========================
     # Just use the Default DDIR
     # ===========================
-    test_ddir = test_session.ddir
+    test_ddir = test_session.ddir.dsname
     # ==================================================
     # Check dump is in DDIR after dump object creation
     # ==================================================
     test_session.init_dump(single_test_dump, use_cur_ddir=True)
-    assert test_session.ddir == test_ddir
+    assert test_session.ddir.dsname == test_ddir
     assert test_session.dsname_in_ddir(single_test_dump)
     Subcmd(test_session, "STATUS REGISTERS")
 

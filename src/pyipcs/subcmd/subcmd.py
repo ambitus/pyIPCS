@@ -184,7 +184,7 @@ class Subcmd:
                 "subcmd": self.subcmd,
                 "outfile": outfile,
                 "keep_file": self.keep_file,
-                "ddir": session.ddir,
+                "ddir": session.ddir.dsname,
                 "allocations": session.aloc.get(),
             },
         )
@@ -262,7 +262,7 @@ class Subcmd:
                 "rc": self.rc,
                 "outfile": self.outfile,
                 "keep_file": self.keep_file,
-                "ddir": session.ddir,
+                "ddir": session.ddir.dsname,
                 "allocations": session.aloc.get(),
             },
         )

@@ -191,7 +191,7 @@ class Dump:
 
         # If use_cur_ddir is True - Use the current pyIPCS session DDIR
         if use_cur_ddir:
-            self.__ddir = session.ddir
+            self.__ddir = session.ddir.dsname
         else:
             # Define DDIR and create/set/initialize dump under DDIR
             if not ddir:

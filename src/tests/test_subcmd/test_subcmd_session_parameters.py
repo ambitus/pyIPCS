@@ -56,7 +56,7 @@ def test_no_dump_subcmd_hlq(opened_session_hlq):
     mock_subcmds = jcl_to_mock_subcmd(
         TEST_SESSION_SUBCMDS,
         opened_session_hlq.get_allocations(),
-        opened_session_hlq.ddir,
+        opened_session_hlq.ddir.dsname,
     )
     check_subcmd_output(opened_session_hlq, mock_subcmds)
 
@@ -94,7 +94,7 @@ def test_no_dump_subcmd_directory(opened_session_directory):
     mock_subcmds = jcl_to_mock_subcmd(
         TEST_SESSION_SUBCMDS,
         opened_session_directory.get_allocations(),
-        opened_session_directory.ddir,
+        opened_session_directory.ddir.dsname,
     )
     check_subcmd_output(opened_session_directory, mock_subcmds)
 

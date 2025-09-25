@@ -52,7 +52,7 @@ def construct_allocations(session: IpcsSession) -> dict[str, str | list[str]]:
 
     allocations_copy = session.aloc.get()
 
-    allocations_copy["IPCSDDIR"] = [session.ddir]
+    allocations_copy["IPCSDDIR"] = [session.ddir.dsname]
     allocations_copy["IPCSEXEC"] = [session._ipcsexec_dsname]
     allocations_copy["SYSEXEC"] = [session._sysexec_dsname]
 
