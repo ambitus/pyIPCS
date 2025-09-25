@@ -18,9 +18,9 @@ from pyipcs import Subcmd
 # =======================================================================
 
 
-# ============================================
-# MockIpcsLogger and MockIpcsSession Object
-# ===========================================
+# =============================================================
+# MockIpcsLogger, MockDumpDirectory, and MockIpcsSession Object
+# =============================================================
 class MockIpcsLogger:
     """
     Mock pyIPCS IpcsLogger object
@@ -66,6 +66,20 @@ class MockIpcsAllocations:
         """
         pass
 
+class MockDumpDirectory:
+    """
+    Mock pyIPCS DumpDirectory object
+
+    Used as helper to add needed variables and functions
+    for MockSubcmd to bypass IPCS functionality and inject output into MockSubcmd
+    """
+
+    def __init__(self):
+        """
+        Mock Constructor
+        """
+        self.dsname = "MOCK.DDIR"
+
 class MockIpcsSession:
     """
     Mock pyIPCS IpcsSession object
@@ -80,7 +94,7 @@ class MockIpcsSession:
         """
         self.active = True
         self.directory = mock_directory
-        self.ddir = "MOCK.DDIR"
+        self.ddir = MockDumpDirectory()
         self.logger = MockIpcsLogger()
         self._session_directory_name = "mock_pyipcs_session"
         self._time_opened = "mock_time_opened"

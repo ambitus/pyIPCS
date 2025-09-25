@@ -92,16 +92,16 @@ def check_open_close(test_session):
     # ===========================================
     # Check if default temporary DDIR exists
     # ===========================================
-    assert datasets.list_vsam_datasets(test_session.ddir, migrated=True)
+    assert datasets.list_vsam_datasets(test_session.ddir.dsname, migrated=True)
 
-    test_ddir = test_session.ddir
+    test_ddir = test_session.ddir.dsname
     session_hlq = test_session._session_hlq
     ipcsexec_dsname = test_session._ipcsexec_dsname
     sysexec_dsname = test_session._sysexec_dsname
     assert test_session.active
     test_session.close()
     assert not test_session.active
-    assert test_session.ddir is None
+    assert test_session.ddir.dsname is None
 
     # ======================================
     # Check temporary datasets don't exist
