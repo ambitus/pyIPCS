@@ -42,11 +42,11 @@ def test_set_dump(opened_session, single_test_dump):
         # Set dump and run subcommand to check for no errors
         # ===================================================
         opened_session.set_dump(dump)
-        assert opened_session.ddir == test_ddir == dump.ddir
+        assert opened_session.ddir.dsname == test_ddir == dump.ddir
         assert opened_session.get_defaults().data["dsname"] == single_test_dump
         Subcmd(opened_session, "STATUS REGISTERS")
 
     finally:
         if not opened_session.active:
             opened_session.open()
-        opened_session._delete_ddir(test_ddir)
+        opened_session.ddir._delete(test_ddir)

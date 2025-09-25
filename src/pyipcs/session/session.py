@@ -18,6 +18,7 @@ from ..error_handling import InvalidReturnCodeError, SessionNotActiveError, Argu
 from ..tso_shell import tsocmd
 from ..util.zoautil_py_util import datasets_recall_exists
 from .allocations import IpcsAllocations
+from .ddir import DumpDirectory
 from .dataset_content import IPCSRUN, IPCSEVAL, IPACTIVE
 
 class IpcsSession:
@@ -30,18 +31,24 @@ class IpcsSession:
     ----------
     userid : str
         z/OS system userid for current user.
+
     hlq : str
         High level qualifier where opened pyIPCS session is or will be under.
         pyIPCS session includes z/OS MVS datasets for pyIPCS EXECs and DDIRs.
+
     directory : str
         File system directory where IPCS session directories and files will be placed.
         These include subcommand output files and other logs.
-    aloc : pyipcs.IpcsAllocations
-        Manages TSO allocations for your IPCS session.
+
     active : bool
         `True` if IPCS session is active, `False` if not active.
-    ddir : str|None
-        DDIR that IPCS will use to run subcommands. `None` if session is not active.
+
+    aloc : pyipcs.IpcsAllocations
+        Manages TSO allocations for your IPCS session.
+
+    ddir : pyipcs.DumpDirectory
+        Manages dump directory(DDIR) that is used during IPCS session.
+
     logger : pyipcs.IpcsLogger
         Manages logging for the pyIPCS session.
 
@@ -56,39 +63,25 @@ class IpcsSession:
         }
     )
         Constructor for pyIPCS IpcsSession Object.
+
     open()
         Opens IPCS/TSO Session.
+
     close()
         Closes IPCS/TSO Session.
-    ddir_defaults(**kwargs)
-        Returns default parameters for dump directory creation. 
-        Input arguments to edit defaults.
-    create_ddir(ddir, **kwargs)
-        Create dump directory. Uses `BLSCDDIR` CLIST to create DDIR.
-    create_session_ddir(**kwargs)
-        Create pyIPCS session dump directory. Will be deleted on session close.
-    set_ddir(ddir)
-        Set `ddir` as the current dump directory for the session.
-    get_defaults()
-        Run SETDEF LIST to get IPCS defaults
-    set_defaults(
-        confirm=None,
-        dsname=None,
-        nodsname=False,
-        asid=None,
-        dspname=None,
-        setdef_params=None,
-    )
-        Runs SETDEF with LIST parameter and other parameters to set IPCS defaults
+
     init_dump(dsname, ddir="", use_cur_ddir=False)
         Initialize/Set dump `dsname` under dump directory `ddir` and return Dump object.
         Will set IPCS session DDIR to `ddir`.
-        Will set IPCS default DSNAME to `dsname`
+        Will set IPCS default DSNAME to `dsname`.
+
     set_dump(dump)
         Set IPCS session DDIR to Dump object DDIR.
         Set IPCS default DSNAME to Dump object dataset name.
+
     dsname_in_ddir(dsname)
         Check if dataset a source described in the current session DDIR.
+        
     evaluate(hex_address, dec_offset, dec_length)
         Read data from dump. Similar to EVALUATE subcommand in REXX.
     """
@@ -131,8 +124,6 @@ class IpcsSession:
         self.__session_id = None
         # Time that session was opened. `None` when session is not open
         self.__time_opened = None
-        # DDIR that is used to run IPCS subcommands. `None` when session is not open
-        self.__ddir = None
         # Setup cleanup
         atexit.register(self.__cleanup__)
 
@@ -163,8 +154,8 @@ class IpcsSession:
         self.__directory = os.getcwd() if directory is None else directory
         # Set initial allocations
         self._aloc = IpcsAllocations(allocations)
-        # Set empty DDIR defaults
-        self.__ddir_defaults = {}
+        # Set up DumpDirectory object
+        self._ddir = DumpDirectory(self)
 
     def open(self) -> None:
         """
@@ -199,7 +190,7 @@ class IpcsSession:
         try:
             self.__create_session_datasets(init_ddir)
         except exceptions.DatasetWriteException:
-            self._delete_ddir(init_ddir)
+            self.ddir._delete(init_ddir)
         # Set init ddir
         self.set_ddir(init_ddir)
 
@@ -224,7 +215,7 @@ class IpcsSession:
         self.__delete_session_datasets()
 
         # Set _time_opened, ddir, and _session_id back to `None`
-        self.__ddir = None
+        self.ddir._clear()
         self.__time_opened = None
         self.__session_id = None
 
@@ -331,21 +322,7 @@ class IpcsSession:
         Returns:
             dict: Keys are `BLSCDDIR` parameters and the values are `BLSCDDIR` parameter values.
         """
-        # Add ddir default if it was specified
-        def set_ddir_default(param_name: str, param_type: type):
-            if param_name in kwargs:
-                if not isinstance(kwargs[param_name], param_type):
-                    raise ArgumentTypeError(param_name, kwargs[param_name], param_type)
-                self.__ddir_defaults[param_name] = kwargs[param_name]
-
-        set_ddir_default("dataclas", str)
-        set_ddir_default("mgmtclas", str)
-        set_ddir_default("ndxcisz", int)
-        set_ddir_default("records", int)
-        set_ddir_default("storclas", str)
-        set_ddir_default("volume", str)
-        set_ddir_default("blscddir_params", str)
-        return self._ddir_defaults
+        return self.ddir.presets(**kwargs)
 
     def create_ddir(self, ddir: str, **kwargs) -> None:
         """
@@ -376,41 +353,6 @@ class IpcsSession:
         Returns:
             None
         """
-        if not isinstance(ddir, str):
-            raise ArgumentTypeError("ddir", ddir, str)
-
-        # ===================================================================
-        # Convert keyword args to BLSCDDIR params
-        # Use keyword args provided otherwise use ddir default if it exists
-        # ===================================================================
-        def blscddir_str_param(param_name: str, param_type: type, param_label: bool = True):
-            param_str = ""
-            if param_name in kwargs:
-                # If argument was specified
-                if not isinstance(kwargs[param_name], param_type):
-                    raise ArgumentTypeError(param_name, kwargs[param_name], param_type)
-                param_str = str(kwargs[param_name])
-            else:
-                # If argument was not specified and there was a default
-                if param_name in self._ddir_defaults:
-                    param_str = str(self._ddir_defaults[param_name])
-            if param_str:
-                if param_label:
-                    param_str = f" {param_name.upper()}({param_str})"
-                else:
-                    # Case only really for blscddir_params
-                    param_str = f" {param_str}"
-            return param_str
-
-        blscddir_params_str = ""
-        blscddir_params_str += blscddir_str_param("dataclas", str)
-        blscddir_params_str += blscddir_str_param("mgmtclas", str)
-        blscddir_params_str += blscddir_str_param("ndxcisz", int)
-        blscddir_params_str += blscddir_str_param("records", int)
-        blscddir_params_str += blscddir_str_param("storclas", str)
-        blscddir_params_str += blscddir_str_param("volume", str)
-        blscddir_params_str += blscddir_str_param("blscddir_params", str, param_label=False)
-
         # Log Create DDIR
         self.logger.log(
             "SESSION",
@@ -419,9 +361,7 @@ class IpcsSession:
                 "ddir": ddir,
             },
         )
-
-        # Run BLSCDDIR EXEC to create DDIR
-        tsocmd(f"%BLSCDDIR DSNAME({ddir}){blscddir_params_str}", allocations=self.aloc.get())
+        self.ddir.create(ddir, use=False, **kwargs)
 
     def create_session_ddir(self, **kwargs) -> str:
         """
@@ -448,33 +388,7 @@ class IpcsSession:
         Returns:
             str: pyIPCS session DDIR dataset name
         """
-        if not self.active:
-            raise SessionNotActiveError()
-
-        # Generate a DDIR with a DDIR id until one that does not exist is found
-        ddir_id = "".join(random.choices("0123456789", k=5))
-        session_ddir = f"{self._session_hlq}.D{ddir_id}.DDIR"
-        while datasets_recall_exists(session_ddir):
-            ddir_id = "".join(random.choices("0123456789", k=5))
-            session_ddir = f"{self._session_hlq}.D{ddir_id}.DDIR"
-
-        # Create the DDIR
-        self.create_ddir(session_ddir, **kwargs)
-
-        # Attempt to add DDIR to main session dataset for tracking
-        datasets_recall_exists(self._session_hlq)
-        try:
-            datasets.write(self._session_hlq, content=session_ddir, append=True)
-        except exceptions.DatasetWriteException as e:
-            self._delete_ddir(session_ddir)
-            raise RuntimeError(
-                "Dataset Write Error - Tracking pyIPCS Session DDIR\n"
-                + f"\nReturn Code: {e.response.rc}\n"
-                + f"\nSTDOUT:\n\n {e.response.stdout_response}\n"
-                + f"\nSTDERR:\n\n {e.response.stderr_response}\n"
-            ) from e
-
-        return session_ddir
+        return self.ddir.create_tmp(use=False, **kwargs)
 
     def set_ddir(self, ddir: str) -> None:
         """
@@ -486,17 +400,6 @@ class IpcsSession:
         Returns:
             None
         """
-        if not isinstance(ddir, str):
-            raise ArgumentTypeError("ddir", ddir, str)
-        if not self.active:
-            raise SessionNotActiveError()
-        # If the DDIR parameter is the same as the session's DDIR attribute - do nothing
-        if self.ddir == ddir:
-            return
-        # Will return empty list if DDIR does not exist
-        if not datasets_recall_exists(ddir):
-            raise ValueError("Dump directory dataset 'ddir' does not exist")
-
         # Log Set DDIR
         self.logger.log(
             "SESSION",
@@ -505,9 +408,7 @@ class IpcsSession:
                 "ddir": ddir,
             },
         )
-
-        # If none of the previous conditions are met set the current ddir
-        self.__ddir = ddir
+        self.ddir.use(ddir)
 
     def get_defaults(self) -> SetDef:
         """
@@ -517,15 +418,7 @@ class IpcsSession:
             pyipcs.SetDef : Custom `SETDEF` Subcmd Object.
                 `outfile` parameter is set to `False` for string output.
         """
-        setdef_obj = SetDef(self)
-        if setdef_obj.rc != 0:
-            raise InvalidReturnCodeError(
-                setdef_obj.subcmd,
-                setdef_obj.output,
-                setdef_obj.rc,
-                0,
-            )
-        return setdef_obj
+        return self.ddir.defaults()
 
     def set_defaults(
         self,
@@ -574,23 +467,20 @@ class IpcsSession:
             pyipcs.SetDef: Custom `SETDEF` Subcmd Object.
                 `outfile` parameter is set to `False` for string output.
         """
-        setdef_obj = SetDef(
-            self,
-            confirm=confirm,
-            dsname=dsname,
-            nodsname=nodsname,
-            asid=asid,
-            dspname=dspname,
-            setdef_params=setdef_params,
-        )
-        if setdef_obj.rc != 0:
-            raise InvalidReturnCodeError(
-                setdef_obj.subcmd,
-                setdef_obj.output,
-                setdef_obj.rc,
-                0,
-            )
-        return setdef_obj
+        kwargs = {}
+        if confirm is not None:
+            kwargs["confirm"] = confirm
+        if dsname is not None:
+            kwargs["dsname"] = dsname
+        if nodsname:
+            kwargs["dsname"] = None
+        if asid is not None:
+            kwargs["asid"] = asid
+        if dspname is not None:
+            kwargs["dspname"] = dspname
+        if setdef_params is not None:
+            kwargs["setdef_params"] = setdef_params
+        return self.ddir.defaults(**kwargs)
 
     def init_dump(
         self, dsname: str, ddir: str = "", use_cur_ddir: bool = False
@@ -744,13 +634,6 @@ class IpcsSession:
         return self.__directory
 
     @property
-    def aloc(self) -> IpcsAllocations:
-        """
-        Attribute aloc
-        """
-        return self._aloc
-
-    @property
     def active(self) -> bool:
         """
         Attribute active
@@ -783,11 +666,18 @@ class IpcsSession:
         )
 
     @property
-    def ddir(self) -> str | None:
+    def aloc(self) -> IpcsAllocations:
+        """
+        Attribute aloc
+        """
+        return self._aloc
+
+    @property
+    def ddir(self) -> DumpDirectory:
         """
         Attribute ddir
         """
-        return self.__ddir
+        return self._ddir
 
     @property
     def logger(self) -> IpcsLogger:
@@ -856,13 +746,6 @@ class IpcsSession:
         }
 
     @property
-    def _ddir_defaults(self) -> dict:
-        """
-        Protected Attribute _ddir_defaults
-        """
-        return self.__ddir_defaults
-
-    @property
     def _time_opened(self) -> str | None:
         """
         Protected Attribute _time_opened
@@ -879,22 +762,6 @@ class IpcsSession:
         Name for session directory
         """
         return "pyipcs_session"
-
-    def _delete_ddir(self, ddir: str) -> None:
-        """
-        Protected Function _delete_ddir. Delete DDIR.
-
-        Args:
-            ddir (str) DDIR to delete.
-        Returns:
-            None
-        """
-        # If DDIR still exists delete
-        if datasets_recall_exists(ddir):
-            tsocmd(
-                f"DELETE '{ddir}'",
-                allocations={"IPCSALOC": ddir},
-            )
 
     def __create_session_datasets(self, init_ddir: str) -> None:
         """
@@ -964,7 +831,7 @@ class IpcsSession:
                     + f" with the pattern '{self._session_hlq}*'",
                     UserWarning
                 )
-            self._delete_ddir(ddir_dsname)
+            self.ddir._delete(ddir_dsname)
             if datasets_recall_exists(ddir_dsname):
                 warnings.warn(
                     "Potential pyIPCS Session Corruption - Please manually delete all datasets"

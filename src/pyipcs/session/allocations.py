@@ -17,14 +17,19 @@ class IpcsAllocations:
     __init__(init_allocations)
         Constructor for pyIPCS IpcsAllocations Object. 
         Sets TSO initial allocations for your IPCS session.
+
     get()
         Get TSO allocations for your IPCS session.
+
     set(dd_name, specification, extend=False)
         Set a single TSO allocation for your IPCS session.
+
     drop(dd_name)
         Remove a specific TSO allocation from your IPCS session by DD name if it exists.
+
     update(new_allocations, clear=True, extend=False)
         Update multiple TSO allocations for your IPCS session.
+        
     clear()
         Clear all TSO allocations for your IPCS session.
     """
