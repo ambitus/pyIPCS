@@ -72,7 +72,6 @@ def test_to_json_dump(opened_session, single_test_dump):
     dump = opened_session.init_dump(single_test_dump)
 
     dump_json = json.loads(json.dumps(dump, cls=IpcsJsonEncoder))
-    assert len(dump_json.keys()) == 4
     assert dump_json["__ipcs_type__"] == "Dump"
     assert dump_json["dsname"] == dump.dsname
     assert dump_json["ddir"] == dump.ddir
@@ -84,7 +83,6 @@ def test_to_json_dump(opened_session, single_test_dump):
     dump.data["field3"] = {"1": Hex(1)}
 
     dump_json = json.loads(json.dumps(dump, cls=IpcsJsonEncoder))
-    assert len(dump_json.keys()) == 4
     assert dump_json["__ipcs_type__"] == "Dump"
     assert dump_json["dsname"] == dump.dsname
     assert dump_json["ddir"] == dump.ddir

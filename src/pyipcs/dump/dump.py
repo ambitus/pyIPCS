@@ -7,23 +7,24 @@ from typing import TYPE_CHECKING
 import textwrap
 from pprint import pformat
 import copy
-from .hex_obj import Hex
-from .util import is_dump, dump_header_data
-from .error_handling import (
+from ..hex_obj import Hex
+from ..util import is_dump
+from ..error_handling import (
     InvalidReturnCodeError,
     SessionNotActiveError,
 )
-from .subcmd import (
-    Subcmd,
+from ..subcmd import Subcmd
+from .dump_subcmds import (
     ListSliptrap,
     ListdumpSelectDsname,
     CbfRtct,
     SelectAll,
     Ipldata,
 )
+from .dump_header import DumpHeader
 
 if TYPE_CHECKING:
-    from .session import IpcsSession
+    from ..session import IpcsSession
 
 
 class Dump:
@@ -34,100 +35,88 @@ class Dump:
 
     Can create a Dump object using `pyipcs.IpcsSession.init_dump()`
 
-    Attributes:
-        dsname (str):
-            Dump dataset name.
-        ddir (str|None):
-            Dump directory when dump was initialized.
-        data (dict):
-            Dictionary containing general data about the dump.
-            Editable by user to store additional info about a dump.
-            **If Dump object cannot find or parse one of the `data` dictionary items below,
-            the item will not be included in the `data` dictionary.**
-        ```
-                'dump_type' (str):
-                    'SAD', 'SVCD', 'TDMP', 'SYSM', or 'SLIP'
-                'sysname' (str)
-                'date_local' (str)
-                'time_local' (str)
-                'title' (str)
-                'original_dump_dsn' (str)
-                'version' (int):
-                    For example z/OS version `3` release `1`
-                'release' (int):
-                    For example z/OS version `3` release `1`
-                'sdrsn' (str)
-                'complete_dump' (bool)
-                'home_jobname' (str):
-                    Not included if 'dump_type'=='SAD'.
-                'primary' (pyipcs.Hex):
-                    Not included if 'dump_type'=='SAD'.
-                'secondary' (pyipcs.Hex):
-                    Not included if 'dump_type'=='SAD'.
-                'home' (pyipcs.Hex):
-                    Not included if 'dump_type'=='SAD'.
-                'sdwa_asid' (pyipcs.Hex):
-                    Not included if 'dump_type'=='SAD'.
-                'sdwa_address' (pyipcs.Hex):
-                    Not included if 'dump_type'=='SAD'.
-                'blocks_allocated_decimal' (int):
-                    Not included if 'dump_type'=='SAD'.
-                'remote_sysname' (str):
-                    Included only if 'remote_dump'==True.
-                    Not included if 'dump_type'=='SAD'.
-                'remote_dump' (bool):
-                    Not included if 'dump_type'=='SAD'.
-                'processor_serial_number' (str)
-                'processor_model_number' (str)
-                'sliptrap' (str):
-                    Included in 'data' dictionary if 'dump_type'=='SLIP'.
-                    Obtained from 'LIST SLIPTRAP' subcommand.
-                'ipl_date_local' (str):
-                    Included in 'data' dictionary if CSA is dumped.
-                    Obtained from 'IPLDATA' subcommand.
-                'ipl_time_local' (str):
-                    Included in 'data' dictionary if CSA is dumped.
-                    Obtained from 'IPLDATA' subcommand.
-                'asids_dumped' (list[pyipcs.Hex]):
-                    list of ASIDs that were dumped.
-                    Obtained from 'CBF RTCT' subcommand.
-                'asids_all' (list[dict]):
-                    Info about all asids on the system at the time of the dump.
-                    Keys are the hex ASIDs on the system and values are a dictionary
-                    containing the string jobname and ASCB address.
-                    Obtained from 'SELECT ALL' subcommand:
-                        'asid' (pyipcs.Hex)
-                        'jobname' (str)
-                        'ascb_addr' (pyipcs.Hex)
-                'storage_areas' (list[dict]):
-                    Info about dumped storage areas.
-                    Obtained from 'LISTDUMP' subcommand with parameters 'DSNAME' and 'SELECT':
-                        'asid' (pyipcs.Hex)
-                        'total_bytes' (pyipcs.Hex|None) :
-                            Total number of bytes dumped for ASID in hex.
-                            None if total_bytes for ASID is not defined in 'LISTDUMP'.
-                        'sumdump' (pyipcs.Hex):
-                            Number of SUMMARY DUMP Data bytes dumped in hex.
-                        'dataspaces' (dict):
-                            {
-                                str(Dataspace Name) :
-                                pyipcs.Hex(Number of bytes dumped for dataspace in hex)
-                            }
-        ```
-    Methods:
-    ```
-        __init__(session:IpcsSession, dsname:str, ddir:str="") -> None:
-            Constructor for Dump Object.
+    Attributes
+    ----------
+    dsname : str
+        Dump dataset name.
+        
+    ddir : str
+        Dump directory when dump was initialized.
 
-        asid_to_jobname(asid:Hex|str|int) -> str|None:
-            Get Jobname from ASID.
+    header : pyipcs.DumpHeader
+        Custom dictionary object containing information about the dump from the dump header.
 
-        jobname_to_asid(jobname:str) -> pyipcs.Hex|None:
-            Get ASID from Jobname.
+    data : dict
+        Dictionary containing general information about the dump from various subcommands.
+        Editable by user to store additional info about a dump.
+        Keys may not appear if information is unknown or unavailable.
 
-        asid_to_ascb_addr(asid:Hex|str|int) -> pyipcs.Hex|None:
-            Get ASCB address from ASID.
-    ```
+        - **"sliptrap"** (str)
+            Included in 'data' dictionary if the dump is a SLIP dump.
+            Obtained from `LIST SLIPTRAP` subcommand.
+
+        - **"ipl_date_local"** (str)
+            Known if CSA is dumped.
+            Obtained from `IPLDATA` subcommand.
+
+        - **"ipl_time_local"** (str)
+            Known if CSA is dumped.
+            Obtained from `IPLDATA` subcommand.
+
+        - **"asids_dumped"** (list[pyipcs.Hex])
+            List of ASIDs that were dumped.
+            Obtained from `CBF RTCT` subcommand.
+
+        - **"asids_all"** (list[dict])
+            Info about all asids on the system at the time of the dump.
+            List of dictionaries containing the hex asid, string jobname, and ASCB address.
+            Obtained from `SELECT ALL` subcommand.
+            Check See Also section for details.
+
+        - **"storage_areas"** (list[dict])
+            Info about dumped storage areas. Contains dataspace information.
+            Obtained from `LISTDUMP` subcommand with `DSNAME` and `SELECT` parameters.
+            Check See Also section for details.
+
+    Methods
+    -------
+    __init__(session, dsname, ddir="", use_cur_ddir=False)
+        Constructor for Dump Object.
+
+    asid_to_jobname(asid)
+        Get Jobname from ASID.
+
+    jobname_to_asid(jobname)
+        Get ASID from Jobname.
+
+    asid_to_ascb_addr(asid)
+        Get ASCB address from ASID.
+
+    See Also
+    --------
+    data["asids_all"] : list[dicts]
+
+        - **"asid"** (pyipcs.Hex)
+
+        - **"jobname"** (str)
+
+        - **"ascb_addr"** (pyipcs.Hex)
+
+    data["storage_areas"] : list[dict]
+
+        - **"asid"** (pyipcs.Hex)
+
+        - **"total_bytes"** (pyipcs.Hex|None)
+            Total number of bytes dumped for ASID in hex.
+
+            None if total_bytes for ASID is not defined in 'LISTDUMP'.
+        - **"sumdump"** (pyipcs.Hex)
+            Number of SUMMARY DUMP Data bytes dumped in hex.
+
+        - **"dataspaces"** (dict)
+            Dictionary where the keys are the string dataspace names.
+            Values are `Hex` objects containing the number of bytes dumped for dataspace.
+    
     """
 
     def __init__(
@@ -141,28 +130,34 @@ class Dump:
         Constructor for Dump Object
 
         Sets regular or temporary DDIR for dump
-        and parses out general info about dump from various subcommands
+        and parses out general info about dump from various subcommands.
 
         Initializes/Sets dump `dsname` under dump directory `ddir`.
         Will set IPCS `session` DDIR to `ddir`.
         Will set IPCS default `DSNAME` to `dsname`
 
-        Args:
-            session (pyipcs.IpcsSession):
-                IPCS Session.
-            dsname (str):
-                Dump dataset name.
-            ddir (str):
-                Optional. Dump directory.
-                If not specified, dump will be initialized under temporary DDIR
-                which will be deleted on session close.
-            use_cur_ddir (bool):
-                Optional. Use current session DDIR.
-                Will use the IpcsSession attribute `ddir` to initialize the dump under.
-                This will take precedence over this function's `ddir` parameter.
-                Default is `False`
-        Returns:
-            None
+        Parameters
+        ----------
+        session : pyipcs.IpcsSession
+            IPCS Session.
+
+        dsname : str
+            Dump dataset name.
+
+        ddir : str, optional
+            Dump directory.
+            If not specified, dump will be initialized under temporary DDIR
+            which will be deleted on session close.
+
+        use_cur_ddir : bool, optional
+            Use current session DDIR.
+            Will use the IpcsSession attribute `ddir` to initialize the dump under.
+            This will take precedence over this function's `ddir` parameter.
+            Default is `False`
+        
+        Returns
+        -------
+        None
         """
         # ==============================
         #  Type/Value Errors Check
@@ -183,7 +178,7 @@ class Dump:
         # Specify Dump Dataset Name
         # ===========================
 
-        self.__dsname = dsname
+        self._dsname = dsname
 
         # ========================================
         # Create/Set Regular or Temporary DDIR
@@ -191,15 +186,15 @@ class Dump:
 
         # If use_cur_ddir is True - Use the current pyIPCS session DDIR
         if use_cur_ddir:
-            self.__ddir = session.ddir.dsname
+            self._ddir = session.ddir.dsname
         else:
             # Define DDIR and create/set/initialize dump under DDIR
             if not ddir:
-                self.__ddir = session.create_session_ddir()
+                self._ddir = session.create_session_ddir()
             # BLSCDDIR will not do anything if DDIR already exists so this is fine
             else:
                 session.create_ddir(ddir)
-                self.__ddir = ddir
+                self._ddir = ddir
 
         # =========================
         # Initialize Setup
@@ -238,15 +233,18 @@ class Dump:
             extra={"dsname": self.dsname, "ddir": self.ddir},
         )
 
+        # ======================================
+        # Process dump header
+        # ======================================
+
+        self._header = DumpHeader(dsname)
+
         # ==================================================
         # Get Data about dump and store in .data attribute
         # ==================================================
 
         # Note: Any data not found will not be included in data
         self.data = {}
-
-        # Add data from dump header
-        self.data.update(dump_header_data(dsname))
 
         # ===========================================
         # Log Start Running Dump Object Subcommands
@@ -259,7 +257,7 @@ class Dump:
         )
 
         # If the dump is a SLIP dump include LIST SLIPTRAP data
-        if self.data["dump_type"] == "SLIP":
+        if self.header["dump_type"] == "SLIP":
             list_sliptrap = ListSliptrap(session)
             if list_sliptrap.rc != 0:
                 raise InvalidReturnCodeError(
@@ -271,7 +269,7 @@ class Dump:
         self.data.update(Ipldata(session).data)
 
         # Include ASIDS Dumped if not a SAD, SYSM, or TDMP dump
-        if self.data["dump_type"] not in ("SAD", "SYSM", "TDMP"):
+        if self.header["dump_type"] not in ("SAD", "SYSM", "TDMP"):
             cbf_rtct = CbfRtct(session)
             if cbf_rtct.rc != 0:
                 raise InvalidReturnCodeError(
@@ -279,7 +277,7 @@ class Dump:
                 )
             self.data["asids_dumped"] = cbf_rtct.data["asids_dumped"]
         # For SYSM/TDMP dumps the ASID dumped is the home asid
-        if self.data["dump_type"] in ("SYSM", "TDMP"):
+        if self.header["dump_type"] in ("SYSM", "TDMP"):
             self.data["asids_dumped"] = [self.data["home"]]
 
         # Get all ASIDs on the system at the time of the dump
@@ -312,18 +310,20 @@ class Dump:
         """
         Convert Dump object for JSON format
 
-        Returns:
-            dict: Dictionary representing Dump object
-            ```
-                'dsname' (str)
-                'ddir' (str)
-                'data' (dict)
-            ```
+        Returns
+        -------
+        dict
+            Dictionary representing Dump object
+            - **"dsname"** (str)
+            - **"ddir"** (str)
+            - **"header"** (dict)
+            - **"data"** (dict)
         """
         return {
             "__ipcs_type__": "Dump",
             "dsname": copy.deepcopy(self.dsname),
             "ddir": copy.deepcopy(self.ddir),
+            "header": copy.deepcopy(self.header),
             "data": copy.deepcopy(self.data),
         }
 
@@ -335,6 +335,7 @@ class Dump:
             "Dump("
             + f"\n  dsname:\n    \'{self.dsname}\'"
             + f"\n  ddir:\n    \'{self.ddir}\'"
+            + f"\n  header:\n{textwrap.indent(pformat(self.header), '    ')}"
             + f"\n  data:\n{textwrap.indent(pformat(self.data), '    ')}"
             + "\n)"
         )
@@ -345,10 +346,14 @@ class Dump:
 
         Obtained info from `SELECT ALL` subcommand
 
-        Args:
-            asid (pyipcs.Hex|str|int)
-        Returns:
-            str|None : Jobname associated with ASID or `None` if ASID is not found
+        Parameters
+        ----------
+        asid : pyipcs.Hex|str|int
+
+        Returns
+        -------
+        str|None 
+            Jobname associated with ASID or `None` if ASID is not found
         """
         if (
             not isinstance(asid, Hex)
@@ -372,10 +377,14 @@ class Dump:
 
         Obtained info from `SELECT ALL` subcommand
 
-        Args:
-            jobname (str)
-        Returns:
-            list[pyipcs.Hex]: List of ASIDs associated with `jobname`
+        Parameters
+        ----------
+        jobname : str
+
+        Returns
+        --------
+        list[pyipcs.Hex]
+            List of ASIDs associated with `jobname`
         """
         if not isinstance(jobname, str):
             raise TypeError(
@@ -394,10 +403,14 @@ class Dump:
 
         Obtained info from `SELECT ALL` subcommand
 
-        Args:
-            asid (pyipcs.Hex|str|int)
-        Returns:
-            pyipcs.Hex|None : ASCB address associated with ASID or `None` if ASID is not found
+        Parameters
+        ----------
+        asid : pyipcs.Hex|str|int
+
+        Returns
+        -------
+        pyipcs.Hex|None 
+            ASCB address associated with ASID or `None` if ASID is not found
         """
         if (
             not isinstance(asid, Hex)
@@ -420,11 +433,18 @@ class Dump:
         """
         Attribute dsname
         """
-        return self.__dsname
+        return self._dsname
 
     @property
     def ddir(self) -> str:
         """
         Attribute ddir
         """
-        return self.__ddir
+        return self._ddir
+
+    @property
+    def header(self) -> str:
+        """
+        Attribute header
+        """
+        return self._header
