@@ -11,5 +11,6 @@ if sys.platform != "zos":
 from .hex_obj import Hex
 from .session import IpcsSession
 from .dump import Dump
+from .dump import DumpHeader
 from .subcmd import Subcmd
 from . import util
