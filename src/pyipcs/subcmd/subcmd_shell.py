@@ -22,11 +22,16 @@ def construct_ipcs_shell_script(session: IpcsSession, ipcs_subcmd: str) -> str:
 
     IPCS_EX_SUBCMD template.
 
-    Args:
-        session (pyipcs.IpcsSession)
-        ipcs_subcmd (str)
-    Returns:
-        str: constructed string for IPCS subcommand shell script
+    Parameters
+    ----------
+    session : pyipcs.IpcsSession
+    
+    ipcs_subcmd : str
+
+    Returns
+    -------
+    str
+        Constructed string for IPCS subcommand shell script
     """
     # ===================================================================
     # Create and fill dict to unpack for IPCS_EX_SUBCMD template
@@ -44,10 +49,14 @@ def construct_allocations(session: IpcsSession) -> dict[str, str | list[str]]:
     """
     Construct allocations for running the IPCS subcommand
 
-    Args:
-        session (pyipcs.IpcsSession)
-    Returns:
-        str: constructed string for IPCS subcommand shell script
+    Parameters
+    ----------
+    session (pyipcs.IpcsSession)
+
+    Returns
+    -------
+    str
+        Constructed string for IPCS subcommand shell script
     """
 
     allocations_copy = session.aloc.get()
@@ -71,16 +80,23 @@ def run_ipcs_subcmd(session: IpcsSession, ipcs_subcmd: str, auth: bool) -> dict:
     """
     Run IPCS Subcommand Shell Script and save output to a string.
 
-    Args:
-        session (pyipcs.IpcsSession)
-        ipcs_subcmd (str)
-        auth (bool): indicates whether the subcommand will be run from an authorized environment
-    Returns:
-        dict: Dictionary of return code from IPCS subcommand and IPCS subcommand output
-        ```
-            'rc' (int): return code
-            'output' (str): output of IPCS command
-        ```
+    Parameters
+    ----------
+    session : pyipcs.IpcsSession
+
+    ipcs_subcmd : str
+    
+    auth : bool
+        indicates whether the subcommand will be run from an authorized environment
+    
+    Returns
+    -------
+    dict
+        Dictionary of return code from IPCS subcommand and IPCS subcommand output
+        - **"rc"** (int)
+            Return code
+        - **"output"** (str) 
+            Output of IPCS command
     """
     # =========================================================
     # Fill out IPCS_EX_SUBCMD template and run IPCS command
@@ -133,19 +149,27 @@ def run_ipcs_subcmd_outfile(
 
     Creates file for subcommand output.
 
-    Args:
-        session (pyipcs.IpcsSession)
-        ipcs_subcmd (str)
-        filepath (str):
-            Filepath for IPCS subcommand output file.
-            If filepath is a duplicate will add `'(1)'`,`'(2)'`, etc. for copy.
-        auth (bool): indicates whether the subcommand will be run from an authorized environment
-    Returns:
-        dict: Dictionary of return code from IPCS subcommand and IPCS subcommand output filepath
-        ```
-            'rc' (int): return code
-            'filepath' (str): filepath of subcommand output file for IPCS subcommand
-        ```
+    Parameters
+    ----------
+    session : pyipcs.IpcsSession
+    
+    ipcs_subcmd : str
+
+    filepath : str
+        Filepath for IPCS subcommand output file.
+        If filepath is a duplicate will add `'(1)'`,`'(2)'`, etc. for copy.
+    
+    auth : bool 
+        Indicates whether the subcommand will be run from an authorized environment
+    
+    Returns
+    -------
+    dict
+        Dictionary of return code from IPCS subcommand and IPCS subcommand output filepath.
+        - **"rc"** (int)
+            Return code
+        - **"filepath"** (str)
+            Filepath of subcommand output file for IPCS subcommand
     """
     # ===========================================
     # Create File and if exists create copy file
