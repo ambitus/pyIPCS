@@ -206,32 +206,12 @@ class Dump:
         # Set default DSNAME
         session.set_defaults(dsname=self.dsname)
 
-        # =================================
-        # Log Start Initialize Dump
-        # =================================
-
-        session.logger.log(
-            "DUMP",
-            "START INITIALIZE DUMP",
-            extra={"dsname": self.dsname, "ddir": self.ddir},
-        )
-
         # ==========================
         # Initialize Dump
         # ==========================
 
         # Run STATUS to start initialization
         Subcmd(session, "STATUS")
-
-        # ============================
-        # Log Finish Initialize Dump
-        # ============================
-
-        session.logger.log(
-            "DUMP",
-            "FINISH INITIALIZE DUMP",
-            extra={"dsname": self.dsname, "ddir": self.ddir},
-        )
 
         # ======================================
         # Process dump header
@@ -245,16 +225,6 @@ class Dump:
 
         # Note: Any data not found will not be included in data
         self.data = {}
-
-        # ===========================================
-        # Log Start Running Dump Object Subcommands
-        # ===========================================
-
-        session.logger.log(
-            "DUMP",
-            "RUNNING DUMP OBJECT SUBCMDS",
-            extra={"dsname": self.dsname, "ddir": self.ddir},
-        )
 
         # If the dump is a SLIP dump include LIST SLIPTRAP data
         if self.header["dump_type"] == "SLIP":
@@ -299,12 +269,6 @@ class Dump:
                 0,
             )
         self.data["storage_areas"] = listdump_select_dsname.data["storage_areas"]
-
-        session.logger.log(
-            "DUMP",
-            "CREATED DUMP OBJECT",
-            extra={"dsname": self.dsname, "ddir": self.ddir},
-        )
 
     def __pyipcs_json__(self) -> dict:
         """

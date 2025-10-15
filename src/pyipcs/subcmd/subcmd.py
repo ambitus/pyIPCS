@@ -152,22 +152,6 @@ class Subcmd:
         self.__keep_file = keep_file
         self._encoding = "cp1047"
 
-        # ====================
-        # Log Running Subcmd
-        # ====================
-
-        session.logger.log(
-            "SUBCMD",
-            "RUNNING SUBCMD",
-            extra={
-                "subcmd": self.subcmd,
-                "outfile": outfile,
-                "keep_file": self.keep_file,
-                "ddir": session.ddir.dsname,
-                "allocations": session.aloc.get(),
-            },
-        )
-
         # =============================
         # Set Subcommand Data Attribute
         # =============================
@@ -229,22 +213,6 @@ class Subcmd:
             self.__rc = subcmd_response["rc"]
             self.__string_output = subcmd_response["output"]
 
-        # ============================
-        # Log Created Subcmd Object
-        # ============================
-
-        session.logger.log(
-            "SUBCMD",
-            "CREATED SUBCMD OBJECT",
-            extra={
-                "subcmd": self.subcmd,
-                "rc": self.rc,
-                "outfile": self.outfile,
-                "keep_file": self.keep_file,
-                "ddir": session.ddir.dsname,
-                "allocations": session.aloc.get(),
-            },
-        )
 
     def __pyipcs_json__(self) -> dict:
         """

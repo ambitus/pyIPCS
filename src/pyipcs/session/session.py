@@ -5,7 +5,6 @@ IpcsSession Object
 import os
 import atexit
 import random
-import copy
 import warnings
 from datetime import datetime
 from zoautil_py import datasets
@@ -13,7 +12,6 @@ from zoautil_py import exceptions
 from ..hex_obj import Hex
 from ..dump import Dump
 from ..subcmd import Subcmd, SetDef
-from ..pyipcs_logging import IpcsLogger
 from ..error_handling import InvalidReturnCodeError, SessionNotActiveError, ArgumentTypeError
 from ..tso_shell import tsocmd
 from ..util.zoautil_py_util import datasets_recall_exists
@@ -48,9 +46,6 @@ class IpcsSession:
 
     ddir : pyipcs.DumpDirectory
         Manages dump directory(DDIR) that is used during IPCS session.
-
-    logger : pyipcs.IpcsLogger
-        Manages logging for the pyIPCS session.
 
     Methods
     -------
@@ -142,8 +137,6 @@ class IpcsSession:
         # Store values in private variables to prevent variable editing without mangling
         # =================================================================================
 
-        # Set Attribute logger
-        self.__logger = IpcsLogger()
         # Attribute hlq
         self.__hlq = self.userid if hlq is None else hlq
         if len(self.hlq) > 16:
@@ -179,9 +172,6 @@ class IpcsSession:
 
         # Mark the time the session was opened
         self.__time_opened = datetime.now().strftime("%Y-%m-%d_%H-%M-%S-%f")
-
-        # Open logging
-        self.logger._open_logging(self)
 
         # Create Initial Session DDIR
         init_ddir = f"{self._session_hlq}.INIT.DDIR"
@@ -219,9 +209,6 @@ class IpcsSession:
         self.__time_opened = None
         self.__session_id = None
 
-        # Close logging
-        self.logger._close_logging()
-
     def get_allocations(self) -> dict[str, str | list[str]]:
         """
         Get allocations for your TSO environment.
@@ -247,12 +234,6 @@ class IpcsSession:
         Returns:
             None
         """
-        # Log Set Allocation
-        self.logger.log(
-            "SESSION",
-            "SET ALLOCATION",
-            extra={"dd_name": dd_name, "specification": copy.deepcopy(specification)},
-        )
         self.aloc.set(dd_name, specification)
 
 
@@ -353,14 +334,6 @@ class IpcsSession:
         Returns:
             None
         """
-        # Log Create DDIR
-        self.logger.log(
-            "SESSION",
-            "CREATE DDIR",
-            extra={
-                "ddir": ddir,
-            },
-        )
         self.ddir.create(ddir, use=False, **kwargs)
 
     def create_session_ddir(self, **kwargs) -> str:
@@ -400,14 +373,6 @@ class IpcsSession:
         Returns:
             None
         """
-        # Log Set DDIR
-        self.logger.log(
-            "SESSION",
-            "SET DDIR",
-            extra={
-                "ddir": ddir,
-            },
-        )
         self.ddir.use(ddir)
 
     def get_defaults(self) -> SetDef:
@@ -521,11 +486,6 @@ class IpcsSession:
         """
         if not self.active:
             raise SessionNotActiveError()
-
-        # Log Set Dump
-        self.logger.log(
-            "DUMP", "SET DUMP", extra={"dsname": dump.dsname, "ddir": dump.ddir}
-        )
 
         # Set DDIR
         self.set_ddir(dump.ddir)
@@ -678,13 +638,6 @@ class IpcsSession:
         Attribute ddir
         """
         return self._ddir
-
-    @property
-    def logger(self) -> IpcsLogger:
-        """
-        Attribute logger
-        """
-        return self.__logger
 
     @property
     def _session_id(self) -> str|None:
