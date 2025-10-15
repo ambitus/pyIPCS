@@ -25,90 +25,62 @@ class Subcmd:
 
     Runs IPCS subcommand and stores output in string or file.
 
-    Attributes:
-        subcmd (str):
-            IPCS subcommand that was ran
-        outfile (str|None):
-            File containing subcommand output.
-            `None` if `outfile` parameter in constructor was set to `False`
-            or if file was deleted with `pyipcs.Subcmd.delete_file()` method.
-        output (str):
-            Returns string containing the entire subcommand output.
-        keep_file (bool):
-            If `True` preserves subcommand output file after program execution.
-            If `False` deletes subcommand output file after program execution.
-            Editable by user.
-        rc (int):
-            Return code from running subcommand.
-        data (dict):
-            Editable by user to store additional info about a IPCS subcommand. Initially empty.
+    Attributes
+    ----------
+    subcmd : str
+        IPCS subcommand that was ran
 
-    Methods:
-    ```
-        __init__(
-            session: pyipcs.IpcsSession,
-            subcmd: str,
-            outfile: bool = False,
-            keep_file: bool = False,
-            auth: bool = False,
-        ) -> None:
-            Constructor for Subcmd Object
+    outfile : str|None
+        File containing subcommand output.
+        `None` if `outfile` parameter in constructor was set to `False`
+        or if file was deleted with `pyipcs.Subcmd.delete_file()` method.
 
-        find(substring: str, start: int = 0, end: int | None = None) -> int:
-            Find the first occurrence of substring.
-            Returns -1 if the value is not found.
+    output : str
+        Returns string containing the entire subcommand output.
 
-        rfind(substring: str, start: int = 0, end: int | None = None) -> int:
-            Find the last occurrence of substring. Returns -1 if the value is not found.
+    keep_file : bool
+        If `True` preserves subcommand output file after program execution.
+        If `False` deletes subcommand output file after program execution.
+        Editable by user.
 
-        get_field(
-            label:str,
-            end_string:str,
-            separator:str="",
-            start:int=0,
-            end:int|None=None,
-            to_hex:bool=False
-        ) -> list:
-            Attempts to get the field value from the output
-            based on a label, separator, and end string.
+    rc : int
+        Return code from running subcommand.
+        
+    data : dict
+        Editable by user to store additional info about a IPCS subcommand. Initially empty.
 
-        get_field2(
-            label:str,
-            length:int,
-            separator:str="",
-            start:int=0,
-            end:int|None=None,
-            to_hex:bool=False
-        ) -> list:
-            Attempts to get the field value from the output
-            based on a label, separator, and field length.
+    Methods
+    -------
+    __init__(session, subcmd, outfile=False, keep_file=False, auth=False,)
+        Constructor for Subcmd Object
 
-        rget_field(
-            label:str,
-            end_string:str,
-            separator:str="",
-            start:int=0,
-            end:int|None=None,
-            to_hex:bool=False
-        ) -> list:
-            Attempts to get the field value in a reverse search from the output
-            based on a label, separator, and end string.
+    find(substring, start=0, end=None)
+        Find the first occurrence of substring.
+        Returns -1 if the value is not found.
 
-        rget_field2(
-            label:str,
-            length:int,
-            separator:str="",
-            start:int=0,
-            end:int|None=None,
-            to_hex:bool=False
-        ) -> list:
-            Attempts to get the field value in a reverse search from the output
-            based on a label, separator, and field length.
+    rfind(substring, start=0, end=None)
+        Find the last occurrence of substring. Returns `-1` if the value is not found.
 
-        delete_file() -> None:
-            Function to preemptively delete file associated with subcommand.
-            Will not be able to index into file output after completion.
-    ```
+    get_field(label, end_string, separator="", start=0, end=None, to_hex=False)
+        Attempts to get the field value from the output
+        based on a label, separator, and end string.
+
+    get_field2(label, length, separator="", start=0, end=None,to_hex=False)
+        Attempts to get the field value from the output
+        based on a label, separator, and field length.
+
+    rget_field(label, end_string, separator="", start=0, end=None, to_hex=False)
+        Attempts to get the field value in a reverse search from the output
+        based on a label, separator, and end string.
+
+    rget_field2(label, length, separator="", start=0, end=None, to_hex=False)
+        Attempts to get the field value in a reverse search from the output
+        based on a label, separator, and field length.
+
+    delete_file()
+        Function to preemptively delete file associated with subcommand.
+        Will not be able to index into file output after completion.
+
     """
 
     def __init__(
@@ -124,26 +96,33 @@ class Subcmd:
 
         Runs IPCS subcommand and stores output in string or file
 
-        Args:
-            session (pyipcs.IpcsSession)
-            subcmd (str):
-                IPCS subcommand to run.
-            outfile (bool):
-                Optional. If `True`, will create and store output in directory
-                `[pyipcs.IpcsSession.directory]/pyipcs_session/...`
-                `...[time of session open]/subcmd_output/`.
-                File would then be specified in `outfile` attribute of Subcmd object.
-                If `False`, stores output in string
-                specified in `output` attribute of Subcmd object. Default is `False`.
-            keep_file (bool):
-                Optional. If `True` preserves subcommand output file after program execution.
-                If `False` deletes subcommand output file after program execution.
-                Default is `False`.
-            auth (bool):
-                Optional. If `True`, subcommand will be run from an authorized environment. 
-                Default is `False`.
-        Returns:
-            None
+        Parameters
+        ----------
+        session : pyipcs.IpcsSession
+
+        subcmd : str
+            IPCS subcommand to run.
+        
+        outfile : bool, optional
+            If `True`, will create and store output in directory
+            `[pyipcs.IpcsSession.directory]/pyipcs_session/...`
+            `...[time of session open]/subcmd_output/`.
+            File would then be specified in `outfile` attribute of Subcmd object.
+            If `False`, stores output in string
+            specified in `output` attribute of Subcmd object. Default is `False`.
+        
+        keep_file : bool, optional
+            If `True` preserves subcommand output file after program execution.
+            If `False` deletes subcommand output file after program execution.
+            Default is `False`.
+
+        auth : bool, optional
+            If `True`, subcommand will be run from an authorized environment. 
+            Default is `False`.
+        
+        Returns
+        -------
+        None
         """
 
         # ============================
@@ -271,16 +250,15 @@ class Subcmd:
         """
         Convert Subcmd object for JSON format
 
-        Returns:
-            dict: Dictionary representing Subcmd object
-            ```
-                'subcmd' (str)
-                'outfile' (str|None)
-                'output' (str)
-                'keep_file' (bool)
-                'rc' (int)
-                'data' (dict)
-            ```
+        Returns
+        -------
+        dict: Dictionary representing Subcmd object
+            - **"subcmd"** (str)
+            - **"outfile"** (str|None)
+            - **"output"** (str)
+            - **"keep_file" (bool)
+            - **"rc"** (int)
+            - **"data"** (dict)
         """
         return {
             "__ipcs_type__": "Subcmd",
@@ -352,16 +330,22 @@ class Subcmd:
         """
         Find the first occurrence of a substring. Returns `-1` if the value is not found.
 
-        Args:
-            substring (str):
-                Substring to search for.
-            start (int):
-                Optional. Index where to start the search. Default is `0`.
-            end (int|None):
-                Optional. Index where to end the search.
-                Default is `None` for the end of the output.
-        Returns:
-            int: Output index where substring was found. `-1` if substring was not found.
+        Parameters
+        ----------
+        substring : str
+            Substring to search for.
+
+        start : int, optional
+            Index where to start the search. Default is `0`.
+
+        end : int|None, optional
+            Index where to end the search.
+            Default is `None` for the end of the output.
+
+        Returns
+        -------
+        int
+            Output index where substring was found. `-1` if substring was not found.
         """
         if not isinstance(substring, str):
             raise TypeError(
@@ -394,16 +378,22 @@ class Subcmd:
         """
         Find the last occurrence of a substring. Returns `-1` if the value is not found.
 
-        Args:
-            substring (str):
-                Substring to search for
-            start (int):
-                Optional. Index where to end the reverse search. Default is `0`.
-            end (int|None):
-                Optional. Index where to start the reverse search.
-                Default is `None` for the end of the output.
-        Returns:
-            int: Output index where substring was found. `-1` if substring was not found
+        Parameters
+        ----------
+        substring : str
+            Substring to search for
+
+        start : int, optional
+            Index where to end the reverse search. Default is `0`.
+
+        end : int|None, optional
+            Index where to start the reverse search.
+            Default is `None` for the end of the output.
+
+        Returns
+        -------
+        int
+            Output index where substring was found. `-1` if substring was not found
         """
         if not isinstance(substring, str):
             raise TypeError(
@@ -444,24 +434,33 @@ class Subcmd:
         """
         Attempts to get the field value from the output based on a label, separator, and end string.
 
-        Args:
-            label (str):
-                The label of the field.
-            end_string (str):
-                End string that indicates end of value.
-            separator (str):
-                Optional. The separator between the label and the value.
-            start (int):
-                Optional. Index where to start the search. Default is `0`.
-            end (int|None):
-                Optional. Index where to end the search.
-                Default is `None` for the end of the output.
-            to_hex (bool):
-                Optional. Return value as pyipcs.Hex if `to_hex` is `True`.
-                Default is `False` for returning a string.
-        Returns:
-            list : A list `[value (str|pyipcs.Hex), start (int), end (int)]`
-                where `subcmd[start:end] == value`. `[None, -1, -1]` if field is not found.
+        Parameters
+        ----------
+        label : str
+            The label of the field.
+
+        end_string : str
+            End string that indicates end of value.
+
+        separator : str, optional
+            The separator between the label and the value.
+        
+        start : int, optional
+            Index where to start the search. Default is `0`.
+        
+        end : int|None, optional
+            Index where to end the search.
+            Default is `None` for the end of the output.
+        
+        to_hex : bool, optional
+            Return value as pyipcs.Hex if `to_hex` is `True`.
+            Default is `False` for returning a string.
+        
+        Returns
+        -------
+        list
+            A list `[value (str|pyipcs.Hex), start (int), end (int)]`
+            where `subcmd[start:end] == value`. `[None, -1, -1]` if field is not found.
         """
         if not isinstance(label, str):
             raise TypeError(
@@ -520,24 +519,33 @@ class Subcmd:
         Attempts to get the field value from the output
         based on a label, separator, and field length.
 
-        Args:
-            label (str):
-                The label of the field.
-            length (int):
-                Length of value to get.
-            separator (str):
-                Optional. The separator between the label and the value.
-            start (int):
-                Optional. Index where to start the search. Default is `0`.
-            end (int|None):
-                Optional. Index where to end the search.
-                Default is `None` for the end of the output.
-            to_hex (bool):
-                Optional. Return value as pyipcs.Hex if `to_hex` is `True`.
-                Default is `False` for returning a string.
-        Returns:
-            list : A list `[value (str|pyipcs.Hex), start (int), end (int)]`
-                where `subcmd[start:end] == value`. `[None, -1, -1]` if field is not found.
+        Parameters
+        ----------
+        label : str
+            The label of the field.
+
+        length : int
+            Length of value to get.
+        
+        separator : str, optional
+            The separator between the label and the value.
+        
+        start : int, optional
+            Index where to start the search. Default is `0`.
+        
+        end : int|None, optional
+            Index where to end the search.
+            Default is `None` for the end of the output.
+        
+        to_hex : bool, optional
+            Return value as pyipcs.Hex if `to_hex` is `True`.
+            Default is `False` for returning a string.
+        
+        Returns
+        -------
+        list 
+            A list `[value (str|pyipcs.Hex), start (int), end (int)]`
+            where `subcmd[start:end] == value`. `[None, -1, -1]` if field is not found.
         """
         if not isinstance(label, str):
             raise TypeError(
@@ -590,24 +598,33 @@ class Subcmd:
         Attempts to get the field value in a reverse search from the output
         based on a label, separator, and end string.
 
-        Args:
-            label (str):
-                The label of the field.
-            end_string (str):
-                End string that indicates end of value.
-            separator (str):
-                Optional. The separator between the label and the value.
-            start (int):
-                Optional. Index where to end the reverse search. Default is `0`.
-            end (int|None):
-                Optional. Index where to start the reverse search.
-                Default is `None` for the end of the output.
-            to_hex (bool):
-                Optional. Return value as pyipcs.Hex if `to_hex` is `True`.
-                Default is `False` for returning a string.
-        Returns:
-            list : A list `[value (str|pyipcs.Hex), start (int), end (int)]`
-                where `subcmd[start:end] == value`. `[None, -1, -1]` if field is not found.
+        Parameters
+        ----------
+        label : str
+            The label of the field.
+
+        end_string : str
+            End string that indicates end of value.
+
+        separator : str, optional
+            The separator between the label and the value.
+
+        start : int, optional
+            Index where to end the reverse search. Default is `0`.
+
+        end : int|None, optional
+            Index where to start the reverse search.
+            Default is `None` for the end of the output.
+        
+        to_hex : bool, optional
+            Return value as pyipcs.Hex if `to_hex` is `True`.
+            Default is `False` for returning a string.
+        
+        Returns
+        -------
+        list 
+            A list `[value (str|pyipcs.Hex), start (int), end (int)]`
+            where `subcmd[start:end] == value`. `[None, -1, -1]` if field is not found.
         """
         if not isinstance(label, str):
             raise TypeError(
@@ -666,24 +683,33 @@ class Subcmd:
         Attempts to get the field value in a reverse search from the output
         based on a label, separator, and field length.
 
-        Args:
-            label (str):
-                The label of the field.
-            length (int):
-                Length of value to get.
-            separator (str):
-                Optional. The separator between the label and the value.
-            start (int):
-                Optional. Index where to end the reverse search. Default is `0`.
-            end (int|None):
-                Optional. Index where to start the reverse search.
-                Default is `None` for the end of the output.
-            to_hex (bool).
-                Optional. Return value as pyipcs.Hex if `to_hex` is `True`.
-                Default is `False` for returning a string.
-        Returns:
-            list : A list `[value (str|pyipcs.Hex), start (int), end (int)]`
-                where `subcmd[start:end] == value`. `[None, -1, -1]` if field is not found.
+        Parameters
+        ----------
+        label : str
+            The label of the field.
+
+        length : int
+            Length of value to get.
+
+        separator : str, optional
+            The separator between the label and the value.
+
+        start : int, optional
+            Index where to end the reverse search. Default is `0`.
+
+        end : int|None, optional
+            Index where to start the reverse search.
+            Default is `None` for the end of the output.
+
+        to_hex : bool, optional
+            Return value as pyipcs.Hex if `to_hex` is `True`.
+            Default is `False` for returning a string.
+
+        Returns
+        -------
+        list 
+            A list `[value (str|pyipcs.Hex), start (int), end (int)]`
+            where `subcmd[start:end] == value`. `[None, -1, -1]` if field is not found.
         """
         if not isinstance(label, str):
             raise TypeError(
@@ -728,8 +754,9 @@ class Subcmd:
         Method to preemptively delete file associated with subcommand.
         Will not be able to index into file output after completion.
 
-        Returns:
-            None
+        Returns
+        -------
+        None
         """
         if self.outfile is None:
             warnings.warn(
