@@ -12,29 +12,15 @@ from pyipcs import Subcmd
 # ---
 #   MockSubcmd CAN BE RUN INDEPENDENTLY TO RUN MOCK SUBCOMMANDS
 # ---
-#   MockIpcsLogger, MockIpcsAllocations, AND MockIpcsSession ARE MERELY HELPER OBJECTS
+#   MockIpcsAllocations, AND MockIpcsSession ARE MERELY HELPER OBJECTS
 # ---
 #   AGAIN MockSubcmd CAN BE RUN WITHOUT CREATING OTHER OBJECTS
 # =======================================================================
 
 
 # =============================================================
-# MockIpcsLogger, MockDumpDirectory, and MockIpcsSession Object
+# MockDumpDirectory, and MockIpcsSession Object
 # =============================================================
-class MockIpcsLogger:
-    """
-    Mock pyIPCS IpcsLogger object
-
-    Used as helper to add needed variables and functions
-    for MockSubcmd to bypass IPCS functionality and inject output into MockSubcmd
-    """
-
-    def log(self, level: str, message: str, extra: dict = {}):
-        """
-        Mock Method
-        """
-        pass
-
 class MockIpcsAllocations:
     """
     Mock pyIPCS IpcsAllocations object
@@ -95,7 +81,6 @@ class MockIpcsSession:
         self.active = True
         self.directory = mock_directory
         self.ddir = MockDumpDirectory()
-        self.logger = MockIpcsLogger()
         self._session_directory_name = "mock_pyipcs_session"
         self._time_opened = "mock_time_opened"
         self.aloc = MockIpcsAllocations()

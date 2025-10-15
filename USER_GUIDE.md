@@ -312,7 +312,7 @@ session.open()
 ---
 ---
 
-## Managing Subcommand Output Files and Log Files
+## Managing Subcommand Output Files
 
 - __[Back to Top](#pyipcs-user-guide)__
 
@@ -324,15 +324,6 @@ session.open()
 
 # Subcommand output file is created
 subcmd = Subcmd(session, "STATUS REGISTERS", outfile=True)
-```
-
-- pyIPCS supports logging to files using the `logger` attribute of the `IpcsSession` object
-
-```python
-
-session.set_directory_level("SUBCMD")
-
-session.logger.log("SUBCMD", "TEST MESSAGE")
 ```
 
 <br>
