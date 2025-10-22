@@ -229,18 +229,18 @@ class DumpDirectory:
 
         # Generate a DDIR with a DDIR id until one that does not exist is found
         ddir_id = "".join(random.choices("0123456789", k=5))
-        tmp_ddir = f"{self._session._session_hlq}.D{ddir_id}.DDIR"
+        tmp_ddir = f"{self._session.hlq_full}.D{ddir_id}.DDIR"
         while datasets_recall_exists(tmp_ddir):
             ddir_id = "".join(random.choices("0123456789", k=5))
-            tmp_ddir = f"{self._session._session_hlq}.D{ddir_id}.DDIR"
+            tmp_ddir = f"{self._session.hlq_full}.D{ddir_id}.DDIR"
 
         # Create the DDIR
         self.create(tmp_ddir, use=use, **kwargs)
 
         # Attempt to add DDIR to main session dataset for tracking
-        datasets_recall_exists(self._session._session_hlq)
+        datasets_recall_exists(self._session.hlq_full)
         try:
-            datasets.write(self._session._session_hlq, content=tmp_ddir, append=True)
+            datasets.write(self._session.hlq_full, content=tmp_ddir, append=True)
         except exceptions.DatasetWriteException as e:
             self._delete(tmp_ddir)
             raise RuntimeError(

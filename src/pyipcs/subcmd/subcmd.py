@@ -4,7 +4,7 @@ Subcmd Object
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
-import os
+from pathlib import Path
 import textwrap
 from pprint import pformat
 import mmap
@@ -148,71 +148,54 @@ class Subcmd:
                 f"Argument 'keep_file' must be of type bool, but got {type(keep_file)}"
             )
 
-        self.__subcmd = subcmd.upper().strip()
-        self.__keep_file = keep_file
-        self._encoding = "cp1047"
+        # ============================================
+        # Set Init Values for Subcommand Attributes
+        # ============================================
 
-        # =============================
-        # Set Subcommand Data Attribute
-        # =============================
+        self._subcmd = subcmd.upper().strip()
+        self._keep_file = keep_file
+
+        self._encoding = "cp1047"
+        self._session_directory = session.directory
+
+        self._outfile = None
+        self._string_output = None
+        self._rc = None
 
         self.data = {}
 
         # ===============================================
         # Run subcommand for string output or output file
         # ===============================================
-        self.__session_directory = None
-        self.__session_instance_directory = None
-        self.__subcmd_output_directory = None
-        self.__outfile = None
-        self.__string_output = None
 
         # If outfile parameter is True create directories and store filename in `outfile` attribute
         if outfile:
+
             # ==========================
-            # Create File Directories
+            # Create Filepath
             # ==========================
 
-            # Session Directory
-            self.__session_directory = os.path.join(
-                session.directory, session._session_directory_name
-            )
-            # Instance Directory
-            self.__session_instance_directory = os.path.join(
-                self._session_directory, session._time_opened
-            )
-            # Subcommand Output Directory
-            self.__subcmd_output_directory = os.path.join(
-                self._session_instance_directory, "subcmd_output"
-            )
-            # Original Filepath (May change if this is a copy to filepath + (1)/(2)/etc.)
-            self.__outfile = os.path.join(
-                self._subcmd_output_directory,
-                re.sub(r"[\/\0\?\*\:\ \']", "", self.subcmd.lower()),
-            )
-            self.__outfile += ".txt"
-
-            # Create the Directories
-            os.makedirs(self._subcmd_output_directory, exist_ok=True)
+            filepath = self._create_outfile_path(session.directory_full)
 
             # ============================================
             # Run the subcommand
             # ============================================
+
             subcmd_response = run_ipcs_subcmd_outfile(
-                session, self.subcmd, self.outfile, auth
+                session, self.subcmd, filepath, auth
             )
-            self.__rc = subcmd_response["rc"]
-            self.__outfile = subcmd_response["filepath"]
+            self._rc = subcmd_response["rc"]
+            self._outfile = subcmd_response["filepath"]
 
         # If outfile parameter is False store output in string in `output` attribute
         else:
             # ============================================
             # Run the subcommand
             # ============================================
-            subcmd_response = run_ipcs_subcmd(session, self.subcmd, auth)
-            self.__rc = subcmd_response["rc"]
-            self.__string_output = subcmd_response["output"]
 
+            subcmd_response = run_ipcs_subcmd(session, self.subcmd, auth)
+            self._rc = subcmd_response["rc"]
+            self._string_output = subcmd_response["output"]
 
     def __pyipcs_json__(self) -> dict:
         """
@@ -269,8 +252,8 @@ class Subcmd:
         )
 
     def __getitem__(self, key):
-        if self.__string_output is not None:
-            return self.__string_output[key]
+        if self._string_output is not None:
+            return self._string_output[key]
         if self.outfile is None:
             raise RuntimeError("Attempt to reference deleted subcommand output file")
         with (
@@ -284,8 +267,8 @@ class Subcmd:
             return mmap_obj[key : key + 1].decode(self._encoding)
 
     def __len__(self) -> int:
-        if self.__string_output is not None:
-            return len(self.__string_output)
+        if self._string_output is not None:
+            return len(self._string_output)
         if self.outfile is None:
             raise RuntimeError("Attempt to reference deleted subcommand output file")
         with (
@@ -328,10 +311,10 @@ class Subcmd:
                 f"Argument 'end' must be of type int, but got {type(start)}"
             )
 
-        if self.__string_output is not None:
+        if self._string_output is not None:
             if end is None:
-                return self.__string_output.find(substring, start)
-            return self.__string_output.find(substring, start, end)
+                return self._string_output.find(substring, start)
+            return self._string_output.find(substring, start, end)
         if self.outfile is None:
             raise RuntimeError("Attempt to reference deleted subcommand output file")
         with (
@@ -376,10 +359,10 @@ class Subcmd:
                 f"Argument 'end' must be of type int, but got {type(start)}"
             )
 
-        if self.__string_output is not None:
+        if self._string_output is not None:
             if end is None:
-                return self.__string_output.rfind(substring, start)
-            return self.__string_output.rfind(substring, start, end)
+                return self._string_output.rfind(substring, start)
+            return self._string_output.rfind(substring, start, end)
         if self.outfile is None:
             raise RuntimeError("Attempt to reference deleted subcommand output file")
         with (
@@ -735,49 +718,55 @@ class Subcmd:
         # ===========================================================
         # Check if file exists, delete it, and set outfile to None
         # ===========================================================
-        if os.path.exists(self.outfile) and os.path.isfile(self.outfile):
-            os.remove(self.outfile)
-            self.__outfile = None
 
-        # ===============================================
-        # Check if directories exist and delete if empty
-        # ===============================================
-        if (
-            os.path.exists(self._subcmd_output_directory)
-            and os.path.isdir(self._subcmd_output_directory)
-            and not os.listdir(self._subcmd_output_directory)
-        ):
-            os.rmdir(self._subcmd_output_directory)
-            self.__subcmd_output_directory = None
+        session_directory_path = Path(self._session_directory)
+        outfile_path = Path(self.outfile)
 
-        if (
-            os.path.exists(self._session_instance_directory)
-            and os.path.isdir(self._session_instance_directory)
-            and not os.listdir(self._session_instance_directory)
-        ):
-            os.rmdir(self._session_instance_directory)
-            self.__session_instance_directory = None
-        if (
-            os.path.exists(self._session_directory)
-            and os.path.isdir(self._session_directory)
-            and not os.listdir(self._session_directory)
-        ):
-            os.rmdir(self._session_directory)
-            self.__session_directory = None
+        if outfile_path.exists() and outfile_path.is_file():
+
+            outfile_path = outfile_path.resolve()
+            session_directory_path = session_directory_path.resolve()
+
+            outfile_path.unlink()
+
+            # ===============================================
+            # Check if directories exist and delete if empty
+            # ===============================================
+
+            for parent in outfile_path.parents:
+                if (
+                    parent == session_directory_path
+                    or not str(parent).startswith(str(session_directory_path))
+                ):
+                    break
+                try:
+                    # Try to remove if empty
+                    # OSError if not empty or no permission
+                    parent.rmdir()
+                except OSError:
+                    # Directory not empty or cannot be removed
+                    # Stop cleanup
+                    break
+
+        # ======================
+        # Set outfile to None
+        # ======================
+
+        self._outfile = None
 
     @property
     def subcmd(self) -> str:
         """
         Attribute subcmd
         """
-        return self.__subcmd
+        return self._subcmd
 
     @property
     def outfile(self) -> str | None:
         """
         Attribute outfile
         """
-        return self.__outfile
+        return self._outfile
 
     @property
     def output(self) -> str | None:
@@ -791,7 +780,7 @@ class Subcmd:
         """
         Attribute keep file
         """
-        return self.__keep_file
+        return self._keep_file
 
     @keep_file.setter
     def keep_file(self, value):
@@ -799,41 +788,49 @@ class Subcmd:
             raise TypeError(
                 f"Attribute 'keep_file' must be of type bool, but got {type(value)}"
             )
-        self.__keep_file = value
+        self._keep_file = value
 
     @property
     def rc(self) -> int:
         """
         Attribute rc
         """
-        return self.__rc
+        return self._rc
 
-    @property
-    def _session_directory(self) -> str | None:
+    def _create_outfile_path(self, session_directory_full: str) -> str:
         """
-        Protected Attribute _session_directory
+        Create the path for outfile
 
-        Session directory
-        """
-        return self.__session_directory
+        Parameters
+        ----------
+        session_directory_full : str
 
-    @property
-    def _session_instance_directory(self) -> str | None:
+        Returns
+        -------
+        str
+            String filepath for outfile
         """
-        Protected Attribute _session_instance_directory
+        # Open Session Directory
 
-        Session instance directory - dependent on when session was opened
-        """
-        return self.__session_instance_directory
+        outfile_path = Path(session_directory_full)
 
-    @property
-    def _subcmd_output_directory(self) -> str | None:
-        """
-        Protected Attribute _subcmd_output_directory
+        # Subcommand Output Directory
 
-        Directory where subcommand output files are stored
-        """
-        return self.__subcmd_output_directory
+        outfile_path = outfile_path / "subcmd_output"
+
+        # Original Filepath (May change if this is a copy to filepath + (1)/(2)/etc.)
+
+        outfile_path = outfile_path / re.sub(r"[\/\0\?\*\:\ \']", "", self.subcmd.lower())
+        outfile_path = outfile_path.with_suffix(".txt")
+
+        # Add copy designation to filepath (1)/(2)/etc.
+
+        dup_num = 1
+        while outfile_path.exists():
+            outfile_path = outfile_path.with_stem(f"{outfile_path.stem}({dup_num})")
+            dup_num += 1
+
+        return str(outfile_path)
 
     def __del__(self):
         if hasattr(self, "outfile") and self.outfile is not None and not self.keep_file:

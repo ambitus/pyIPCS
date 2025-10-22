@@ -7,6 +7,7 @@ import atexit
 import random
 import warnings
 from datetime import datetime
+from pathlib import Path
 from zoautil_py import datasets
 from zoautil_py import exceptions
 from ..hex_obj import Hex
@@ -47,6 +48,16 @@ class IpcsSession:
     ddir : pyipcs.DumpDirectory
         Manages dump directory(DDIR) that is used during IPCS session.
 
+    uid : str | None
+        Unique ID for open pyIPCS session. `None` if pyIPCS session is not active.
+
+    hlq_full : str | None
+        Full high level qualifier for open pyIPCS session. `None` if pyIPCS session is not active.
+
+    directory_full : str | None
+        Full directory where pyIPCS files for the open session will be placed.
+        `None` if pyIPCS session is not active.
+        
     Methods
     -------
     __init__(
@@ -116,7 +127,7 @@ class IpcsSession:
             None
         """
         # ID for opened session. Initially `None` when session is not open
-        self.__session_id = None
+        self.__uid = None
         # Time that session was opened. `None` when session is not open
         self.__time_opened = None
         # Setup cleanup
@@ -166,15 +177,15 @@ class IpcsSession:
 
         # Generate session id until you find one that does not exist
         # Session HLQ is dependent on the id
-        self.__session_id = "".join(random.choices("0123456789", k=5))
-        while datasets_recall_exists(self._session_hlq):
-            self.__session_id = "".join(random.choices("0123456789", k=5))
+        self.__uid = "S" + "".join(random.choices("0123456789", k=5))
+        while datasets_recall_exists(self.hlq_full):
+            self.__uid = "S" + "".join(random.choices("0123456789", k=5))
 
         # Mark the time the session was opened
         self.__time_opened = datetime.now().strftime("%Y-%m-%d_%H-%M-%S-%f")
 
         # Create Initial Session DDIR
-        init_ddir = f"{self._session_hlq}.INIT.DDIR"
+        init_ddir = f"{self.hlq_full}.INIT.DDIR"
         self.create_ddir(init_ddir)
         # Create session datasets
         try:
@@ -204,10 +215,10 @@ class IpcsSession:
         # Delete temporary datasets
         self.__delete_session_datasets()
 
-        # Set _time_opened, ddir, and _session_id back to `None`
+        # Set _time_opened, ddir, and id back to `None`
         self.ddir._clear()
         self.__time_opened = None
-        self.__session_id = None
+        self.__uid = None
 
     def get_allocations(self) -> dict[str, str | list[str]]:
         """
@@ -599,15 +610,15 @@ class IpcsSession:
         Attribute active
         """
         # If id and time opened are not set then the session is not active
-        if self._session_id is None and self._time_opened is None:
+        if self.uid is None and self._time_opened is None:
             return False
         # If only one is set the session is corrupted
-        if self._session_id is None:
+        if self.uid is None:
             raise RuntimeError("Potential pyIPCS Session Corruption - Exiting")
         if self._time_opened is None:
             raise RuntimeError(
                 "Potential pyIPCS Session Corruption"
-                + f" - Please manually delete all datasets with the pattern '{self._session_hlq}*'"
+                + f" - Please manually delete all datasets with the pattern '{self.hlq_full}*'"
             )
         # Check if IPACTIVE output matches intended output
         completed_tsocmd = tsocmd(
@@ -622,7 +633,7 @@ class IpcsSession:
         # If output does not match session has become corrupted
         raise RuntimeError(
             "Potential pyIPCS Session Corruption"
-            + f" - Please manually delete all datasets with the pattern '{self._session_hlq}*'"
+            + f" - Please manually delete all datasets with the pattern '{self.hlq_full}*'"
         )
 
     @property
@@ -640,22 +651,40 @@ class IpcsSession:
         return self._ddir
 
     @property
-    def _session_id(self) -> str|None:
+    def uid(self) -> str|None:
         """
-        Protected Attribute _session_id
-
-        Id for the pyIPCS session. `None` if pyIPCS session is not open
+        Attribute uid
         """
-        return self.__session_id
+        return self.__uid
 
     @property
-    def _session_hlq(self) -> str:
+    def hlq_full(self) -> str | None:
         """
-        Protected Attribute _session_hlq
+        Attribute hlq_full
+        """
+        if not self.uid:
+            return None
+        return f"{self.hlq}.PYIPCS.{self.uid}"
 
-        High level qualifier for the session instance
+    @property
+    def directory_full(self) -> str | None:
         """
-        return f"{self.hlq}.PYIPCS.T{self._session_id}"
+        Attribute directory_full
+        """
+        if not self.uid:
+            return None
+        directory_full_path = Path(self.directory) / "pyipcs_directory"
+        directory_full_path = directory_full_path / f"{self.uid}.{self._time_opened}"
+        return str(directory_full_path)
+
+    @property
+    def _time_opened(self) -> str | None:
+        """
+        Protected Attribute _time_opened
+
+        Time that current instance of pyIPCS session was opened. `None` if session is not open.
+        """
+        return self.__time_opened
 
     @property
     def _ipcsexec_dsname(self) -> str:
@@ -664,7 +693,7 @@ class IpcsSession:
 
         Dataset name for dataset that contains pyIPCS IPCSEXEC execs
         """
-        return f"{self._session_hlq}.IPCSEXEC"
+        return f"{self.hlq_full}.IPCSEXEC"
 
     @property
     def _ipcsexec_execs(self) -> dict[str, str]:
@@ -685,7 +714,7 @@ class IpcsSession:
 
         Dataset name for dataset that contains pyIPCS SYSEXEC execs
         """
-        return f"{self._session_hlq}.SYSEXEC"
+        return f"{self.hlq_full}.SYSEXEC"
 
     @property
     def _sysexec_execs(self) -> dict[str, str]:
@@ -697,24 +726,6 @@ class IpcsSession:
         return {
             "IPCSEVAL": f"{self._sysexec_dsname}(IPCSEVAL)"
         }
-
-    @property
-    def _time_opened(self) -> str | None:
-        """
-        Protected Attribute _time_opened
-
-        Time that current instance of pyIPCS session was opened. `None` if session is not open.
-        """
-        return self.__time_opened
-
-    @property
-    def _session_directory_name(self) -> str:
-        """
-        Protected Attribute _session_directory_name
-
-        Name for session directory
-        """
-        return "pyipcs_session"
 
     def __create_session_datasets(self, init_ddir: str) -> None:
         """
@@ -729,7 +740,7 @@ class IpcsSession:
         try:
             # Main Session Dataset
             # Write Initial DDIR to dataset
-            datasets.write(self._session_hlq, content=init_ddir)
+            datasets.write(self.hlq_full, content=init_ddir)
             # All IPCSEXEC execs
             datasets.write(
                 self._ipcsexec_execs["IPACTIVE"],
@@ -766,14 +777,14 @@ class IpcsSession:
             if not datasets_recall_exists(non_vsam_dsname):
                 warnings.warn(
                     "Potential pyIPCS Session Corruption - Please manually delete all datasets"
-                    + f" with the pattern '{self._session_hlq}*'",
+                    + f" with the pattern '{self.hlq_full}*'",
                     UserWarning
                 )
             rc = datasets.delete(non_vsam_dsname)
             if rc != 0:
                 warnings.warn(
                     "Potential pyIPCS Session Corruption - Please manually delete all datasets"
-                    + f" with the pattern '{self._session_hlq}*'",
+                    + f" with the pattern '{self.hlq_full}*'",
                     UserWarning
                 )
 
@@ -781,25 +792,25 @@ class IpcsSession:
             if not datasets_recall_exists(ddir_dsname):
                 warnings.warn(
                     "Potential pyIPCS Session Corruption - Please manually delete all datasets"
-                    + f" with the pattern '{self._session_hlq}*'",
+                    + f" with the pattern '{self.hlq_full}*'",
                     UserWarning
                 )
             self.ddir._delete(ddir_dsname)
             if datasets_recall_exists(ddir_dsname):
                 warnings.warn(
                     "Potential pyIPCS Session Corruption - Please manually delete all datasets"
-                    + f" with the pattern '{self._session_hlq}*'",
+                    + f" with the pattern '{self.hlq_full}*'",
                     UserWarning
                 )
 
         # Delete all DDIRs in the main session dataset
-        if datasets_recall_exists(self._session_hlq):
+        if datasets_recall_exists(self.hlq_full):
             try:
-                ddirs = datasets.read(self._session_hlq).splitlines()
+                ddirs = datasets.read(self.hlq_full).splitlines()
             except exceptions.DatasetFetchException:
                 warnings.warn(
                     "Potential pyIPCS Session Corruption - Please manually delete all datasets"
-                    + f" with the pattern '{self._session_hlq}*'",
+                    + f" with the pattern '{self.hlq_full}*'",
                     UserWarning
                 )
             for ddir in ddirs:
@@ -807,12 +818,12 @@ class IpcsSession:
         else:
             warnings.warn(
                 "Potential pyIPCS Session Corruption - Please manually delete all datasets"
-                + f" with the pattern '{self._session_hlq}*'",
+                + f" with the pattern '{self.hlq_full}*'",
                 UserWarning
             )
         delete_session_dataset(self._ipcsexec_dsname)
         delete_session_dataset(self._sysexec_dsname)
-        delete_session_dataset(self._session_hlq)
+        delete_session_dataset(self.hlq_full)
 
     def __cleanup__(self) -> None:
         """
