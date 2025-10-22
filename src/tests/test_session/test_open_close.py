@@ -67,7 +67,7 @@ def check_open_close(test_session):
     # Check temporary datasets exist
     # ================================
     assert datasets.list_dataset_names(
-        test_session._session_hlq, migrated=True
+        test_session.hlq_full, migrated=True
     )
     assert datasets.list_dataset_names(
         test_session._ipcsexec_dsname, migrated=True
@@ -95,7 +95,7 @@ def check_open_close(test_session):
     assert datasets.list_vsam_datasets(test_session.ddir.dsname, migrated=True)
 
     test_ddir = test_session.ddir.dsname
-    session_hlq = test_session._session_hlq
+    session_hlq = test_session.hlq_full
     ipcsexec_dsname = test_session._ipcsexec_dsname
     sysexec_dsname = test_session._sysexec_dsname
     assert test_session.active

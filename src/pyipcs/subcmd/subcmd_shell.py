@@ -4,7 +4,7 @@ IPCS Subcommand Shell Execution
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
-import os
+from pathlib import Path
 import subprocess
 import copy
 from ..tso_shell import tsocmd, construct_tso_shell_script, CalledTsoProcessError
@@ -172,42 +172,32 @@ def run_ipcs_subcmd_outfile(
             Filepath of subcommand output file for IPCS subcommand
     """
     # ===========================================
-    # Create File and if exists create copy file
+    # Create Directories and Files
     # ===========================================
 
-    encoding = "cp1047"
+    outfile_path = Path(filepath)
 
-    # Split filepath (path/to/my/dir/myfile.txt) into:
-    #   Path to the directory (path/to/my/dir/)
-    #   Filename with the extension (myfile.txt)
-    dirpath, filename_plus_extension = os.path.split(filepath)
+    # Check if file exists and if it does throw error
 
-    tmp_dirpath = os.path.join(dirpath, "pyipcs_tmp")
+    if outfile_path.exists():
+        raise ValueError("Outfile path for subcommand output should not already exist")
 
-    # Create Temp Directory needed to store unprocessed shell output
-    os.makedirs(tmp_dirpath, exist_ok=True)
+    # Create tmp filepath
 
-    # Create tmp file to dump unproccessed output to
-    tmp_filepath = os.path.join(tmp_dirpath, "output.tmp")
+    tmp_path = outfile_path.parent / "tmp" / "output.tmp"
 
-    # Split Filename with extension (myfile.txt) into:
-    #   Filename (myfile)
-    #   Extension (.txt)
-    filename, file_extension = os.path.splitext(filename_plus_extension)
+    # Create Directories
 
-    dup_num = 1
-    while os.path.exists(filepath):
-        # Create filepath of copy subcommand output
-        filename_plus_extension = f"{filename}({dup_num}){file_extension}"
-        # Change filepath to copy
-        filepath = os.path.join(dirpath, filename_plus_extension)
-        dup_num += 1
+    outfile_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path.parent.mkdir(parents=True, exist_ok=True)
 
     # ===============================================================
     # Run IPCS Subcommand
     # Place unformatted IPCS subcommand CLIST output into tmp file
     # Format output and move into subcommand output file
     # ===============================================================
+
+    encoding = "cp1047"
 
     shell_script = construct_tso_shell_script(
         tso_command=construct_ipcs_shell_script(session, ipcs_subcmd),
@@ -216,8 +206,8 @@ def run_ipcs_subcmd_outfile(
     )
 
     with (
-        open(filepath, "w", encoding=encoding) as outfile_obj,
-        open(tmp_filepath, "w+", encoding=encoding) as outfile_obj_tmp,
+        open(outfile_path, "w", encoding=encoding) as outfile_obj,
+        open(tmp_path, "w+", encoding=encoding) as outfile_obj_tmp,
     ):
         # Run IPCS Subcommand
         # Place unformatted IPCS subcommand CLIST output into tmp file
@@ -230,8 +220,8 @@ def run_ipcs_subcmd_outfile(
         ) as process:
             process.wait()
             if process.returncode != 0:
-                os.remove(tmp_filepath)
-                os.rmdir(tmp_dirpath)
+                tmp_path.unlink()
+                tmp_path.parent.rmdir()
                 raise CalledTsoProcessError(
                     construct_ipcs_shell_script(session, ipcs_subcmd),
                     0,
@@ -244,6 +234,7 @@ def run_ipcs_subcmd_outfile(
         # ====================================================
 
         # Written Label Checks
+
         found_subcmd_start = False
         found_subcmd_end = False
         found_return_code = False
@@ -252,6 +243,7 @@ def run_ipcs_subcmd_outfile(
 
         # Search for ___SUBCMD_START___ and break
         # The next line will be the start of the output
+
         for line in outfile_obj_tmp:
             if "___SUBCMD_START___" in line:
                 found_subcmd_start = True
@@ -260,6 +252,7 @@ def run_ipcs_subcmd_outfile(
         # Store lines in subcommand output file until you hit ___SUBCMD_END___
         # If next line is ___SUBCMD_END___ - remove endline character from final output line
         # The next line after that would then be ___SUBCMD_RC_START___, then the return code
+
         if found_subcmd_start:
             # Start reading subcmd output
             subcmd_output_line = outfile_obj_tmp.readline()
@@ -275,6 +268,7 @@ def run_ipcs_subcmd_outfile(
                 subcmd_output_line = line
 
         # Start reading return code
+
         if found_subcmd_end:
             for line in outfile_obj_tmp:
                 if "___SUBCMD_RC_START___" in line:
@@ -282,12 +276,13 @@ def run_ipcs_subcmd_outfile(
                     break
 
         # If we failed to parse something, delete files and raise error
+
         if not found_subcmd_start or not found_subcmd_end or not found_return_code:
             outfile_obj_tmp.seek(0)
             shell_output = outfile_obj_tmp.read()
-            os.remove(filepath)
-            os.remove(tmp_filepath)
-            os.rmdir(tmp_dirpath)
+            outfile_path.unlink()
+            tmp_path.unlink()
+            tmp_path.parent.rmdir()
             raise RuntimeError(
                 "Failed To Parse Subcommand Output"
                 + " or Return Code In IPCS Subcommand Shell Script Output\n"
@@ -296,9 +291,11 @@ def run_ipcs_subcmd_outfile(
             )
 
         # The next line is the return code
+
         rc = int(outfile_obj_tmp.readline().strip())
 
     # Remove temp file and directory before returning
-    os.remove(tmp_filepath)
-    os.rmdir(tmp_dirpath)
+
+    tmp_path.unlink()
+    tmp_path.parent.rmdir()
     return {"rc": rc, "filepath": filepath}

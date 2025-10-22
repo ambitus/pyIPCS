@@ -87,7 +87,7 @@ def opened_session():
     finally:
         if session.active:
             session.close()
-        session_dir = os.path.join(session.directory, "pyipcs_session")
+        session_dir = os.path.join(session.directory, "pyipcs_directory")
         if os.path.exists(session_dir) and os.path.isdir(session_dir):
             shutil.rmtree(session_dir)
 
@@ -104,7 +104,7 @@ def opened_session_hlq():
     finally:
         if session.active:
             session.close()
-        session_dir = os.path.join(session.directory, "pyipcs_session")
+        session_dir = os.path.join(session.directory, "pyipcs_directory")
         if os.path.exists(session_dir) and os.path.isdir(session_dir):
             shutil.rmtree(session_dir)
 
@@ -128,7 +128,7 @@ def opened_session_directory(request):
     finally:
         if session.active:
             session.close()
-        session_dir = os.path.join(session.directory, "pyipcs_session")
+        session_dir = os.path.join(session.directory, "pyipcs_directory")
         if not test_dir_exists:
             if os.path.exists(test_directory) and os.path.isdir(test_directory):
                 shutil.rmtree(test_directory)

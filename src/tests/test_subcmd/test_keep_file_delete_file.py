@@ -47,6 +47,7 @@ Tests:
 
 # pylint: disable=duplicate-code
 import os
+from pathlib import Path
 import pytest
 from pyipcs import Subcmd
 from ..conftest import NO_TEST_DUMPS
@@ -183,6 +184,7 @@ def check_delete_file(test_session, dump_set: bool):
         Delete subcommand output file with delete_file method.
     """
     test_subcmds = TEST_SESSION_SUBCMDS if dump_set else TEST_DUMP_SUBCMDS
+
     for test_subcmd in test_subcmds:
         try:
             subcmd = Subcmd(test_session, test_subcmd, outfile=True)
@@ -191,31 +193,23 @@ def check_delete_file(test_session, dump_set: bool):
             # =======================================
             # Check if file exists
             # =======================================
-            assert os.path.exists(subcmd.outfile) and os.path.isfile(subcmd.outfile)
 
-            session_directory = subcmd._session_directory
-            session_instance_directory = subcmd._session_instance_directory
-            subcmd_output_directory = subcmd._subcmd_output_directory
-            outfile = subcmd.outfile
+            outfile_path = Path(subcmd.outfile)
+
+            assert outfile_path.exists() and outfile_path.is_file()
 
             # ======================================
             # Check if files and directories exist
             # ======================================
+
             subcmd.delete_file()
-            assert not (os.path.exists(outfile) and os.path.isfile(outfile))
-            assert not (
-                os.path.exists(subcmd_output_directory)
-                and os.path.isdir(subcmd_output_directory)
-            )
-            assert not (
-                os.path.exists(session_instance_directory)
-                and os.path.isdir(session_instance_directory)
-            )
-            assert not (
-                os.path.exists(session_directory) and os.path.isdir(session_directory)
-            )
+
+            assert not outfile_path.exists()
+
             assert subcmd.outfile is None
+
         except AssertionError as e:
+
             pytest.fail(f"Subcommand: {test_subcmd}, {e}")
 
 
