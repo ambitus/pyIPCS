@@ -27,26 +27,35 @@ class MockSubcmd(Subcmd):
         """
         Constructor for MockSubcmd object
 
-        Args:
-            mock_output (str):
-                Input to inject into MockSubcmd object
-            mock_subcmd (str):
-                Optional. Will become 'subcmd' attribute. 'MOCKSUBCMD' by default.
-            mock_dsname (str|None):
-                Optional. Will become 'dsname' attribute.
-                None by default (IpcsSession Subcommand).
-                Could also be a string to mimic a Dump Subcommand.
-            mock_rc (int):
-                Optional. Will become 'rc' attribute
-            mock_directory (str|None):
-                Optional. Will become the directory for MockIpcsSession object.
-                Default is None for current working directory.
-            outfile (bool):
-                Optional. Default is False
-            keep_file (bool):
-                Optional. Default is False
-        Returns:
-            None
+        Parameters
+        ----------
+        mock_output : str
+            Input to inject into MockSubcmd object
+
+        mock_subcmd : str, optional
+            Will become `subcmd` attribute. `"MOCKSUBCMD"` by default.
+
+        mock_dsname : str|None, optional
+            Will become `dsname` attribute.
+            `None` by default (IpcsSession Subcommand).
+            Could also be a string to mimic a Dump Subcommand.
+
+        mock_rc : int, optional
+            Will become `rc` attribute
+
+        mock_directory : str|None, optional
+            Will become the directory for MockIpcsSession object.
+            Default is `None` for current working directory.
+
+        outfile : bool, optional
+            Default is `False`
+
+        keep_file : bool, optional
+            Default is `False`
+
+        Returns
+        -------
+        None
         """
 
         # ================================================

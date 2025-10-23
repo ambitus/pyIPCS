@@ -1,19 +1,13 @@
 """
 Test suite for custom Dump object
 
-Tests:
-```
-    test_custom_dump():
-        Test custom Dump Object
-```
+Tests
+-----
+test_custom_dump
+    Test custom Dump Object
 """
 
-import pytest
 from pyipcs import IpcsSession, Dump
-from ..conftest import NO_TEST_DUMPS
-
-if NO_TEST_DUMPS:
-    pytest.skip("No test z/OS dumps set", allow_module_level=True)
 
 
 class MyDumpObject(Dump):
@@ -31,12 +25,9 @@ class MyDumpObject(Dump):
         self.data["new_dump_data_key"] = "new_dump_data_value"
 
 
-def test_custom_dump(opened_session, single_test_dump):
+def test_custom_dump(open_session_default, test_dump_single):
     """
-    Object:
-        Dump
-    Description:
-        Test custom Dump Object
+    Test custom Dump Object
     """
-    my_dump_object = MyDumpObject(opened_session, single_test_dump)
+    my_dump_object = MyDumpObject(open_session_default, test_dump_single)
     assert my_dump_object.data["new_dump_data_key"] == "new_dump_data_value"

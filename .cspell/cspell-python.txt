@@ -1,6 +1,9 @@
 conftest
 docstrings
+fixturenames
+getfixturevalue
 kwargs
+metafunc
 pylint
 pytest
 repr

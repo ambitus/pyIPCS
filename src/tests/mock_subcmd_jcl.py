@@ -1,19 +1,20 @@
 """
 File for using JCL to create MockSubcmd Objects
 """
-
+# pylint: disable=consider-using-join
 import warnings
 from zoautil_py import jobs, datasets
 from .mock_subcmd import MockSubcmd
 from .conftest import TEST_HLQ
 
-SUBCMD_JCL_OUTPUT_DSNAME = ".PYTEST.MOCKPY"
+JCL_TEMP_DSNAME = f"{TEST_HLQ}.JCLIN"
 
-JCL_TEMP_DSNAME = ".ZOAU.JCL"
+JCL_TEMP_MEMBERNAME = f"{JCL_TEMP_DSNAME}(TMP)"
 
-JCL_TEMP_MEMBERNAME = "TMP"
+JCL_OUTPUT_DSNAME = f"{TEST_HLQ}.JCLOUT"
 
-MOCK_SUBCMD_JCL_NO_DSNAME = """//MOCKPY JOB 'MOCK PYIPCS',CLASS=A
+
+MOCK_SUBCMD_JCL = """//MOCKPY JOB 'MOCK PYIPCS',CLASS=A
 //*====================================================================  
 //* MOCK PYIPCS SUBCOMMAND OBJECT JCL
 //*====================================================================  
@@ -25,52 +26,44 @@ MOCK_SUBCMD_JCL_NO_DSNAME = """//MOCKPY JOB 'MOCK PYIPCS',CLASS=A
 //SYSTSIN DD * 
 PROFILE MSGID 
 IPCS NOPARM 
-SETDEF NODSNAME LIST NOCONFIRM
-{subcmds}
-END   
-"""
-
-MOCK_SUBCMD_JCL_DSNAME = """//MOCKPY JOB 'MOCK PYIPCS',CLASS=A
-//*====================================================================  
-//* MOCK PYIPCS SUBCOMMAND OBJECT JCL
-//*====================================================================  
-//IPCS EXEC PGM=IKJEFT01,DYNAMNBR=1000,REGION=0M                         
-//IPCSDDIR DD DISP=SHR,DSN={ddir}
-{allocations_jcl}
-//SYSUDUMP DD SYSOUT=*         
-//SYSTSPRT  DD DSN={mock_subcmd_dsname},DISP=OLD
-//SYSTSIN DD * 
-PROFILE MSGID 
-IPCS NOPARM 
-SETDEF DSN('{dsname}') LIST NOCONFIRM
+SETDEF {dsname_param} LIST
 {subcmds}
 END   
 """
 
 
-def jcl_to_mock_subcmd(
-    test_subcmds: list[str],
-    test_allocations: dict[str, str | list[str]],
+def mock_subcmd_jcl(
     test_ddir: str,
+    test_allocations: dict[str, str | list[str]],
+    test_subcmds: list[str],
     test_dsname: str = "",
-):
+) -> list[MockSubcmd]:
     """
     Uses JCL to create MockSubcmd objects
 
-    Args:
-        test_subcmds (list[str])
-        test_allocations (dict[str,str|list[str]])
-        test_ddir (str)
-        test_dsname (str):
-            Optional.
-            Use dsname string to specify 'SETDEF DSNAME..' (Run dump against particular dump).
-            Default is to empty string for 'SETDEF NODSNAME..'.
-    Returns:
-        list[MockSubcmd]: list of mock Subcmd objects where 'test_subcmds[i]'
-            corresponds to 'returned_list[i]'
+    Parameters
+    ----------
+    test_ddir : str
+        Existing DDIR to run subcommands against
+
+    test_allocations : dict[str,str|list[str]]
+
+    test_subcmds : list[str]
+
+    test_dsname : str, optional
+        Use dsname string to specify `SETDEF DSNAME..` (Run subcommands against particular dump).
+        Default is to empty string for `SETDEF NODSNAME..`.
+
+    Returns
+    -------
+    list[MockSubcmd]: list of mock Subcmd objects where 'test_subcmds[i]'
+        corresponds to 'returned_list[i]'
     """
 
-    def format_allocations(allocations):
+    def format_allocations(allocations) -> str:
+        """
+        Format allocations for JCL
+        """
         allocations_str = ""
         for dd_name, specification in allocations.items():
             if specification:
@@ -79,63 +72,61 @@ def jcl_to_mock_subcmd(
                 allocations_str += f"//         DD DSN={dsname},DISP=SHR\n"
         return allocations_str[:-1]
 
-    def submit_jcl(jcl):
-        jcl_dsname = TEST_HLQ + JCL_TEMP_DSNAME
-        jcl_membername = f"{jcl_dsname}({JCL_TEMP_MEMBERNAME})"
+    def submit_jcl():
+        """
+        Submit JCL and get output
+        """
 
-        # create and write JCL to data set
-        datasets.write(dataset_name=jcl_membername, content=jcl)
+        # Create IPCS JCL
 
-        # submit job
-        job = jobs.submit(jcl_membername)
+        jcl_subcmd_str = ""
+        for subcmd in test_subcmds:
+            jcl_subcmd_str += f"{subcmd}\n"
+
+        jcl_str = MOCK_SUBCMD_JCL.format(
+            ddir=test_ddir,
+            allocations_jcl=(
+                format_allocations(test_allocations) if test_allocations else "//*"
+            ),
+            mock_subcmd_dsname=JCL_OUTPUT_DSNAME,
+            dsname_param=f"DSN('{test_dsname}')" if test_dsname else "NODSNAME",
+            subcmds=jcl_subcmd_str,
+        )
+
+        # Create and write JCL to data set
+
+        datasets.write(dataset_name=JCL_TEMP_MEMBERNAME, content=jcl_str)
+
+        # Create JCL output dataset
+
+        datasets.write(dataset_name=JCL_OUTPUT_DSNAME, content="")
+
+        # Submit job
+
+        job = jobs.submit(JCL_TEMP_MEMBERNAME)
         job.wait()
         job.refresh()
 
-        rc = datasets.delete(jcl_dsname)
-        if rc != 0:
+        # Get job output
+
+        job_output = datasets.read(JCL_OUTPUT_DSNAME)
+
+        # Delete JCL datasets
+
+        rc_jcl = datasets.delete(JCL_TEMP_DSNAME)
+        rc_out = datasets.delete(JCL_OUTPUT_DSNAME)
+        if rc_jcl != 0 or rc_out != 0:
             warnings.warn(
-                f"Mock pyIPCS Dataset To Write JCL '{jcl_membername}' Not Deleted",
+                "Error in Deleting Temp pyIPCS JCL Test Datasets: "
+                f"{JCL_TEMP_DSNAME} and/or {JCL_OUTPUT_DSNAME}",
                 UserWarning,
             )
 
-    mock_subcmd_dsname = TEST_HLQ + ".SUBCMD.MOCKJCL"
-    datasets.write(mock_subcmd_dsname, "")
+        # Return job output
 
-    allocations_jcl = format_allocations(test_allocations)
+        return job_output
 
-    jcl_subcmds = ""
-    for test_subcmd in test_subcmds:
-        jcl_subcmds = f"{jcl_subcmds}{test_subcmd}\n"
-    jcl_subcmds = jcl_subcmds[:-1]
-
-    if test_dsname:
-        submit_jcl(
-            MOCK_SUBCMD_JCL_DSNAME.format(
-                ddir=test_ddir,
-                allocations_jcl=allocations_jcl if allocations_jcl else "//*",
-                mock_subcmd_dsname=mock_subcmd_dsname,
-                dsname=test_dsname,
-                subcmds=jcl_subcmds,
-            )
-        )
-    else:
-        submit_jcl(
-            MOCK_SUBCMD_JCL_NO_DSNAME.format(
-                ddir=test_ddir,
-                allocations_jcl=allocations_jcl if allocations_jcl else "//*",
-                mock_subcmd_dsname=mock_subcmd_dsname,
-                subcmds=jcl_subcmds,
-            )
-        )
-
-    job_output = datasets.read(mock_subcmd_dsname)
-    rc = datasets.delete(mock_subcmd_dsname)
-    if rc != 0:
-        warnings.warn(
-            f"Mock pyIPCS Dataset To Write JCL Subcommand Output '{mock_subcmd_dsname}'"
-            + " Not Deleted",
-            UserWarning,
-        )
+    job_output = submit_jcl()
 
     # ==============================
     # Parse Output
