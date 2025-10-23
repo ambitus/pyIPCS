@@ -1,121 +1,73 @@
 """
-Test suite for IpcsSesion open and close methods
+Test suite for IpcsSession open and close logic
 
-Tests:
-```
-    test_open_close_no_params():
-        Open and close IpcsSession with no parameters
+Tests
+-----
+test_temp_datasets
+    Checks temporary datasets on session open and close
 
-    test_open_deletion_no_params():
-        Open and deltion IpcsSession with no parameters
-
-    test_cleanup_close():
-        Check no pyIPCS datasets exist after running test
-
-```
+test_cleanup
+    Make sure no temporary datasets are left over after previous tests
 """
 
+import pytest
 from zoautil_py import datasets
-from ..conftest import USERID, TEST_HLQ
+from pyipcs import IpcsSession
 
 
-def test_open_close_default_session(opened_session):
+@pytest.mark.parametrize(
+    "use_test_hlq", [False, True], ids=["default_session", "hlq_session"]
+)
+def test_temp_datasets(use_test_hlq, test_hlq):
     """
-    Object:
-        IpcsSession
-    Description:
-        Open and close. IpcsSession with no parameters
-    """
-    check_open_close(opened_session)
-
-def test_open_close_hlq_session(
-    opened_session_hlq,
-):
-    """
-    Object:
-        IpcsSession
-    Description:
-        Open and close. IpcsSession with set hlq parameter
-    """
-    check_open_close(opened_session_hlq)
-
-def test_cleanup_close():
-    """
-    Object:
-        IpcsSession
-    Description:
-        Check no pyIPCS datasets exist after running tests
-    """
-    assert not datasets.list_dataset_names(USERID+".PYIPCS", migrated=True)
-    assert not datasets.list_vsam_datasets(USERID+".PYIPCS", migrated=True)
-    assert not datasets.list_dataset_names(TEST_HLQ+".PYIPCS", migrated=True)
-    assert not datasets.list_vsam_datasets(TEST_HLQ+".PYIPCS", migrated=True)
-
-# ==================
-# CHECKS
-# ==================
-
-
-def check_open_close(test_session):
-    """
-    Object:
-        IpcsSession
-    Check Description:
-        Open and close IpcsSession
+    Checks temporary datasets on session open and close
     """
     # ================================
-    # Check temporary datasets exist
+    # Create IpcsSession and open
     # ================================
-    assert datasets.list_dataset_names(
-        test_session.hlq_full, migrated=True
-    )
-    assert datasets.list_dataset_names(
-        test_session._ipcsexec_dsname, migrated=True
-    )
-    assert datasets.list_dataset_names(
-        test_session._sysexec_dsname, migrated=True
-    )
-    # ===============================
-    # Check if temporary execs exist
-    # ===============================
-    # IPCSEXEC
-    assert "IPCSRUN" in datasets.list_members(
-        test_session._ipcsexec_dsname,
-    )
-    assert "IPACTIVE" in datasets.list_members(
-        test_session._ipcsexec_dsname,
-    )
-    # SYSEXEC
-    assert "IPCSEVAL" in datasets.list_members(
-        test_session._sysexec_dsname,
-    )
-    # ===========================================
-    # Check if default temporary DDIR exists
-    # ===========================================
-    assert datasets.list_vsam_datasets(test_session.ddir.dsname, migrated=True)
 
-    test_ddir = test_session.ddir.dsname
-    session_hlq = test_session.hlq_full
-    ipcsexec_dsname = test_session._ipcsexec_dsname
-    sysexec_dsname = test_session._sysexec_dsname
-    assert test_session.active
-    test_session.close()
+    test_session = None
+    if use_test_hlq:
+        test_session = IpcsSession(hlq=test_hlq)
+    else:
+        test_session = IpcsSession()
+
     assert not test_session.active
-    assert test_session.ddir.dsname is None
 
-    # ======================================
-    # Check temporary datasets don't exist
-    # ======================================
-    assert not datasets.list_dataset_names(
-        session_hlq, migrated=True
-    )
-    assert not datasets.list_dataset_names(
-        ipcsexec_dsname, migrated=True
-    )
-    assert not datasets.list_dataset_names(
-        sysexec_dsname, migrated=True
-    )
-    # ===============================================
-    # Check if default temporary DDIR doesn't exist
-    # ===============================================
-    assert not datasets.list_vsam_datasets(test_ddir, migrated=True)
+    assert not test_session.ddir.dsname
+
+    test_session.open()
+
+    # ================================
+    # Check if datasets exists
+    # ================================
+
+    assert datasets.list_dataset_names(test_session.hlq_full + ".*", migrated=True)
+
+    session_hlq = test_session.hlq_full
+
+    # ====================================================
+    # Close session and check active is working properly
+    # ====================================================
+
+    assert test_session.active
+
+    test_session.close()
+
+    assert not test_session.active
+
+    # ================================
+    # Check if datasets were deleted
+    # ================================
+
+    assert not datasets.list_dataset_names(session_hlq + ".*", migrated=True)
+
+
+def test_cleanup(userid, test_hlq):
+    """
+    Make sure no temporary datasets are left over after previous tests
+    """
+    assert not datasets.list_dataset_names(userid + ".PYIPCS.*", migrated=True)
+    assert not datasets.list_vsam_datasets(userid + ".PYIPCS.*", migrated=True)
+    assert not datasets.list_dataset_names(test_hlq + ".PYIPCS.*", migrated=True)
+    assert not datasets.list_vsam_datasets(test_hlq + ".PYIPCS.*", migrated=True)

@@ -185,7 +185,7 @@ class DumpDirectory:
 
     def create_tmp(self, use: bool = True, **kwargs) -> str:
         """
-        Create temporary dump directory. Will be deleted on IPCS session close
+        Create temporary dump directory. Will be deleted on IPCS session close.
 
         Uses `BLSCDDIR` CLIST to create DDIR.
         Adding additional keyword arguments will override pyIPCS DDIR presets.

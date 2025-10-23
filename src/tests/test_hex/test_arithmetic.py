@@ -1,23 +1,22 @@
 """
 Test suite for Hex object arithmetic
 
-Tests:
-```
-    test_add():
-        Test Hex add
+Tests
+-----
+test_add
+    Test Hex add
 
-    test_sub():
-        Test Hex subtract
+test_sub
+    Test Hex subtract
 
-    test_mul():
-        Test Hex multiply
+test_mul
+    Test Hex multiply
 
-    test_div():
-        Test Hex division
+test_div
+    Test Hex division
 
-    test_modulo():
-        Test Hex modulo
-```
+test_modulo
+    Test Hex modulo
 """
 
 import pytest
@@ -26,10 +25,7 @@ from pyipcs import Hex
 
 def test_add():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex add
+    Test Hex add
     """
     assert Hex("1") + Hex("9") == Hex("A")
     assert Hex(1) + Hex(9) == Hex("A")
@@ -49,10 +45,7 @@ def test_add():
 
 def test_sub():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex subtract
+    Test Hex subtract
     """
     assert Hex("9") - Hex("1") == Hex("8")
     assert Hex(9) - Hex(1) == Hex("8")
@@ -72,10 +65,7 @@ def test_sub():
 
 def test_mul():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex multiply
+    Test Hex multiply
     """
     assert Hex("2") * Hex("4") == Hex("8")
     assert Hex(2) * Hex(4) == Hex("8")
@@ -98,10 +88,7 @@ def test_mul():
 
 def test_div():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex division
+    Test Hex division
     """
     assert Hex("4") / Hex("2") == Hex("2")
     assert Hex(4) / Hex(2) == Hex("2")

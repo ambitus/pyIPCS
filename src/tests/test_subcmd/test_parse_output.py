@@ -1,32 +1,32 @@
 """
-Test suite for find and get_field methods
+Test suite for Subcmd methods such as
+indexing, length, find, and get_field methods
 
-Tests:
-```
-    test_indexing():
-        Test Subcmd indexing
+Tests
+-----
+test_indexing
+    Test Subcmd indexing
 
-    test_len():
-        Test Subcmd len function
+test_len
+    Test Subcmd len function
 
-    test_find():
-        Run find method
+test_find
+    Run find method
 
-    test_rfind():
-        Run rfind method
+test_rfind
+    Run rfind method
 
-    test_get_field():
-        Run get_field method
+test_get_field
+    Run get_field method
 
-    test_get_field2():
-        Run get_field2 method
+test_get_field2
+    Run get_field2 method
 
-    test_rget_field():
-        Run rget_field method
+test_rget_field
+    Run rget_field method
 
-    test_rget_field2():
-        Run rget_field2 method
-```
+test_rget_field2
+    Run rget_field2 method
 """
 
 from pyipcs import Hex
@@ -35,10 +35,7 @@ from ..mock_subcmd import MockSubcmd
 
 def test_indexing():
     """
-    Object:
-        Subcmd
-    Description:
-        Test Subcmd indexing
+    Test Subcmd indexing
     """
     # =========================
     # Test with string output
@@ -63,10 +60,7 @@ def test_indexing():
 
 def test_subcmd_length():
     """
-    Object:
-        Subcmd
-    Description:
-        Test Subcmd Test Subcmd len function
+    Test Subcmd Test Subcmd len function
     """
     # =========================
     # Test with string output
@@ -87,10 +81,7 @@ def test_subcmd_length():
 
 def test_find():
     """
-    Object:
-        Subcmd
-    Description:
-        Run find method
+    Run find method
     """
     # =========================
     # Test with string output
@@ -119,10 +110,7 @@ def test_find():
 
 def test_rfind():
     """
-    Object:
-        Subcmd
-    Description:
-        Run rfind method
+    Run rfind method
     """
     # =========================
     # Test with string output
@@ -151,10 +139,7 @@ def test_rfind():
 
 def test_get_field():
     """
-    Object:
-        Subcmd
-    Description:
-        Run get_field method
+    Run get_field method
     """
     # =========================
     # Test with string output
@@ -217,10 +202,7 @@ def test_get_field():
 
 def test_get_field2():
     """
-    Object:
-        Subcmd
-    Description:
-        Run get_field2 method
+    Run get_field2 method
     """
     # =========================
     # Test with string output
@@ -279,10 +261,7 @@ def test_get_field2():
 
 def test_rget_field():
     """
-    Object:
-        Subcmd
-    Description:
-        Run rget_field method
+    Run rget_field method
     """
     # =========================
     # Test with string output
@@ -347,10 +326,7 @@ def test_rget_field():
 
 def test_rget_field2():
     """
-    Object:
-        Subcmd
-    Description:
-        Run rget_field2 method
+    Run rget_field2 method
     """
     # =========================
     # Test with string output

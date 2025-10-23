@@ -1,26 +1,25 @@
 """
 Test suite for Hex object bitwise methods
 
-Tests:
-```
-    test_resize():
-        Test Hex resize method
+Tests
+-----
+test_resize
+    Test Hex resize method
 
-    test_bit_len_no_pad():
-        Test Hex bit_len_no_pad method
+test_bit_len_no_pad
+    Test Hex bit_len_no_pad method
 
-    test_bit_len():
-        Test Hex bit_len method
+test_bit_len
+    Test Hex bit_len method
 
-    test_turn_on_bit():
-        Test Hex turn_on_bit method
+test_turn_on_bit
+    Test Hex turn_on_bit method
 
-    test_turn_off_bit():
-        est Hex turn_off_bit method
+test_turn_off_bit
+    est Hex turn_off_bit method
 
-    test_check_bit():
-        Test Hex check_bit method
-```
+test_check_bit
+    Test Hex check_bit method
 """
 
 from pyipcs import Hex
@@ -28,10 +27,7 @@ from pyipcs import Hex
 
 def test_resize():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex resize method
+    Test Hex resize method
     """
 
     assert Hex("ABCD").resize(8) == Hex("CD")
@@ -43,10 +39,7 @@ def test_resize():
 
 def test_bit_len_no_pad():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex bit_len_no_pad method
+    Test Hex bit_len_no_pad method
     """
 
     assert Hex("ABCD").bit_len_no_pad() == 16
@@ -58,10 +51,7 @@ def test_bit_len_no_pad():
 
 def test_bit_len():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex bit_len method
+    Test Hex bit_len method
     """
     assert Hex("ABCD").bit_len() == 16
     assert Hex("00AB").bit_len() == 16
@@ -72,10 +62,7 @@ def test_bit_len():
 
 def test_turn_on_bit():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex turn_on_bit method
+    Test Hex turn_on_bit method
     """
     assert Hex("00").turn_on_bit(1) == Hex("40")
     assert Hex("00").turn_on_bit(1, True) == Hex("02")
@@ -92,10 +79,7 @@ def test_turn_on_bit():
 
 def test_turn_off_bit():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex turn_off_bit method
+    Test Hex turn_off_bit method
     """
     assert Hex("41").turn_off_bit(1) == Hex("01")
     assert Hex("12").turn_off_bit(1, True) == Hex("10")
@@ -112,10 +96,7 @@ def test_turn_off_bit():
 
 def test_check_bit():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex check_bit method
+    Test Hex check_bit method
     """
     assert Hex("41").check_bit(1) is True
     assert Hex("41").check_bit(0) is False

@@ -1,29 +1,28 @@
 """
 Test suite for Hex object basic methods
 
-Tests:
-```
-    test_sign():
-        Test Hex sign method
+Tests
+-----
+test_sign
+    Test Hex sign method
 
-    test_unsigned():
-        Test Hex unsigned method
+test_unsigned
+    Test Hex unsigned method
 
-    test_hex_indexing():
-        Test Hex indexing
+test_hex_indexing
+    Test Hex indexing
 
-    test_hex_to_int():
-        Test Hex to_int method
+test_hex_to_int
+    Test Hex to_int method
 
-    test_hex_to_str():
-        Test Hex to_str, __str__, __repr__ methods
+test_hex_to_str
+    Test Hex to_str, __str__, __repr__ methods
 
-    test_hex_to_char_str():
-        Test Hex to_char_str method
+test_hex_to_char_str
+    Test Hex to_char_str method
 
-    test_concat():
-        Test Hex to_char_str method
-```
+test_concat
+    Test Hex to_char_str method
 """
 
 from pyipcs import Hex
@@ -31,10 +30,7 @@ from pyipcs import Hex
 
 def test_sign():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex sign method
+    Test Hex sign method
     """
     assert Hex("4").sign() == ""
     assert Hex("-4").sign() == "-"
@@ -44,10 +40,7 @@ def test_sign():
 
 def test_unsigned():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex unsigned method
+    Test Hex unsigned method
     """
     assert Hex("4").unsigned() == Hex("4")
     assert Hex("-4").unsigned() == Hex("4")
@@ -57,10 +50,7 @@ def test_unsigned():
 
 def test_hex_indexing():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex indexing
+    Test Hex indexing
     """
     assert Hex("123456789ABCDEF")[1] == Hex("2")
     assert Hex("-123456789ABCDEF")[1] == Hex("2")
@@ -74,10 +64,7 @@ def test_hex_indexing():
 
 def test_hex_to_int():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex to_int method
+    Test Hex to_int method
     """
     assert Hex("4").to_int() == 4
     assert Hex("004").to_int() == 4
@@ -92,10 +79,7 @@ def test_hex_to_int():
 
 def test_hex_to_str():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex to_str, __str__, __repr__ methods
+    Test Hex to_str, __str__, __repr__ methods
     """
     assert Hex("4").to_str() == "4"
     assert Hex("004").to_str() == "004"
@@ -117,23 +101,20 @@ def test_hex_to_str():
     assert str(Hex("-A")) == "-A"
     assert str(Hex("-00A")) == "-00A"
 
-    assert repr(Hex("4")) == "Hex(\'4\')"
-    assert repr(Hex("004")) == "Hex(\'004\')"
-    assert repr(Hex("-4")) == "Hex(\'-4\')"
-    assert repr(Hex("-004")) == "Hex(\'-004\')"
+    assert repr(Hex("4")) == "Hex('4')"
+    assert repr(Hex("004")) == "Hex('004')"
+    assert repr(Hex("-4")) == "Hex('-4')"
+    assert repr(Hex("-004")) == "Hex('-004')"
 
-    assert repr(Hex("A")) == "Hex(\'A\')"
-    assert repr(Hex("00A")) == "Hex(\'00A\')"
-    assert repr(Hex("-A")) == "Hex(\'-A\')"
-    assert repr(Hex("-00A")) == "Hex(\'-00A\')"
+    assert repr(Hex("A")) == "Hex('A')"
+    assert repr(Hex("00A")) == "Hex('00A')"
+    assert repr(Hex("-A")) == "Hex('-A')"
+    assert repr(Hex("-00A")) == "Hex('-00A')"
 
 
 def test_hex_to_char_str():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex to_char_str method
+    Test Hex to_char_str method
     """
     assert Hex("E3C5E2E3").to_char_str() == "TEST"
     assert Hex("54455354").to_char_str("utf-8") == "TEST"
@@ -141,10 +122,7 @@ def test_hex_to_char_str():
 
 def test_concat():
     """
-    Object:
-        Hex
-    Description:
-        Test Hex to_char_str method
+    Test Hex to_char_str method
     """
     assert Hex("ABCD").concat(Hex("EF")) == Hex("ABCDEF")
     assert Hex("-ABCD").concat(Hex("EF")) == Hex("-ABCDEF")
