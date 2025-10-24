@@ -11,7 +11,7 @@ class MockSubcmd(Subcmd):
     """
     Mock pyIPCS Subcmd Object
 
-    Mimics Subcmd Object by bypassing IPCS call to forcefully inject output into the object
+    Mimics Subcmd Object by bypassing IPCS call to forcefully inject output into the object.
     """
 
     def __init__(
@@ -21,16 +21,15 @@ class MockSubcmd(Subcmd):
         mock_rc: int = 0,
         mock_directory: str | None = None,
         outfile: bool = False,
-        keep_file: bool = False,
-        auth: bool = False
+        keep_file: bool = False
     ):
         """
-        Constructor for MockSubcmd object
+        Constructor for MockSubcmd object.
 
         Parameters
         ----------
         mock_output : str
-            Input to inject into MockSubcmd object
+            Input to inject into MockSubcmd object.
 
         mock_subcmd : str, optional
             Will become `subcmd` attribute. `"MOCKSUBCMD"` by default.
@@ -48,10 +47,10 @@ class MockSubcmd(Subcmd):
             Default is `None` for current working directory.
 
         outfile : bool, optional
-            Default is `False`
+            Default is `False`.
 
         keep_file : bool, optional
-            Default is `False`
+            Default is `False`.
 
         Returns
         -------

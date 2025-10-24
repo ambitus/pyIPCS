@@ -12,63 +12,62 @@ class Hex:
 
     Contains various methods and functionality to manage hex variables in a IPCS environment
 
-    Methods:
-    ```
-        __init__(value:str|int) -> None:
-            Constructor for Hex Object
+    Methods
+    -------
+    __init__(value)
+        Constructor for Hex Object
 
-        sign() -> str:
-            Get sign of hex value.
+    sign()
+        Get sign of hex value.
 
-        unsigned() -> pyipcs.Hex:
-            Get unsigned hex value.
+    unsigned()
+        Get unsigned hex value.
 
-        get_nibble(nibble:int, from_right:bool=False):
-            Get 0 indexed nibble. Default 0 index is from left side of hex string.
+    get_nibble(nibble, from_right=False)
+        Get 0 indexed nibble. Default 0 index is from left side of hex string.
 
-        get_byte(byte:int, from_right:bool=False):
-            Get 0 indexed byte. Default 0 index is from left side of hex string.
+    get_byte(byte, from_right=False)
+        Get 0 indexed byte. Default 0 index is from left side of hex string.
 
-        get_half_word(half_word:int, from_right:bool=False):
-            Get 0 indexed half word. Default 0 index is from left side of hex string.
+    get_half_word(half_word, from_right=False)
+        Get 0 indexed half word. Default 0 index is from left side of hex string.
 
-        get_word(word:int, from_right:bool=False):
-            Get 0 indexed word. Default 0 index is from left side of hex string.
+    get_word(word, from_right=False)
+        Get 0 indexed word. Default 0 index is from left side of hex string.
 
-        get_doubleword(doubleword:int, from_right:bool=False):
-            Get 0 indexed doubleword. Default 0 index is from left side of hex string.
+    get_doubleword(doubleword, from_right=False)
+        Get 0 indexed doubleword. Default 0 index is from left side of hex string.
 
-        to_int() -> int:
-            Convert hex to an integer.
+    to_int()
+        Convert hex to an integer.
 
-        to_str() -> str:
-            Convert Hex object to a hex string.
+    to_str()
+        Convert Hex object to a hex string.
 
-        to_char_str(encoding:str="ibm1047") -> str:
-            Convert hex to character string.
+    to_char_str(encoding="ibm1047")
+        Convert hex to character string.
 
-        concat(other) -> pyipcs.Hex:
-            Concatenate with other Hex Object/Objects.
+    concat(other)
+        Concatenate with other Hex Object/Objects.
 
-        resize(new_bit_length:int) -> pyipcs.Hex:
-            Convert hex string to new bit length.
+    resize(new_bit_length)
+        Convert hex string to new bit length.
 
-        bit_len_no_pad() -> int:
-            Determine bit length of hex string, not including leading 0s.
+    bit_len_no_pad()
+        Determine bit length of hex string, not including leading 0s.
 
-        bit_len() -> int:
-            Determine bit length of hex string, including leading 0s.
+    bit_len()
+        Determine bit length of hex string, including leading 0s.
 
-        turn_on_bit(bit_position:int, from_right:bool=False) -> pyipcs.Hex:
-            Turn on bit at 0 indexed bit position. Default 0 index is from left side of hex string.
+    turn_on_bit(bit_position, from_right=False)
+        Turn on bit at 0 indexed bit position. Default 0 index is from left side of hex string.
 
-        turn_off_bit(bit_position:int, from_right:bool=False) -> pyipcs.Hex:
-            Turn off bit at 0 indexed bit position. Default 0 index is from left side of hex string.
+    turn_off_bit(bit_position, from_right=False)
+        Turn off bit at 0 indexed bit position. Default 0 index is from left side of hex string.
 
-        check_bit(bit_position:int, from_right:bool=False) -> bool:
-            Check bit at 0 indexed bit position. Default 0 index is from left side of hex string.
+    check_bit(bit_position, from_right=False)
+        Check bit at 0 indexed bit position. Default 0 index is from left side of hex string.
 
-    ```
     """
 
     def __init__(self, value: str | int) -> None:
@@ -78,11 +77,14 @@ class Hex:
         Either convert int to hex string or check that string is valid hex
         Then convert hex string to IPCS format and Store
 
-        Args:
-            value (str|int):
-                hex string or integer for hex value
-        Returns:
-            None
+        Parameters
+        ----------
+        value : str|int
+            Hex string or integer for hex value.
+        
+        Returns
+        -------
+        None
         """
         # ==============================
         #  TYPE ERRORS CHECK
@@ -134,8 +136,9 @@ class Hex:
         """
         Convert Hex object for JSON format
 
-        Returns:
-            str
+        Returns
+        -------
+        str
         """
         return {
             "__ipcs_type__": "Hex",
@@ -150,8 +153,10 @@ class Hex:
         """
         Get sign of hex value.
 
-        Returns:
-            str : '-' or '' depending on whether Hex is positive or negative
+        Returns
+        -------
+        str
+            `"-"` or `""` depending on whether Hex is positive or negative
         """
         if self.__value.startswith("-"):
             return "-"
@@ -161,8 +166,10 @@ class Hex:
         """
         Get unsigned hex value.
 
-        Returns:
-            pyipcs.Hex : unsigned Hex
+        Returns
+        -------
+        pyipcs.Hex
+            Unsigned Hex
         """
         return Hex(self.__value.removeprefix("-"))
 
@@ -176,13 +183,18 @@ class Hex:
         """
         Get 0 indexed nibble. Default 0 index is from left side of hex string.
 
-        Args:
-            nibble (int):
-                0 indexed nibble position
-            from_right (bool):
-                Optional. If 'True' will make 0 index the right most nibble. 'False' by Default.
-        Returns:
-            pyipcs.Hex: 0 indexed nibble at position nibble
+        Parameters
+        ----------
+        nibble : int
+            0 indexed nibble position.
+
+        from_right : bool, optional
+            If `True` will make 0 index the right most nibble. `False` by default.
+        
+        Returns
+        -------
+        pyipcs.Hex
+            0 indexed nibble at position nibble.
         """
         if not isinstance(nibble, int):
             raise TypeError(
@@ -198,13 +210,18 @@ class Hex:
         """
         Get 0 indexed byte. Default 0 index is from left side of hex string.
 
-        Args:
-            byte (int):
-                0 indexed byte position
-            from_right (bool):
-                Optional. If 'True' will make 0 index the right most byte. 'False' by Default.
-        Returns:
-            pyipcs.Hex: 0 indexed byte at position byte
+        Parameters
+        ----------
+        byte : int
+            0 indexed byte position.
+
+        from_right : bool, optional
+            If `True` will make 0 index the right most byte. `False` by default.
+        
+        Returns
+        -------
+        pyipcs.Hex
+            0 indexed byte at position byte.
         """
         if not isinstance(byte, int):
             raise TypeError(
@@ -220,13 +237,18 @@ class Hex:
         """
         Get 0 indexed half word. Default 0 index is from left side of hex string.
 
-        Args:
-            half_word (int):
-                0 indexed half word position
-            from_right (bool):
-                Optional. If 'True' will make 0 index the right most half word. 'False' by Default.
-        Returns:
-            pyipcs.Hex: 0 indexed half word at position half_word
+        Parameters
+        ----------
+        half_word : int
+            0 indexed half word position.
+        
+        from_right : bool, optional
+            If `True` will make 0 index the right most half word. `False` by default.
+        
+        Returns
+        -------
+        pyipcs.Hex
+            0 indexed half word at position half_word.
         """
         if not isinstance(half_word, int):
             raise TypeError(
@@ -242,13 +264,18 @@ class Hex:
         """
         Get 0 indexed word. Default 0 index is from left side of hex string.
 
-        Args:
-            word (int):
-                0 indexed word position
-            from_right (bool):
-                Optional. If 'True' will make 0 index the right most word. 'False' by Default.
-        Returns:
-            pyipcs.Hex: 0 indexed word at position word
+        Parameters
+        ----------
+        word : int
+            0 indexed word position.
+    
+        from_right : bool, optional
+            If `True` will make 0 index the right most word. `False` by default.
+        
+        Returns
+        -------
+        pyipcs.Hex
+            0 indexed word at position word.
         """
         if not isinstance(word, int):
             raise TypeError(
@@ -264,14 +291,19 @@ class Hex:
         """
         Get 0 indexed doubleword. Default 0 index is from left side of hex string.
 
-        Args:
-            doubleword (int):
-                0 indexed doubleword position
-            from_right (bool):
-                Optional. If 'True' will make 0 index the right most doubleword.
-                'False' by Default.
-        Returns:
-            pyipcs.Hex: 0 indexed doubleword at position doubleword
+        Parameters
+        ----------
+        doubleword : int
+            0 indexed doubleword position.
+
+        from_right : bool, optional
+            If `True` will make 0 index the right most doubleword.
+            `False` by default.
+
+        Returns
+        -------
+        pyipcs.Hex
+            0 indexed doubleword at position doubleword.
         """
         if not isinstance(doubleword, int):
             raise TypeError(
@@ -291,8 +323,10 @@ class Hex:
         """
         Convert hex to an integer.
 
-        Returns:
-            int : hex integer
+        Returns
+        -------
+        int 
+            Hex integer.
         """
         return int(self.__value, 16)
 
@@ -300,8 +334,10 @@ class Hex:
         """
         Convert Hex object to a hex string.
 
-        Returns:
-            str : hex string
+        Returns
+        -------
+        str
+            Hex string.
         """
         return self.__value
 
@@ -311,11 +347,15 @@ class Hex:
 
         If there is an error reading the hex string to characters, will return empty string('').
 
-        Args:
-            encoding (str):
-                Optional. Encoding to use to decode hex string. Default is 'ibm1047'.
-        Returns:
-            str : character string
+        Parameters
+        ----------
+        encoding : str, optional
+            Encoding to use to decode hex string. Default is `"ibm1047"`.
+
+        Returns
+        -------
+        str
+            Character string.
         """
         try:
             # Convert hex string to bytes
@@ -344,15 +384,19 @@ class Hex:
     # ===============================
     def concat(self, other):
         """
-        Concatenate with other Hex Object/Objects
+        Concatenate with other Hex Object/Objects.
 
-        Args:
-            other (pyipcs.Hex|Iterable):
-                Other Hex object or Iterable of Hex objects
-                to concatenate to the end of the current Hex Object.
-                Disregard sign of this variable in concatenation.
-        Returns:
-            pyipcs.Hex: Concatenated Hex Object
+        Parameters
+        ----------
+        other : pyipcs.Hex|Iterable
+            Other Hex object or Iterable of Hex objects
+            to concatenate to the end of the current Hex Object.
+            Disregard sign of this variable in concatenation.
+
+        Returns
+        -------
+        pyipcs.Hex
+            Concatenated Hex Object
         """
         if isinstance(other, Hex):
             return Hex(self.to_str() + other.unsigned().to_str())
@@ -380,11 +424,15 @@ class Hex:
 
         Will either pad hex string with 0s or truncate string at bit length.
 
-        Args:
-            new_bit_length (int):
-                new length of string in bits
-        Returns:
-            pyipcs.Hex: hex with new bit length
+        Parameters
+        ----------
+        new_bit_length : int
+            New length of string in bits.
+
+        Returns
+        -------
+        pyipcs.Hex
+            Hex with new bit length.
         """
         if not isinstance(new_bit_length, int):
             raise TypeError(
@@ -415,8 +463,10 @@ class Hex:
         """
         Determine bit length of hex string, not including leading 0s.
 
-        Returns:
-            int: Length in bits of hex string, not including leading 0s
+        Returns
+        -------
+        int
+            Length in bits of hex string, not including leading 0s.
         """
         return self.to_int().bit_length()
 
@@ -424,8 +474,10 @@ class Hex:
         """
         Determine bit length of hex string, including leading 0s.
 
-        Returns:
-            int: Length in bits of hex string, including leading 0s
+        Returns
+        -------
+        int
+            Length in bits of hex string, including leading 0s.
         """
         return len(self.unsigned().to_str()) * 4
 
@@ -433,13 +485,18 @@ class Hex:
         """
         Turn on bit at 0 indexed bit position. Default 0 index is from left side of hex string.
 
-        Args:
-            bit_position (int):
-                0 indexed bit position
-            from_right (bool):
-                Optional. If 'True' will make 0 index the right most bit. 'False' by Default.
-        Returns:
-            pyipcs.Hex: hex with bit at bit_position on
+        Parameters
+        ----------
+        bit_position : int
+            0 indexed bit position.
+
+        from_right : bool, optional
+            If `True` will make 0 index the right most bit. `False` by Default.
+        
+        Returns
+        -------
+        pyipcs.Hex
+            Hex with bit at bit_position on.
         """
         if not isinstance(bit_position, int):
             raise TypeError(
@@ -481,13 +538,18 @@ class Hex:
         """
         Turn off bit at 0 indexed bit position. Default 0 index is from left side of hex string.
 
-        Args:
-            bit_position (int):
-                0 indexed bit position
-            from_right (bool):
-                Optional. If 'True' will make 0 index the right most bit. 'False' by Default.
-        Returns:
-            pyipcs.Hex: hex with bit at bit_position off.
+        Parameters
+        ----------
+        bit_position : int
+            0 indexed bit position.
+
+        from_right : bool, optional
+            If `True` will make 0 index the right most bit. `False` by default.
+
+        Returns
+        -------
+        pyipcs.Hex
+            Hex with bit at bit_position off.
         """
         if not isinstance(bit_position, int):
             raise TypeError(
@@ -529,13 +591,18 @@ class Hex:
         """
         Check bit at 0 indexed bit position. Default 0 index is from left side of hex string.
 
-        Args:
-            bit_position (int):
-                0 indexed bit position
-            from_right (bool):
-                Optional. If 'True' will make 0 index the right most bit. 'False' by Default.
-        Returns:
-            bool: 'True' if bit is on, 'False' if it is off
+        Parameters
+        ----------
+        bit_position : int
+            0 indexed bit position.
+
+        from_right : bool, optional
+            If `True` will make 0 index the right most bit. `False` by default.
+        
+        Returns
+        -------
+        bool
+            `True` if bit is on, `False` if it is off.
         """
         if not isinstance(bit_position, int):
             raise TypeError(
@@ -679,17 +746,24 @@ class Hex:
     def __get_chunk(
         self, chunk: int, chunk_nibble_length: int, from_right: bool = False
     ):
-        """Used by all get hex functions to grab a hex chunk
+        """
+        Used by all get hex functions to grab a hex chunk
 
-        Args:
-            chunk (int):
-                0 indexed chunk position
-            chunk_nibble_length (int):
-                length of hex chunk to grab
-            from_right (bool): Optional.
-                If 'True' will make 0 index the right most chunk. 'False' by Default
-        Returns:
-            pyipcs.Hex: 0 indexed chunk of chunk_nibble_length at position chunk
+        Parameters
+        ----------
+        chunk : int
+            0 indexed chunk position.
+
+        chunk_nibble_length : int
+            Length of hex chunk to grab.
+
+        from_right : bool, optional
+            If `True` will make 0 index the right most chunk. `False` by default.
+
+        Returns
+        -------
+        pyipcs.Hex
+            0 indexed chunk of chunk_nibble_length at position chunk.
         """
 
         if from_right:

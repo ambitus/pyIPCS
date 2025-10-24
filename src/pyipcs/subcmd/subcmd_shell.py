@@ -67,7 +67,7 @@ def construct_allocations(session: IpcsSession) -> dict[str, str | list[str]]:
 
     # Add in SYSEXEC from user allocations
     if "SYSEXEC" in session.aloc.get():
-        allocations_sysexec = copy.deepcopy(session.get_allocations()["SYSEXEC"])
+        allocations_sysexec = copy.deepcopy(session.aloc.get()["SYSEXEC"])
         if isinstance(allocations_sysexec, str):
             allocations_copy["SYSEXEC"].append(allocations_sysexec)
         else:

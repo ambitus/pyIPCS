@@ -34,21 +34,27 @@ def construct_tso_shell_script(
 
     TSO_SHELL_SCRIPT template.
 
-    Args:
-        tso_command (str):
-            TSO/E command to run
-        allocations (dict[str,str|list[str]]):
-            Optional. Dictionary of allocations where keys are DD names
-            and values are string data set allocation requests or lists of cataloged datasets.
-        omvs (bool):
-            Optional.
-            If `True` uses the `tso` shell command to issue a command through the OMVS interface.
-            If `False` uses the `tsocmd` shell command 
-            to issue a command through a TSO/E service routine.
-            The `tso` shell command will set up a mini TSO/E environment in a new address space.
-            The `tsocmd` shell command can be used to issue authorized TSO/E commands.
-    Returns:
-        str: constructed string for TSO command shell script
+    Parameters
+    ----------
+    tso_command : str
+        TSO/E command to run.
+
+    allocations : dict[str,str|list[str]], optional
+        Dictionary of allocations where keys are DD names
+        and values are string data set allocation requests or lists of cataloged datasets.
+    
+    omvs : bool, optional
+        If `True` uses the `tso` shell command to issue a TSO command through the OMVS interface.
+        If `False` uses the `tsocmd` shell command to issue a 
+        TSO command by using the TSO/E terminal monitor program (IKJEFT01).
+        to issue a command through a TSO/E service routine.
+        The `tso` shell command will set up a mini TSO/E environment in a new address space.
+        The `tsocmd` shell command can be used to issue authorized TSO/E commands.
+    
+    Returns
+    -------
+    str
+        Constructed string for TSO command shell script.
     """
     # =========================================
     # Create Dict to fill out string template
@@ -106,20 +112,26 @@ class CalledTsoProcessError(Exception):
         stderr: str | None,
     ):
         """
-        Constructor for invalid return code from a TSO command exception
+        Constructor for invalid return code from a TSO command exception.
 
-        Args:
-            tso_command (str):
-                TSO/E command that was attempted
-            expected_rc (int):
-                Expected return code from TSO command shell script
-            rc (int):
-                Return code from TSO command shell script
-            stderr (str|None):
-                Error output from TSO command shell script.
-                `None` if there is no error output
-        Returns:
-            None
+        Parameters
+        ----------
+        tso_command : str
+            TSO/E command that was attempted.
+
+        expected_rc : int
+            Expected return code from TSO command shell script.
+
+        rc : int
+            Return code from TSO command shell script.
+
+        stderr : str|None
+            Error output from TSO command shell script.
+            `None` if there is no error output.
+
+        Returns
+        -------
+        None
         """
         exception_str = (
             "Unexpected TSO Subprocess Error - Invalid Return Code\n"
@@ -142,33 +154,41 @@ def tsocmd(
     """
     Run a TSO/E Command and store output in a string
 
-    Args:
-        tso_command (str):
-            TSO/E command to run
-        allocations (dict[str,str|list[str]]):
-            Optional. Dictionary of allocations where keys are DD names
-            and values are string data set allocation requests or lists of cataloged datasets.
-            Default is an empty dictionary.
-        omvs (bool):
-            Optional.
-            If `True` uses the `tso` shell command to issue a command through the OMVS interface.
-            If `False` uses the `tsocmd` shell command 
-            to issue a command through a TSO/E service routine.
-            The `tso` shell command will set up a mini TSO/E environment in a new address space.
-            The `tsocmd` shell command can be used to issue authorized TSO/E commands.
-            Default is `False`.
-        check (bool):
-            If `True`, return error for unexpected return code as specified by `expected_rc`
-            Default is `True`.
-        expected_rc (int):
-            Specify expected return code.
-            Default is `0`.
-    Returns:
-        dict: Dictionary containing output, return code and standard error.
-        ```
-            'rc' (int): Return code of TSO shell script
-            'output' (str): Output of TSO shell script combined with possible error output
-        ```
+    Parameters
+    ----------
+    tso_command : str
+        TSO/E command to run.
+
+    allocations : dict[str,str|list[str]], optional
+        Dictionary of allocations where keys are DD names
+        and values are string data set allocation requests or lists of cataloged datasets.
+        Default is an empty dictionary.
+    
+    omvs : bool, optional
+        If `True` uses the `tso` shell command to issue a TSO command through the OMVS interface.
+        If `False` uses the `tsocmd` shell command to issue a 
+        TSO command by using the TSO/E terminal monitor program (IKJEFT01).
+        to issue a command through a TSO/E service routine.
+        The `tso` shell command will set up a mini TSO/E environment in a new address space.
+        The `tsocmd` shell command can be used to issue authorized TSO/E commands.
+        Default is `False`.
+    
+    check : bool, optional
+        If `True`, return error for unexpected return code as specified by `expected_rc`
+        Default is `True`.
+    
+    expected_rc : int, optional
+        Specify expected return code.
+        Default is `0`.
+
+    Returns
+    -------
+    dict
+        Dictionary containing output, return code and standard error.
+        - **"rc"** (int)
+            Return code of TSO shell script.
+        - **"output"** (str)
+            Output of TSO shell script combined with possible error output.
     """
     # ======================
     # Form TSO shell script
@@ -212,13 +232,16 @@ def tsocmd(
 
 def recall(dsname: str):
     """
-    Use automatic recall to attempt to recall dataset
+    Use automatic recall to attempt to recall dataset.
 
-    Args:
-        dsname (str):
-            Dataset name for dataset you want to recall
-    Returns:
-        None
+    Parameters
+    ----------
+    dsname : str
+        Dataset name for dataset you want to recall.
+
+    Returns
+    -------
+    None
     """
     tsocmd(
         "TIME",

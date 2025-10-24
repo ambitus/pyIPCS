@@ -22,11 +22,11 @@ def test_double_open(test_allocations):
     Test double open exception/warning
     """
     session = IpcsSession()
-    session.update_allocations(test_allocations)
+    session.aloc.update(test_allocations)
     session.open()
 
     session2 = IpcsSession()
-    session2.update_allocations(test_allocations)
+    session2.aloc.update(test_allocations)
     try:
         with pytest.warns(UserWarning):
             session.open()
@@ -39,7 +39,7 @@ def test_double_close(test_allocations):
     Test double close warnings
     """
     session = IpcsSession()
-    session.update_allocations(test_allocations)
+    session.aloc.update(test_allocations)
     session.open()
     with pytest.warns(UserWarning):
         session.close()
