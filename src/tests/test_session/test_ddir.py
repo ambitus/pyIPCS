@@ -60,28 +60,12 @@ def test_create_tmp_ddir(test_session):
     init_ddir = test_session.ddir.dsname
 
     # ==============================
-    # Temporary DDIR 1 - use=True
+    # Temporary DDIR
     # ==============================
 
-    temp_ddir1 = test_session.ddir.create_tmp()
+    temp_ddir = test_session.ddir.create_tmp()
 
-    assert temp_ddir1 == test_session.ddir.dsname
-
-    assert datasets.list_vsam_datasets(temp_ddir1, migrated=True)
-
-    # ==============================
-    # Temporary DDIR 2 - use=False
-    # ==============================
-
-    temp_ddir2 = test_session.ddir.create_tmp(use=False)
-
-    assert not temp_ddir2 == test_session.ddir.dsname
-
-    test_session.ddir.use(temp_ddir2)
-
-    assert temp_ddir2 == test_session.ddir.dsname
-
-    assert datasets.list_vsam_datasets(temp_ddir2, migrated=True)
+    assert datasets.list_vsam_datasets(temp_ddir, migrated=True)
 
     # =================================
     # Close session and check deletion
@@ -92,8 +76,7 @@ def test_create_tmp_ddir(test_session):
     assert test_session.ddir.dsname is None
 
     assert not datasets.list_vsam_datasets(init_ddir, migrated=True)
-    assert not datasets.list_vsam_datasets(temp_ddir1, migrated=True)
-    assert not datasets.list_vsam_datasets(temp_ddir2, migrated=True)
+    assert not datasets.list_vsam_datasets(temp_ddir, migrated=True)
 
 
 @pytest.mark.parametrize(
@@ -117,15 +100,23 @@ def test_create_ddir(test_session, test_hlq):
     try:
         test_session.ddir.create(test_ddir1)
 
-        assert test_session.ddir.dsname == test_ddir1
+        test_session.ddir.create(test_ddir2)
 
-        test_session.ddir.create(test_ddir2, use=False)
+        # ==================================
+        # Check DDIRs exist
+        # ==================================
 
-        assert test_session.ddir.dsname == test_ddir1
+        assert datasets.list_vsam_datasets(test_ddir1, migrated=True)
+        assert datasets.list_vsam_datasets(test_ddir2, migrated=True)
 
-        test_session.ddir.use(test_ddir2)
+        # ==================================
+        # Check DDIRs exist after close
+        # ==================================
 
-        assert test_session.ddir.dsname == test_ddir2
+        test_session.close()
+
+        assert datasets.list_vsam_datasets(test_ddir1, migrated=True)
+        assert datasets.list_vsam_datasets(test_ddir2, migrated=True)
 
     finally:
 

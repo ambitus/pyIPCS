@@ -12,7 +12,7 @@ from zoautil_py import datasets
 from zoautil_py import exceptions
 from ..hex_obj import Hex
 from ..dump import Dump
-from ..subcmd import Subcmd, SetDef
+from ..subcmd import Subcmd
 from ..error_handling import InvalidReturnCodeError, SessionNotActiveError, ArgumentTypeError
 from ..tso_shell import tsocmd
 from ..util.zoautil_py_util import datasets_recall_exists
@@ -106,25 +106,28 @@ class IpcsSession:
 
         Sets TSO initial allocations and set z/OS locations for pyIPCS temporary EXECs and DDIRs.
 
-        Args:
-            hlq (str|None):
-                Optional.
-                High level qualifier where opened pyIPCS session is or will be under.
-                pyIPCS session includes z/OS MVS datasets for pyIPCS EXECs and DDIRs.
-                High level qualifier has a max length of 16 characters excluding `'.'`.
-                By default is `None` which will set the high level qualifier as your userid.
-            directory (str|None):
-                Optional.
-                File system directory where IPCS session directories and files will be placed.
-                By default is `None`
-                which will set the directory as the current working directory of executed file.
-            allocations (dict[str,str|list[str]]):
-                Optional. Dictionary of allocations where keys are DD names
-                and values are string data set allocation requests or lists of cataloged datasets.
-                The default allocations are dataset SYS1.PARMLIB for DD name IPCSPARM
-                and dataset SYS1.SBLSCLI0 for DD name SYSPROC.
-        Returns:
-            None
+        Parameters
+        ----------
+        hlq : str|None, optional
+            High level qualifier where opened pyIPCS session is or will be under.
+            pyIPCS session includes z/OS MVS datasets for pyIPCS EXECs and DDIRs.
+            High level qualifier has a max length of 16 characters excluding `'.'`.
+            By default is `None` which will set the high level qualifier as your userid.
+        
+        directory : str|None, optional
+            File system directory where IPCS session directories and files will be placed.
+            By default is `None`
+            which will set the directory as the current working directory of executed file.
+        
+        allocations : dict[str,str|list[str]], optional
+            Dictionary of allocations where keys are DD names
+            and values are string data set allocation requests or lists of cataloged datasets.
+            The default allocations are dataset SYS1.PARMLIB for DD name IPCSPARM
+            and dataset SYS1.SBLSCLI0 for DD name SYSPROC.
+        
+        Returns
+        -------
+        None
         """
         # ID for opened session. Initially `None` when session is not open
         self.__uid = None
@@ -167,8 +170,9 @@ class IpcsSession:
 
         Create pyIPCS temporary datasets necessary for pyIPCS operations.
 
-        Returns:
-            None
+        Returns
+        -------
+        None
         """
         # Check session is not already opened
         if self.active:
@@ -186,14 +190,14 @@ class IpcsSession:
 
         # Create Initial Session DDIR
         init_ddir = f"{self.hlq_full}.INIT.DDIR"
-        self.create_ddir(init_ddir)
+        self.ddir.create(init_ddir)
         # Create session datasets
         try:
             self.__create_session_datasets(init_ddir)
         except exceptions.DatasetWriteException:
             self.ddir._delete(init_ddir)
         # Set init ddir
-        self.set_ddir(init_ddir)
+        self.ddir.use(init_ddir)
 
 
     def close(self) -> None:
@@ -202,8 +206,9 @@ class IpcsSession:
 
         Deletes pyIPCS temporary EXECs and temporary DDIRs.
 
-        Returns:
-            None
+        Returns
+        -------
+        None
         """
         # Check session is not already closed
         if not self.active:
@@ -220,265 +225,35 @@ class IpcsSession:
         self.__time_opened = None
         self.__uid = None
 
-    def get_allocations(self) -> dict[str, str | list[str]]:
-        """
-        Get allocations for your TSO environment.
-
-        Returns:
-            dict[str,str|list[str]]: Returns dictionary of all allocations where keys are DD names
-                and values are string data set allocation requests or lists of cataloged datasets
-        """
-        return self.aloc.get()
-
-
-    def set_allocation(self, dd_name: str, specification: str | list[str]) -> None:
-        """
-        Set a TSO allocation.
-
-        If the specification is an empty list or empty string,
-        will remove or not include DD name-specification pair within allocations
-
-        Args:
-            dd_name (str)
-            specifications (str|list[str]):
-                string data set allocation request or list of cataloged datasets
-        Returns:
-            None
-        """
-        self.aloc.set(dd_name, specification)
-
-
-    def update_allocations(
-        self,
-        new_allocations: dict[str, str | list[str]],
-        clear_old_allocations: bool = True,
-    ) -> None:
-        """
-        Update multiple TSO allocations.
-
-        Args:
-            new_allocations (dict[str,str|list[str]]):
-                Dictionary of allocations where keys are DD names
-                and values are string data set allocation requests or lists of cataloged datasets.
-            clear_old_allocations (bool):
-                Optional. If `True`, will clear all old allocations before setting new allocations.
-                Default is `True`.
-        Returns:
-            None
-        """
-        self.aloc.update(new_allocations, clear=clear_old_allocations)
-
-    def ddir_defaults(self, **kwargs) -> dict:
-        """
-        Returns default parameters for dump directory creation. 
-        Input arguments to edit defaults.
-        Returns `BLSCDDIR` CLIST parameters
-        where keys are `BLSCDDIR` parameters and the values are `BLSCDDIR` parameter values.
-
-        https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory
-
-        Args:
-            dataclas (str):
-                Optional.
-                Specifies the data class for the new directory. 
-                If you omit this parameter, there is no data class specified for the new directory.
-            mgmtclas (str):
-                Optional.
-                Specifies the management class for the new directory. 
-                If you omit this parameter, 
-                there is no management class specified for the new directory.
-            ndxcisz (int):
-                Optional.
-                Specifies the control interval size for the index portion of the new directory. 
-                If you omit this parameter, the IBM-supplied default is 4096 bytes.
-            records (int):
-                Optional.
-                Specifies the number of records you want the directory to accommodate. 
-                If you omit this parameter, the IBM-supplied default is 5000; 
-                your installation's default might vary.
-            storclas (str):
-                Optional.
-                Specifies the storage class for the new directory. 
-                If you omit this parameter, 
-                there is no storage class specified for the new directory.
-            volume (str):
-                Optional.
-                Specifies the VSAM volume on which the directory should reside. 
-                If you omit DATACLAS, MGMTCLAS, STORCLAS, and VOLUME, 
-                the IBM-supplied default is VSAM01. 
-                Otherwise, there is no IBM-supplied default.
-            blscddir_params (str):
-                Optional.
-                String of `BLSCDDIR` parameters.
-                Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
-        Returns:
-            dict: Keys are `BLSCDDIR` parameters and the values are `BLSCDDIR` parameter values.
-        """
-        return self.ddir.presets(**kwargs)
-
-    def create_ddir(self, ddir: str, **kwargs) -> None:
-        """
-        Create dump directory. Uses `BLSCDDIR` CLIST to create DDIR.
-        Adding additional keyword arguments will override pyIPCS DDIR defaults.
-
-        https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory
-
-        Args:
-            ddir (str):
-                Dump directory that will be created.
-            dataclas (str):
-                Optional.
-            mgmtclas (str):
-                Optional.
-            ndxcisz (int):
-                Optional.
-            records (int):
-                Optional.
-            storclas (str):
-                Optional.
-            volume (str):
-                Optional.
-            blscddir_params (str):
-                Optional.
-                String of `BLSCDDIR` parameters.
-                Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
-        Returns:
-            None
-        """
-        self.ddir.create(ddir, use=False, **kwargs)
-
-    def create_session_ddir(self, **kwargs) -> str:
-        """
-        Create pyIPCS session dump directory. Will be deleted on session close.
-        Adding additional keyword arguments will override pyIPCS DDIR defaults.
-
-        Args:
-            dataclas (str):
-                Optional.
-            mgmtclas (str):
-                Optional.
-            ndxcisz (int):
-                Optional.
-            records (int):
-                Optional.
-            storclas (str):
-                Optional.
-            volume (str):
-                Optional.
-            blscddir_params (str):
-                Optional.
-                String of `BLSCDDIR` parameters.
-                Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
-        Returns:
-            str: pyIPCS session DDIR dataset name
-        """
-        return self.ddir.create_tmp(use=False, **kwargs)
-
-    def set_ddir(self, ddir: str) -> None:
-        """
-        Set `ddir` as the current dump directory for the session.
-
-        Args:
-            ddir (str):
-                Dump directory will be set as the sessions DDIR
-        Returns:
-            None
-        """
-        self.ddir.use(ddir)
-
-    def get_defaults(self) -> SetDef:
-        """
-        Run `SETDEF LIST` to get IPCS defaults.
-
-        Returns:
-            pyipcs.SetDef : Custom `SETDEF` Subcmd Object.
-                `outfile` parameter is set to `False` for string output.
-        """
-        return self.ddir.defaults()
-
-    def set_defaults(
-        self,
-        confirm: bool | None = None,
-        dsname: str | None = None,
-        nodsname: bool = False,
-        asid: Hex | str | int | None = None,
-        dspname: str | None = None,
-        setdef_params: str | None = None,
-    ) -> SetDef:
-        """
-        Runs `SETDEF` with `LIST` parameter and other parameters to set IPCS defaults
-
-        https://www.ibm.com/docs/en/zos/3.1.0?topic=subcommands-setdef-subcommand-set-defaults
-        https://www.ibm.com/docs/en/zos/3.1.0?topic=parameter-address-processing-parameters
-
-        Only Global Defaults impact the pyIPCS session.
-        Args:
-            confirm (bool|None):
-                Optional.
-                `True` for `CONFIRM` parameter.
-                `False` for `NOCONFIRM` parameter.
-                Default is `None` to not include parameter in subcommand.
-            dsname (str|None):
-                Optional.
-                String dataset name to be used for `DSNAME` parameter.
-                Default is `None` to not include parameter in subcommand.
-            nodsname (bool):
-                Optional.
-                `True` for `NODSNAME` parameter.
-                Default is `False` to not include parameter in subcommand.
-            asid (pyipcs.Hex|str|int|None):
-                Optional.
-                pyipcs.Hex object or string or int to be used for `ASID` parameter.
-                Default is `None` to not include parameter in subcommand.
-            dspname (str|None):
-                Optional.
-                String dataspace name to be used for `DSPNAME` parameter.
-                Default is `None` to not include parameter in subcommand.
-            setdef_params (str|None):
-                Optional.
-                String of `SETDEF` parameters. 
-                Write parameters as you would in regular IPCS (ex: `'ACTIVE LENGTH(4)'`). 
-                Default is `None` to not include in subcommand.
-        Returns:
-            pyipcs.SetDef: Custom `SETDEF` Subcmd Object.
-                `outfile` parameter is set to `False` for string output.
-        """
-        kwargs = {}
-        if confirm is not None:
-            kwargs["confirm"] = confirm
-        if dsname is not None:
-            kwargs["dsname"] = dsname
-        if nodsname:
-            kwargs["dsname"] = None
-        if asid is not None:
-            kwargs["asid"] = asid
-        if dspname is not None:
-            kwargs["dspname"] = dspname
-        if setdef_params is not None:
-            kwargs["setdef_params"] = setdef_params
-        return self.ddir.defaults(**kwargs)
 
     def init_dump(
         self, dsname: str, ddir: str = "", use_cur_ddir: bool = False
     ) -> Dump:
         """
         Initialize/Set dump `dsname` under dump directory `ddir` and return Dump object.
+
         Will set IPCS session DDIR to `ddir`.
+
         Will set IPCS default `DSNAME` to `dsname`
 
-        Args:
-            dsname (str):
-                Dump dataset name.
-            ddir (str):
-                Optional. Dump directory.
-                If empty, dump will be initialized under temporary DDIR.
-            use_cur_ddir (bool):
-                Optional. Use current session DDIR.
-                Will use the IpcsSession attribute `ddir` to initialize the dump under.
-                This will take precedence over this function's `ddir` parameter.
-                Default is `False`.
-        Returns:
-            pyipcs.Dump
+        Parameters
+        ----------
+        dsname : str
+            Dump dataset name.
+        
+        ddir : str, optional
+            Dump directory.
+            If empty, dump will be initialized under temporary DDIR.
+
+        use_cur_ddir : bool, optional
+            Use current session DDIR.
+            Will use the IpcsSession attribute `ddir` to initialize the dump under.
+            This will take precedence over this function's `ddir` parameter.
+            Default is `False`.
+        
+        Returns
+        -------
+        pyipcs.Dump
         """
         if not self.active:
             raise SessionNotActiveError()
@@ -488,18 +263,22 @@ class IpcsSession:
     def set_dump(self, dump: Dump) -> None:
         """
         Set IPCS session DDIR to Dump object DDIR.
+
         Set IPCS default `DSNAME` to Dump object dataset name.
 
-        Args:
-            dump (pyipcs.Dump)
-        Returns:
-            None
+        Parameters
+        ----------
+        dump : pyipcs.Dump
+        
+        Returns
+        -------
+        None
         """
         if not self.active:
             raise SessionNotActiveError()
 
         # Set DDIR
-        self.set_ddir(dump.ddir)
+        self.ddir.use(dump.ddir)
 
         # Check that dump is still initialized under DDIR
         if not self.dsname_in_ddir(dump.dsname):
@@ -508,7 +287,7 @@ class IpcsSession:
             )
 
         # Set default DSNAME
-        self.set_defaults(dsname=dump.dsname)
+        self.ddir.defaults(dsname=dump.dsname)
 
         # Run STATUS to finish setup
         Subcmd(self, "STATUS")
@@ -519,11 +298,15 @@ class IpcsSession:
 
         Used to check if a dump dataset was initialized under the current DDIR.
 
-        Args:
-            dsname (str):
-                Dataset name.
-        Returns:
-            bool: `True` if dataset name a source described in the current DDIR, `False` if not.
+        Parameters
+        ----------
+        dsname : str
+            Dataset name.
+
+        Returns
+        -------
+        bool
+            `True` if dataset name a source described in the current DDIR, `False` if not.
         """
         if not isinstance(dsname, str):
             raise ArgumentTypeError("dsname", dsname, str)
@@ -551,15 +334,21 @@ class IpcsSession:
 
         https://www.ibm.com/docs/en/zos/3.1.0?topic=instruction-evaluate-subcommand
 
-        Args:
-            hex_address (pyipcs.Hex|str|int):
-                Starting hex address to read from
-            dec_offset (int):
-                Byte offset from the starting address in decimal
-            dec_length (int):
-                Byte length of data to access in decimal
-        Returns:
-            pyipcs.Hex: Hex object representing the data at the specified address
+        Parameters
+        ----------
+        hex_address : pyipcs.Hex|str|int
+            Starting hex address to read from
+
+        dec_offset : int
+            Byte offset from the starting address in decimal
+
+        dec_length : int
+            Byte length of data to access in decimal
+        
+        Returns
+        -------
+        pyipcs.Hex
+            Hex object representing the data at the specified address
         """
         if not self.active:
             raise SessionNotActiveError()
@@ -731,11 +520,14 @@ class IpcsSession:
         """
         Private Function __create_session_datasets Create pyIPCS session datasets/execs.
 
-        Args:
-            init_ddir (str):
-                Initial DDIR for the pyIPCS session.
-        Returns:
-            None
+        Parameters
+        ----------
+        init_ddir : str
+            Initial DDIR for the pyIPCS session.
+
+        Returns
+        -------
+        None
         """
         try:
             # Main Session Dataset
@@ -770,8 +562,9 @@ class IpcsSession:
         """
         Private Function __delete_temp_datasets Delete pyIPCS temporary datasets.
 
-        Returns:
-            None
+        Returns
+        -------
+        None
         """
         def delete_session_dataset(non_vsam_dsname: str) -> None:
             if not datasets_recall_exists(non_vsam_dsname):
@@ -828,6 +621,10 @@ class IpcsSession:
     def __cleanup__(self) -> None:
         """
         Cleanup for pyIPCS session. Closes IPCS/TSO session if active.
+
+        Returns
+        -------
+        None
         """
         if self.active:
             self.close()
@@ -836,7 +633,8 @@ class IpcsSession:
         """
         Destructor for pyIPCS IpcsSession object. Closes IPCS/TSO session if active.
 
-        Returns:
-            None
+        Returns
+        -------
+        None
         """
         self.__cleanup__()

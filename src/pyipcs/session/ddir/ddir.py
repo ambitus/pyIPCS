@@ -106,7 +106,7 @@ class DumpDirectory:
         # If none of the previous conditions are met set the current ddir
         self._dsname = dsname
 
-    def create(self, dsname: str, use: bool = True, **kwargs) -> None:
+    def create(self, dsname: str, **kwargs) -> None:
         """
         Create dump directory. 
         
@@ -119,10 +119,6 @@ class DumpDirectory:
         ----------
         dsname : str
             Dump directory that will be created.
-
-        use : bool, optional
-            If `True` will set newly created DDIR as the current DDIR for your IPCS session.
-            Default is `True`.
 
         kwargs: dict, optional
             Additional parameters (see other parameters)
@@ -179,11 +175,8 @@ class DumpDirectory:
         # Run BLSCDDIR EXEC to create DDIR
         tsocmd(blscddir_cmd, allocations=self._session.aloc.get())
 
-        # If use is True set the created DDIR as the DDIR for the session
-        if use:
-            self.use(dsname)
 
-    def create_tmp(self, use: bool = True, **kwargs) -> str:
+    def create_tmp(self, **kwargs) -> str:
         """
         Create temporary dump directory. Will be deleted on IPCS session close.
 
@@ -194,10 +187,6 @@ class DumpDirectory:
 
         Parameters
         ----------
-        use : bool, optional
-            If `True` will set newly created DDIR as the current DDIR for your IPCS session.
-            Default is `True`.
-
         kwargs: dict, optional
             Additional parameters (see other parameters)
 
@@ -235,7 +224,7 @@ class DumpDirectory:
             tmp_ddir = f"{self._session.hlq_full}.D{ddir_id}.DDIR"
 
         # Create the DDIR
-        self.create(tmp_ddir, use=use, **kwargs)
+        self.create(tmp_ddir, **kwargs)
 
         # Attempt to add DDIR to main session dataset for tracking
         datasets_recall_exists(self._session.hlq_full)

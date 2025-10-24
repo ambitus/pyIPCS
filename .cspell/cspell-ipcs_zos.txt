@@ -35,6 +35,7 @@ ipled
 jobname
 LASTCC
 LISTDUMP
+lrecl
 MAXCC
 MGMTCLAS
 NDXCISZ

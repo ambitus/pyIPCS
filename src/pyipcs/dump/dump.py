@@ -190,10 +190,10 @@ class Dump:
         else:
             # Define DDIR and create/set/initialize dump under DDIR
             if not ddir:
-                self._ddir = session.create_session_ddir()
+                self._ddir = session.ddir.create_tmp()
             # BLSCDDIR will not do anything if DDIR already exists so this is fine
             else:
-                session.create_ddir(ddir)
+                session.ddir.create(ddir)
                 self._ddir = ddir
 
         # =========================
@@ -201,10 +201,10 @@ class Dump:
         # =========================
 
         # Set DDIR
-        session.set_ddir(self.ddir)
+        session.ddir.use(self.ddir)
 
         # Set default DSNAME
-        session.set_defaults(dsname=self.dsname)
+        session.ddir.defaults(dsname=self.dsname)
 
         # ==========================
         # Initialize Dump

@@ -33,10 +33,14 @@ def get_dataset(dsname: str) -> datasets.Dataset | None:
 
     Will recall dataset if it exists.
 
-    Args:
-        dsname (str)
-    Returns:
-        zoautil_py.datasets.Dataset|None: `None` if z/OS dataset does not exist
+    Parameters
+    ----------
+    dsname : str
+
+    Returns
+    -------
+    zoautil_py.datasets.Dataset|None
+        `None` if z/OS dataset does not exist
     """
     if not isinstance(dsname, str):
         raise ArgumentTypeError("dsname", dsname, str)
@@ -64,10 +68,13 @@ def datasets_recall_exists(dsname: str) -> bool:
 
     Will recall dataset if it exists.
 
-    Args:
-        dsname (str)
-    Returns:
-        bool
+    Parameters
+    ----------
+    dsname : str
+
+    Returns
+    -------
+    bool
     """
     if not isinstance(dsname, str):
         raise ArgumentTypeError("dsname", dsname, str)
@@ -94,11 +101,14 @@ def is_dump(dsname: str) -> bool:
 
     Will recall dataset if it exists.
 
-    Args:
-        dsname (str):
-            z/OS dataset name
-    Returns:
-        bool
+    Parameters
+    ----------
+    dsname : str
+        z/OS dataset name
+
+    Returns
+    -------
+    bool
     """
     if not isinstance(dsname, str):
         raise TypeError(

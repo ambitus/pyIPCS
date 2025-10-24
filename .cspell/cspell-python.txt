@@ -6,6 +6,7 @@ kwargs
 metafunc
 pylint
 pytest
+readrecords
 repr
 subshell
 zoautil

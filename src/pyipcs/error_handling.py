@@ -32,14 +32,26 @@ class InvalidReturnCodeError(Exception):
         If error code is as expected execution will continue
             but warning will be issued
 
-        Args:
-            subcmd (str): IPCS subcommand
-            output (str): IPCS subcommand output
-            rc (int): actual return code
-            expected_rc (int): expected return code
-            dsname (str): Optional. Dump dataset that IPCS subcommand was run against
-        Returns:
-            None
+        Parameters
+        ----------
+        subcmd : str
+            IPCS subcommand.
+
+        output : str
+            IPCS subcommand output.
+
+        rc : int 
+            Actual return code.
+
+        expected_rc : int
+            Expected return code.
+
+        dsname : str, optional
+            Dump dataset that IPCS subcommand was run against
+        
+        Returns
+        -------
+        None
         """
         print(subcmd)
         if rc == expected_rc:
@@ -72,8 +84,9 @@ class SessionNotActiveError(Exception):
         """
         Constructor for IpcsSession not being active exception
 
-        Returns:
-            None
+        Returns
+        -------
+        None
         """
         super().__init__(
             "Function or method cannot be executed when IPCS Session is not active -"

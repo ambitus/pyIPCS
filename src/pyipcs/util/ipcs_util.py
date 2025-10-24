@@ -15,15 +15,19 @@ if TYPE_CHECKING:
 # PSW Functions
 def psw_scrunch(psw: Hex) -> Hex:
     """
-    Scrunch 128 bit PSW to 64 bits
+    Scrunch 128 bit PSW to 64 bits.
 
-    If 64 bit PSW is inputted as argument return PSW as is
+    If 64 bit PSW is inputted as argument return PSW as is.
 
-    Args:
-        psw (pyipcs.Hex):
-            128 bit PSW or 64 bit PSW
-    Returns:
-        pyipcs.Hex: 64 bit PSW
+    Parameters
+    ----------
+    psw : pyipcs.Hex
+        128 bit PSW or 64 bit PSW.
+
+    Returns
+    -------
+    pyipcs.Hex
+        64 bit PSW
     """
     if not isinstance(psw, Hex):
         raise TypeError(f"psw must be of type pyipcs.Hex, but got {type(psw)}\n")
@@ -45,25 +49,34 @@ def psw_scrunch(psw: Hex) -> Hex:
 
 def psw_parse(psw: Hex) -> Hex:
     """
-    Obtain data from PSW
+    Obtain data from PSW.
 
-    Args:
-        psw (pyipcs.Hex):
-            128 bit PSW or 64 bit PSW
+    Parameters
+    ----------
+    psw : pyipcs.Hex
+        128 bit PSW or 64 bit PSW.
 
-    Returns:
-        dict: data from PSW
-            'enabled' (bool|None):
-                `True` for Enabled for I/O and External Interrupts if bit 6 and 7 are on
-                `False` for Disabled for I/O and External Interrupts if they are both off
-                'None' if one of either bit 6 or 7 is on and one is off
-            'key' (int): PSW key
-            'privileged' (bool): `True` for supervisor state(privileged)
-                        `False` for problem program state(unprivileged)
-            'asc_mode' (str): One of either ``'PRIMARY'`, `'AR'`, `'SECONDARY'`, or `'HOME'`
-            'cc' (int): Condition code
-            'amode' (int|None): Either `24`, `31`, `64`, or `None` if invalid
-            'instr_addr' (pyipcs.Hex): Instruction address
+    Returns
+    -------
+    dict
+        data from PSW
+        - **"enabled"** (bool|None)
+            `True` for Enabled for I/O and External Interrupts if bit 6 and 7 are on.
+            `False` for Disabled for I/O and External Interrupts if they are both off.
+            `None` if one of either bit 6 or 7 is on and one is off.
+        - **"key"** (int)
+            PSW key.
+        - **"privileged"** (bool):
+            `True` for supervisor state(privileged).
+            `False` for problem program state(unprivileged).
+        - **"asc_mode"** (str)
+            One of either `'PRIMARY'`, `"AR"`, `"SECONDARY"`, or `"HOME"`.
+        - **"cc"** (int)
+            Condition code.
+        - **"amode"** (int|None)
+            Either `24`, `31`, `64`, or `None` if invalid.
+        - **"instr_addr"** (pyipcs.Hex)
+            Instruction address.
     """
     if not isinstance(psw, Hex):
         raise TypeError(f"psw must be of type pyipcs.Hex, but got {type(psw)}\n")
@@ -100,7 +113,7 @@ def psw_parse(psw: Hex) -> Hex:
         psw_data["asc_mode"] = "SECONDARY"
     else:
         psw_data["asc_mode"] = "HOME"
-    # Condtion Code
+    # Condition Code
     bit18 = 2 if psw.check_bit(18) else 0
     bit19 = 1 if psw.check_bit(19) else 0
     psw_data["cc"] = bit18 + bit19
@@ -125,18 +138,23 @@ def psw_parse(psw: Hex) -> Hex:
 
 def opcode(session: IpcsSession, instr: str | int | Hex) -> str | None:
     """
-    Get mnemonic of instruction
+    Get mnemonic of instruction.
 
-    Runs `OPCODE` subcommand
+    Runs `OPCODE` subcommand.
 
-    Args:
-        session (pyipcs.Session)
-        instr (str|int|pyipcs.Hex):
-            Instruction to get mnemonic from
-    Returns:
-        str|None: Instruction mnemonic.
-            Returns `None` if `OPCODE` subcommand returns with non-zero
-            return code or mnemonic can't be determined.
+    Parameters
+    ----------
+    session : pyipcs.IpcsSession
+
+    instr : str|int|pyipcs.Hex
+        Instruction to get mnemonic from.
+
+    Returns
+    -------
+    str|None
+        Instruction mnemonic.
+        Returns `None` if `OPCODE` subcommand returns with non-zero
+        return code or mnemonic can't be determined.
     """
     if isinstance(instr, (int, str)):
         instr = Hex(instr)
@@ -164,14 +182,19 @@ def addr_key(session: IpcsSession, storage_addr: str | int | Hex) -> int | None:
     Make sure to set correct defaults `DSNAME`, `ASID`, and `DSPNAME`
     prior to calling this function.
 
-    Args:
-        session (pyipcs.IpcsSession)
-        storage_addr (str|int|pyipcs.Hex):
-            Storage Address
-    Returns:
-        int|None : Storage key.
-            Returns `None` if `LIST` subcommand with the `DISPLAY` parameter subcommand
-            returns with non-zero return code or key can't be determined.
+    Parameters
+    ----------
+    session : pyipcs.IpcsSession
+
+    storage_addr : str|int|pyipcs.Hex
+        Storage Address.
+
+    Returns
+    -------
+    int|None
+        Storage key.
+        Returns `None` if `LIST` subcommand with the `DISPLAY` parameter subcommand
+        returns with non-zero return code or key can't be determined.
     """
     if isinstance(storage_addr, (int, str)):
         storage_addr = Hex(storage_addr)
@@ -197,21 +220,26 @@ def addr_fetch_protected(
     session: IpcsSession, storage_addr: str | int | Hex
 ) -> bool | None:
     """
-    Return if storage address is fetch protected
+    Return if storage address is fetch protected.
 
     Runs `LIST` subcommand with the `DISPLAY` parameter.
 
     Make sure to set correct defaults `DSNAME`, `ASID`, and `DSPNAME`
     prior to calling this function.
 
-    Args:
-        session (pyipcs.Session)
-        storage_addr (str|int|pyipcs.Hex):
-            Storage Address
-    Returns:
-        bool : `True` if storage_addr is fetch protected, `False` if not.
-            Returns `None` if `LIST` subcommand with the `DISPLAY` parameter subcommand
-            returns with non-zero return code or fetch protected can't be determined.
+    Parameters
+    ----------
+    session : pyipcs.IpcsSession
+
+    storage_addr : str|int|pyipcs.Hex
+        Storage Address.
+
+    Returns
+    -------
+    bool 
+        `True` if storage_addr is fetch protected, `False` if not.
+        Returns `None` if `LIST` subcommand with the `DISPLAY` parameter subcommand
+        returns with non-zero return code or fetch protected can't be determined.
     """
     if isinstance(storage_addr, (int, str)):
         storage_addr = Hex(storage_addr)

@@ -45,7 +45,7 @@ def test_ddir(test_hlq, test_allocations):
     """
     test_ddir_ret = test_hlq + ".TEST.DDIR"
     test_ddir_session = IpcsSession(allocations=test_allocations)
-    test_ddir_session.ddir.create(test_ddir_ret, use=False)
+    test_ddir_session.ddir.create(test_ddir_ret)
     yield test_ddir_ret
     test_ddir_session.ddir._delete(test_ddir_ret)
 
