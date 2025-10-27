@@ -12,6 +12,9 @@ test_create_tmp_ddir
 test_create_ddir
     Checks DDIR logic using DumpDirectory.create
 
+test_sources
+    Test DumpDirectory.sources method
+
 test_ddir_defaults
     Test some DDIR defaults
 """
@@ -128,6 +131,30 @@ def test_create_ddir(test_session, test_hlq):
             test_session.ddir._delete(test_ddir1)
         if datasets.list_vsam_datasets(test_ddir2, migrated=True):
             test_session.ddir._delete(test_ddir2)
+
+def test_sources(open_session_default, test_dump_list):
+    """
+    Test DumpDirectory.sources method
+    """
+
+    test_ddir = open_session_default.ddir.create_tmp()
+    # open_session_default.ddir.use(test_ddir)
+
+    test_dumps_3_max = test_dump_list[:3]
+
+    # Initialize dumps
+    print()
+    for test_dump in test_dumps_3_max:
+        print(f"START DUMP INITIALIZATION - '{test_dump}'")
+        open_session_default.init_dump(test_dump, ddir=test_ddir)
+        print(f"END DUMP INITIALIZATION - '{test_dump}'")
+
+    test_sources_list = open_session_default.ddir.sources()
+
+    # Check dump is in sources
+
+    for test_dump in test_dumps_3_max:
+        assert test_dump in test_sources_list, f"Test Dump: '{test_dump}'"
 
 def test_ddir_defaults(open_session_default, test_dump_single):
     """

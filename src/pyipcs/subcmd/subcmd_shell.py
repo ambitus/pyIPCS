@@ -31,7 +31,7 @@ def construct_ipcs_shell_script(session: IpcsSession, ipcs_subcmd: str) -> str:
     Returns
     -------
     str
-        Constructed string for IPCS subcommand shell script
+        Constructed string for IPCS subcommand shell script.
     """
     # ===================================================================
     # Create and fill dict to unpack for IPCS_EX_SUBCMD template
@@ -157,7 +157,7 @@ def run_ipcs_subcmd_outfile(
 
     filepath : str
         Filepath for IPCS subcommand output file.
-        If filepath is a duplicate will add `'(1)'`,`'(2)'`, etc. for copy.
+        If filepath is a duplicate will add `"(1)"`,`"(2)"`, etc. for copy.
     
     auth : bool 
         Indicates whether the subcommand will be run from an authorized environment

@@ -94,7 +94,7 @@ class DumpHeader(dict):
         Parameters
         ----------
         dsname : str
-            Dump Dataset Name
+            Dump Dataset Name.
 
         Returns
         -------

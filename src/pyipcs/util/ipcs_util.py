@@ -70,7 +70,7 @@ def psw_parse(psw: Hex) -> Hex:
             `True` for supervisor state(privileged).
             `False` for problem program state(unprivileged).
         - **"asc_mode"** (str)
-            One of either `'PRIMARY'`, `"AR"`, `"SECONDARY"`, or `"HOME"`.
+            One of either `"PRIMARY"`, `"AR"`, `"SECONDARY"`, or `"HOME"`.
         - **"cc"** (int)
             Condition code.
         - **"amode"** (int|None)

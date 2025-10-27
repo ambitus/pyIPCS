@@ -138,7 +138,11 @@ class Hex:
 
         Returns
         -------
-        str
+        dict
+            Dictionary representing Hex object
+            - **"__ipcs_type__"** *(str)*
+                `"Hex"`
+            - **"value"** *(str)*
         """
         return {
             "__ipcs_type__": "Hex",
@@ -194,7 +198,7 @@ class Hex:
         Returns
         -------
         pyipcs.Hex
-            0 indexed nibble at position nibble.
+            0 indexed nibble at position `nibble`.
         """
         if not isinstance(nibble, int):
             raise TypeError(
@@ -221,7 +225,7 @@ class Hex:
         Returns
         -------
         pyipcs.Hex
-            0 indexed byte at position byte.
+            0 indexed byte at position `byte`.
         """
         if not isinstance(byte, int):
             raise TypeError(
@@ -248,7 +252,7 @@ class Hex:
         Returns
         -------
         pyipcs.Hex
-            0 indexed half word at position half_word.
+            0 indexed half word at position `half_word`.
         """
         if not isinstance(half_word, int):
             raise TypeError(
@@ -275,7 +279,7 @@ class Hex:
         Returns
         -------
         pyipcs.Hex
-            0 indexed word at position word.
+            0 indexed word at position `word`.
         """
         if not isinstance(word, int):
             raise TypeError(
@@ -303,7 +307,7 @@ class Hex:
         Returns
         -------
         pyipcs.Hex
-            0 indexed doubleword at position doubleword.
+            0 indexed doubleword at position `doubleword`.
         """
         if not isinstance(doubleword, int):
             raise TypeError(
@@ -345,7 +349,7 @@ class Hex:
         """
         Convert hex to character string.
 
-        If there is an error reading the hex string to characters, will return empty string('').
+        If there is an error reading the hex string to characters, will return empty string(`""`).
 
         Parameters
         ----------
@@ -396,7 +400,7 @@ class Hex:
         Returns
         -------
         pyipcs.Hex
-            Concatenated Hex Object
+            Concatenated Hex Object.
         """
         if isinstance(other, Hex):
             return Hex(self.to_str() + other.unsigned().to_str())
