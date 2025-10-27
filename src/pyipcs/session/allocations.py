@@ -10,7 +10,7 @@ class IpcsAllocations:
     """
     IpcsAllocations Object
 
-    Manages TSO allocations for IPCS Session
+    Manages TSO allocations for IPCS Session.
 
     Methods
     -------
@@ -65,7 +65,7 @@ class IpcsAllocations:
         -------
         dict[str,str|list[str]]
             Returns dictionary of all allocations where keys are DD names
-            and values are string data set allocation requests or lists of cataloged datasets
+            and values are string data set allocation requests or lists of cataloged datasets.
         """
         return copy.deepcopy(self._allocations)
 

@@ -1,10 +1,14 @@
 # Contributing To pyIPCS
 
-- __[Setting Up Your Development Environment](#setting-up-your-development-environment)__
-- __[How to Submit Your Code Changes](#how-to-submit-your-code-changes)__
-- __[Branch Naming Conventions](#branch-naming-conventions)__
-- __[Running and Creating Tests](#running-and-creating-tests)__
-- __[Style Guidelines](#style-guidelines)__
+- **[Setting Up Your Development Environment](#setting-up-your-development-environment)**
+
+- **[How to Submit Your Code Changes](#how-to-submit-your-code-changes)**
+
+- **[Branch Naming Conventions](#branch-naming-conventions)**
+
+- **[Running and Creating Tests](#running-and-creating-tests)**
+
+- **[Style Guidelines](#style-guidelines)**
 
 ---
 ---
@@ -16,45 +20,48 @@
 
 ## Setting Up Your Development Environment
 
-- __[Back to Top](#contributing-to-pyipcs)__
+- **[Back to Top](#contributing-to-pyipcs)**
 
 ---
 
-- __Create a Fork of pyIPCS__
-  - __[Fork a repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo?tool=cli)__
+- **Create a Fork of pyIPCS**
+  - **[Fork a repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo?tool=cli)**
     - *Has options for forking with Mac, Windows, and Linux*
     - *Has options for forking with GitHub CLI, Desktop, and Web browser*
-- __[Getting Started](./GETTING_STARTED.md)__
+
+- **[Getting Started](./GETTING_STARTED.md)**
   - Make sure you have followed the prerequisite and install steps in Getting Started
-- __Run pyIPCS Devlopment Setup Scripts__
-  - Create a Python virtual enviroment (Optional)
-  - __*Make setup scripts executable and run scripts*__
+
+- **Run pyIPCS Development Setup Scripts**
+  - Create a Python virtual environment (Optional)
+  - ***Make setup scripts executable and run scripts***
     - pyIPCS Install Dependencies Setup script: `./dev/install_setup.sh`
-    - DCO Setup script: `./dev/dco_setup.sh "Your Name" "your_public_github@email.com"`
+    - DCO Setup script: `./dev/dco_setup.sh "Your Full Name" "your_public_github@email.com"`
     - Add pyIPCS Upstream Setup script: `./dev/upstream_setup.sh`
-- __Within your fork open up a [Development Branch](#development-branch-naming-conventions) to begin devlopment__
+
+- **Within your fork open up a [Development Branch](#development-branch-naming-conventions) to begin development**
 
 ---
 ---
 
 ## How to Submit Your Code Changes
 
-- __[Back to Top](#contributing-to-pyipcs)__
+- **[Back to Top](#contributing-to-pyipcs)**
 
 ---
 
-- __*All contributions must be accompanied by a [Developer Certification of Origin (DCO) signoff](https://github.com/openmainframeproject/tsc/blob/master/process/contribution_guidelines.md#developer-certificate-of-origin).*__
-  - __*You can include this automatically when you commit a change to your local git repository using `git commit -s`.*__
+- ***All contributions must be accompanied by a [Developer Certification of Origin (DCO) signoff](https://github.com/openmainframeproject/tsc/blob/master/process/contribution_guidelines.md#developer-certificate-of-origin).***
+  - ***You can include this automatically when you commit a change to your local git repository using `git commit -s`.***
 
 <br>
 
-- Switch to your __[Development Branch](#development-branch-naming-conventions)__ on your fork
+- Switch to your **[Development Branch](#development-branch-naming-conventions)** on your fork
 
 ```bash
 git checkout <development-branch>
 ```
 
-- Develop in your __[Development Branch](#development-branch-naming-conventions)__ on your fork
+- Develop in your **[Development Branch](#development-branch-naming-conventions)** on your fork
 
 - Fetch the latest from upstream
 
@@ -62,10 +69,10 @@ git checkout <development-branch>
 git fetch upstream
 ```
 
-- Rebase onto the develop branch
+- Merge from the develop branch
 
 ```bash
-git rebase upstream/develop
+git merge upstream/develop
 ```
 
 - Open a pull request from that branch to the develop branch in the main repository
@@ -75,14 +82,13 @@ git rebase upstream/develop
 
 ## Branch Naming Conventions
 
-- __[Back to Top](#contributing-to-pyipcs)__
+- **[Back to Top](#contributing-to-pyipcs)**
 
 ---
 
 ### Development Branch Naming Conventions
 
 - `update/...` *(Branch where new functionality or enhancements are being developed. Could include bug fixes or test development.)*
-- `bug/...` *(Branch where specifically one or more bugs are being fixed. Could include test development)*
 - `doc/...` *(Branch where non-code related updates are being made)*
 - `exp/...` *(Throwaway branch for experimentation of new tools and functionality)*
 
@@ -96,59 +102,62 @@ git rebase upstream/develop
 
 ## Running and Creating Tests
 
-- __[Back to Top](#contributing-to-pyipcs)__
+- **[Back to Top](#contributing-to-pyipcs)**
 
 ---
 
-- __How to run tests: [Tests README](./src/tests/README.md)__
-- __[pytest Documentation](https://docs.pytest.org/en/stable/contents.html)__
-- __While creating tests, please refer to the following files for various settings, fixtures, and helpful mock Subcmd functions/objects to use in your tests:__
-  - __`src/tests/conftest.py`__
-  - __`src/tests/mock_subcmd.py`__
-  - __`src/tests/mock_subcmd_jcl.py`__
-- __pyIPCS tests are located in the [src/tests](./src/tests/) folder__
+- **How to run tests: [Tests README](./src/tests/README.md)**
+
+- **[pytest Documentation](https://docs.pytest.org/en/stable/contents.html)**
+
+- **While creating tests, please refer to the following files for various settings, fixtures, and helpful mock Subcmd functions/objects to use in your tests:**
+  - **`src/tests/conftest.py`**
+  - **`src/tests/mock_subcmd.py`**
+  - **`src/tests/mock_subcmd_jcl.py`**
+
+- **pyIPCS tests are located in the [src/tests](./src/tests/) folder**
 
 ---
 ---
 
 ## Style Guidelines
 
-- __[Back to Top](#contributing-to-pyipcs)__
-- __[Markdown Style Guidelines](#markdown-style-guidelines)__
-- __[Code Style Guidelines](#code-style-guidelines)__
+- **[Back to Top](#contributing-to-pyipcs)**
+- **[Markdown Style Guidelines](#markdown-style-guidelines)**
+- **[Code Style Guidelines](#code-style-guidelines)**
 
 ---
 
 ### Markdown Style Guidelines
 
-- __Markdown lint__
+- **Markdown lint**
   - [markdown lint](https://github.ibm.com/zosdev/zai-devops/wiki/wiki-lints) or its [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint) *(Recommended)* or its [markdownlint-cli2 cli](https://www.npmjs.com/package/markdownlint-cli2).
-  - __*All Markdown lint warnings must be addressed*__
+  - ***All Markdown lint warnings must be addressed***
 
 <br>
 
-- __Code Spell Checker *(Recommended)*__
+- **Code Spell Checker *(Recommended)***
   - To check for spelling warnings
 
 <br>
 
-- __VSCode Plugins__
+- **VSCode Plugins**
 
-```markdown
-Name: markdownlint
-Id: DavidAnson.vscode-markdownlint
-Description: Markdown linting and style checking for Visual Studio Code
-Version: 0.54.0
-Publisher: David Anson
-VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint
+  ```markdown
+  Name: markdownlint
+  Id: DavidAnson.vscode-markdownlint
+  Description: Markdown linting and style checking for Visual Studio Code
+  Version: 0.54.0
+  Publisher: David Anson
+  VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint
 
-Name: Code Spell Checker
-Id: streetsidesoftware.code-spell-checker
-Description: Spelling checker for source code
-Version: 3.0.1
-Publisher: Street Side Software
-VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker
-```
+  Name: Code Spell Checker
+  Id: streetsidesoftware.code-spell-checker
+  Description: Spelling checker for source code
+  Version: 3.0.1
+  Publisher: Street Side Software
+  VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker
+  ```
 
 ### Code Style Guidelines
 
@@ -156,11 +165,9 @@ VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=streets
 
 <br>
 
-- __*Before submitting code please make sure:*__
-  - *All contributions in `src/` have a `pylint` score of __10__*.
+- ***Before submitting code please make sure:***
+  - *All contributions in `src/` have a `pylint` score of **10***.
   - All pyIPCS classes, functions, and tests include a corresponding docstring for explanation.
-    - __pyIPCS Classes:__ Should include a description of the class, an Attributes section, and a Methods section.
-    - __pyIPCS Functions/Methods:__ Should include a description of the function/method, an Args section, and a Returns section.
-    - __Test Modules:__ Should include a description of the test module and a Tests section corresponding to the test within the class
-    - __Test Functions:__ Should include a description of the test and a Object or Function section.
-  - __*Refer to examples in the repo to correctly format docstrings*__
+    - **NumPy Styling**
+  
+  - ***Refer to examples in the repo to correctly format docstrings***

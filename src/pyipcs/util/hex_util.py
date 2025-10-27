@@ -5,7 +5,7 @@ pyIPCS Hex Related Util Functions
 
 def is_hex(hex_str: str):
     """
-    Check if string is hex
+    Check if string is hex.
 
     Parameters
     ----------

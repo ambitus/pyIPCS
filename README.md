@@ -1,26 +1,29 @@
 # pyIPCS README
 
-- __[Getting Started (Installation Guide)](#getting-started-installation-guide)__
-- __[pyIPCS Versioning and Updates](#pyipcs-versioning-and-updates)__
-- __[pyIPCS User Guide](#pyipcs-user-guide)__
-- __[Report a Bug or Request a Feature](#report-a-bug-or-request-a-feature)__
-- __[Contribute to pyIPCS](#contribute-to-pyipcs)__
-- __Documentation__
-  - __[Hex Object](#hex-object)__
-  - __[IpcsSession Object](#ipcssession-object)__
-  - __[Dump Object](#dump-object)__
-  - __[Subcmd Object](#subcmd-object)__
-  - __[Creating Custom Subcmd Objects](#creating-custom-subcmd-objects)__
-  - __[SetDef Custom Subcmd Object](#setdef-custom-subcmd-object)__
-  - __[Util Functions](#util-functions)__
-  - __[Converting pyIPCS Objects to JSON](#converting-pyipcs-objects-to-json)__
+- **[Important Disclaimer (Please Read)](#important-disclaimer-please-read)**
+- **[Getting Started (Installation Guide)](#getting-started-installation-guide)**
+- **[pyIPCS Versioning and Updates](#pyipcs-versioning-and-updates)**
+- **[Report a Bug or Request a Feature](#report-a-bug-or-request-a-feature)**
+- **[Contribute to pyIPCS](#contribute-to-pyipcs)**
+- **[pyIPCS Examples](#pyipcs-examples)**
+
+- **Documentation**
+
+  - **[Hex Object](#hex-object)**
+  - **[IpcsSession Object](#ipcssession-object)**
+  - **[DumpHeader Object](#dumpheader-object)**
+  - **[Dump Object](#dump-object)**
+  - **[Subcmd Object](#subcmd-object)**
+  - **[Creating Custom Subcmd Objects](#creating-custom-subcmd-objects)**
+  - **[Util Functions](#util-functions)**
+  - **[Converting pyIPCS Objects to JSON](#converting-pyipcs-objects-to-json)**
 
 ---
 ---
 
 ## pyIPCS Version: `1.1.0`
 
-- __To check your current pyIPCS version:__
+- **To check your current pyIPCS version:**
 
 ```bash
 pip show pyipcs
@@ -29,213 +32,191 @@ pip show pyipcs
 ---
 ---
 
-## Example Scripts
-
-- __[Back to Top](#pyipcs-readme)__
-- __[Run IPCS subcommand against single z/OS dump](#run-ipcs-subcommand-against-single-zos-dump)__
-- __[Run IPCS subcommands against multiple z/OS dumps](#run-ipcs-subcommands-against-multiple-zos-dumps)__
-
----
-
-### Run IPCS subcommand against single z/OS dump
-
-- __[Back to Example Scripts](#example-scripts)__
-
 ```python
-
-# Import pyIPCS objects and util functions
 from pyipcs import Hex, IpcsSession, Subcmd
 from pyipcs.util import *
 
 # Create IpcsSession object
+# Manages settings for your IPCS session
+
 session = IpcsSession()
 
 # Open IPCS Session
+
 session.open()
 
 # String dataset name of z/OS dump
+
 dsname = ...
 
 # Create Dump object `dump`
 # Initializes z/OS dump and stores general info
+
 dump = session.init_dump(dsname)
 
 # Print the dump title
-print(dump.data["title"])
+# "SAD", "SVCD", "TDMP", "SYSM", or "SLIP"
+
+if "dump_type" in dump.header:
+  print(dump.header["dump_type"])
+else:
+  print("Dump Type Not Found")
 
 # Run IPCS subcommand against z/OS dump `dump` and store output
+
 subcmd = Subcmd(session, "STATUS REGISTERS")
 
 # Print portion of IPCS subcommand output
+
 print(subcmd[10:20])
 
 # Close IPCS Session
+
 session.close()
 ```
+
+---
+---
+
+## Important Disclaimer (Please Read)
+
+- **[Back to Top](#pyipcs-readme)**
+
+---
+
+- **In order to perform operations, pyIPCS creates temporary execs, DDIRs, and files while the IPCS Session is open.**
 
 <br>
 
-### Run IPCS subcommands against multiple z/OS dumps
+- **Please be aware of leftover datasets and files in the event of unintended cleanup failures.**
 
-- __[Back to Example Scripts](#example-scripts)__
+<br>
 
-```python
+- **High level qualifiers for pyIPCS temporary datasets**
+  - **`IpcsSession.hlq`**
+  - **`IpcsSession.hlq_full`**
 
-# Import pyIPCS objects and util functions
-from pyipcs import Hex, IpcsSession, Subcmd
-from pyipcs.util import *
-
-# Create IpcsSession object
-session = IpcsSession()
-
-# Open IPCS Session
-session.open()
-
-# String datasets names of z/OS dumps
-dsnameA = ...
-dsnameB = ...
-
-# Create Dump object `dumpA`
-dumpA = session.init_dump(dsnameA)
-
-# Run IPCS subcommand against z/OS dump `dumpA` and store output
-subcmdA = Subcmd(session, "LIST TITLE")
-
-# Create Dump object `dumpB`
-dumpB = session.init_dump(dsnameB)
-
-# Run IPCS subcommand against z/OS dump `dumpB` and store output
-subcmdB = Subcmd(session, "LIST TITLE")
-
-# Set session back to `dumpA`
-session.set_dump(dumpA)
-
-# Run IPCS subcommand against z/OS dump `dumpA` and store output
-subcmdA2 = Subcmd(session, "STATUS REGISTERS")
-
-# Close IPCS Session
-session.close()
-```
+- **Directories for pyIPCS temporary files**
+  - **`IpcsSession.directory`**
+  - **`IpcsSession.directory_full`**
 
 ---
 ---
 
 ## Getting Started (Installation Guide)
 
-- __[Back to Top](#pyipcs-readme)__
+- **[Back to Top](#pyipcs-readme)**
 
 ---
 
 ### [Getting Started](./GETTING_STARTED.md)
 
-- __Contains information about:__
-  - __Dependencies and Prerequisites__
-  - __pyIPCS Installation__
+- **Dependencies and Prerequisites**
+- **pyIPCS Installation**
 
 ---
 ---
 
 ## pyIPCS Versioning and Updates
 
-- __[Back to Top](#pyipcs-readme)__
+- **[Back to Top](#pyipcs-readme)**
 
 ---
 
 ### Example Version: `1.2.3`
 
-- __Major Version (`1`)__
+- **Major Version (`1`)**
   - Indicates a significant update.
   - Probable to include breaking changes that are not backward-compatible.
-- __Minor Version (`2`)__
+
+- **Minor Version (`2`)**
   - Adds new features or functionality.
   - Mostly backward-compatible with previous versions within the same major version.
-- __Patch Version (`3`)__
+
+- **Patch Version (`3`)**
   - Fixes bugs or makes small improvements.
   - Always backward-compatible.
 
-#### [CHANGELOG.md](./CHANGELOG.md)
+### [CHANGELOG.md](./CHANGELOG.md)
 
-- __The Changelog file contains info on changes between each new version__
-
----
----
-
-## pyIPCS User Guide
-
-- __[Back to Top](#pyipcs-readme)__
-
----
-
-### [User Guide](./USER_GUIDE.md)
-
-- __To get the most out of pyIPCS, we strongly recommend checking out the User Guide.__
-
-<br>
-
-- __The User Guide provides:__
-  - __Key Features:__ Learn about the core capabilities and functionality of the package.
-  - __Best Practices:__ Discover tips and recommendations for optimal performance and maintainability.
-  - __Advanced Features:__ Dive deeper into advanced functionality to unlock the full potential of the package.
+- **The Changelog file contains info on changes between each new version**
 
 ---
 ---
 
 ## Report a Bug or Request a Feature
 
-- __[Back to Top](#pyipcs-readme)__
+- **[Back to Top](#pyipcs-readme)**
 
 ---
 
-- __To report a bug, or request a feature or other update, please open a new issue.__
-  - Once you open an issue, there are templates for submitting a Bug Report, Feature Request, Documentation Update, or other requests you might have for pyIPCS
+- **To report a bug or request a feature/update, please open a new issue.**
+  - Once you open an issue, there are various templates
+    - Bug Report
+    - Feature Request
+    - Documentation Update
+    - Other requests you might have for pyIPCS
 
 ---
 ---
 
 ## Contribute to pyIPCS
 
-- __[Back to Top](#pyipcs-readme)__
+- **[Back to Top](#pyipcs-readme)**
 
 ---
 
 ### [How to Contribute to pyIPCS](./CONTRIBUTING.md)
 
-- __Follow the link above to get information on how to contribute to pyIPCS__
+- **Follow the link above to get information on how to contribute to pyIPCS**
+
+---
+---
+
+## pyIPCS Examples
+
+- **[Back to Top](#pyipcs-readme)**
+
+---
+
+- **You can find practical usage examples and runnable scripts in the `/examples` directory**
+
+### [pyIPCS Examples README](./examples/README.md)
 
 ---
 ---
 
 ## Hex Object
 
-- __[Back to Top](#pyipcs-readme)__
-- __[Arithmetic, Logical, and Bitwise Operations With Hex Object](#arithmetic-logical-and-bitwise-operations-with-hex-object)__
-- __[Methods](#hex-methods)__
+- **[Back to Top](#pyipcs-readme)**
+- **[Arithmetic, Logical, and Bitwise Operations With Hex Object](#arithmetic-logical-and-bitwise-operations-with-hex-object)**
+- **[Methods](#hex-methods)**
 
 ---
 
 ### *class* pyipcs.Hex(*value*)
 
-__Bases:__ *object*
+**Bases:** *object*
 
-#### Description
+### Description
 
 - Contains various methods and functionality to manage hex variables in an IPCS environment
 - Accepts strings or integers as input
 
-#### Args
+### Parameters
 
-- __value__ *(str|int)*: hex string or integer for hex value
+- **value** *(str|int)*: Hex string or integer for hex value
 
 ---
 
 ### Arithmetic, Logical, and Bitwise Operations With Hex Object
 
-- __[Back to Hex Object](#hex-object)__
+- **[Back to Hex Object](#hex-object)**
 
 ---
 
 - The `Hex` object supports a variety of arithmetic, logical, and bitwise operations
-- These operations include:  __+ , - , * , / *(integer division)* , = , == , !=, < , <= , > , >= , % , | , &__
+- These operations include:  **+ , - , * , / *(integer division)* , = , == , !=, < , <= , > , >= , % , | , &**
 
 ```python
     from pyipcs import Hex
@@ -280,30 +261,51 @@ __Bases:__ *object*
 
 ### Hex Methods
 
-- __[Back to Hex Object](#hex-object)__
-- __[sign](#hexsign)__
-- __[unsigned](#hexsign)__
-- __[get_nibble](#hexget_nibblenibble-from_right)__
-- __[get_byte](#hexget_bytebyte-from_right)__
-- __[get_half_word](#hexget_half_wordhalf_word-from_right)__
-- __[get_word](#hexget_wordword-from_right)__
-- __[get_doubleword](#hexget_doubleworddoubleword-from_right)__
-- __[to_int](#hexto_int)__
-- __[to_str](#hexto_str)__
-- __[to_char_str](#hexto_char_str)__
-- __[concat](#hexconcatother)__
-- __[resize](#hexresizenew_bit_length)__
-- __[bit_len_no_pad](#hexbit_len_no_pad)__
-- __[bit_len](#hexbit_len)__
-- __[turn_on_bit](#hexturn_on_bitbit_position-from_right)__
-- __[turn_off_bit](#hexturn_off_bitbit_position-from_right)__
-- __[check_bit](#hexcheck_bitbit_position-from_right)__
+- **[Back to Hex Object](#hex-object)**
+
+- **[sign](#hexsign)**
+
+- **[unsigned](#hexunsigned)**
+
+- **[get_nibble](#hexget_nibble)**
+
+- **[get_byte](#hexget_byte)**
+
+- **[get_half_word](#hexget_half_word)**
+
+- **[get_word](#hexget_word)**
+
+- **[get_doubleword](#hexget_doubleword)**
+
+- **[to_int](#hexto_int)**
+
+- **[to_str](#hexto_str)**
+
+- **[to_char_str](#hexto_char_str)**
+
+- **[concat](#hexconcat)**
+
+- **[resize](#hexresize)**
+
+- **[bit_len_no_pad](#hexbit_len_no_pad)**
+
+- **[bit_len](#hexbit_len)**
+
+- **[turn_on_bit](#hexturn_on_bit)**
+
+- **[turn_off_bit](#hexturn_off_bit)**
+
+- **[check_bit](#hexcheck_bit)**
 
 ---
 
-### Hex.sign()
+### Hex.sign
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### sign()
 
 #### Description
 
@@ -311,13 +313,17 @@ __Bases:__ *object*
 
 #### Returns
 
-- __*str*__: `'-'` or `''` depending on whether Hex is positive or negative
+- ***str***: `"-"` or `""` depending on whether Hex is positive or negative
 
 ---
 
-### Hex.unsigned()
+### Hex.unsigned
 
-- __[Back to Hex Methods](#hex-methods)__  
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### unsigned()
 
 #### Description
 
@@ -325,108 +331,132 @@ __Bases:__ *object*
 
 #### Returns
 
-- __*pyipcs.Hex*__: unsigned Hex
+- ***pyipcs.Hex***: Unsigned Hex
 
 ---
 
-### Hex.get_nibble(*nibble*, *from_right*)
+### Hex.get_nibble
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### get_nibble(*nibble*, *from_right=False*)
 
 #### Description
 
 - Get 0 indexed nibble. Default 0 index is from left side of hex string.
 
-#### Args
+#### Parameters
 
-- __nibble__ *(int)*: 0 indexed nibble position.
-- __from_right__ *(bool)*: __Optional__. If `True` will make 0 index the right most nibble. `False` by Default.
+- **nibble** *(int)*: 0 indexed nibble position.
+- **from_right** *(bool, optional)*: If `True` will make 0 index the right most nibble. `False` by Default.
 
 #### Returns
 
-- __*pyipcs.Hex*__: 0 indexed nibble at position `nibble`
+- ***pyipcs.Hex***: 0 indexed nibble at position `nibble`
 
 ---
 
-### Hex.get_byte(*byte*, *from_right*)
+### Hex.get_byte
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### get_byte(*byte*, *from_right=False*)
 
 #### Description
 
 - Get 0 indexed byte. Default 0 index is from left side of hex string.
 
-#### Args
+#### Parameters
 
-- __byte__ *(int)*: 0 indexed byte position.
-- __from_right__ *(bool)*: __Optional__. If `True` will make 0 index the right most byte. `False` by Default.
+- **byte** *(int)*: 0 indexed byte position.
+- **from_right** *(bool, optional)*: If `True` will make 0 index the right most byte. `False` by Default.
 
 #### Returns
 
-- __*pyipcs.Hex*__: 0 indexed byte at position `byte`
+- ***pyipcs.Hex***: 0 indexed byte at position `byte`
 
 ---
 
-### Hex.get_half_word(*half_word*, *from_right*)
+### Hex.get_half_word
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### get_half_word(*half_word*, *from_right=False*)
 
 #### Description
 
 - Get 0 indexed half word. Default 0 index is from left side of hex string.
 
-#### Args
+#### Parameters
 
-- __half_word__ *(int)*: 0 indexed half word position.
-- __from_right__ *(bool)*: __Optional__. If `True` will make 0 index the right most half word. `False` by Default.
+- **half_word** *(int)*: 0 indexed half word position.
+- **from_right** *(bool, optional)*: If `True` will make 0 index the right most half word. `False` by Default.
 
 #### Returns
 
-- __*pyipcs.Hex*__: 0 indexed half word at position `half_word`
+- ***pyipcs.Hex***: 0 indexed half word at position `half_word`
 
 ---
 
-### Hex.get_word(*word*, *from_right*)
+### Hex.get_word
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### get_word(*word*, *from_right=False*)
 
 #### Description
 
 - Get 0 indexed word. Default 0 index is from left side of hex string.
 
-#### Args
+#### Parameters
 
-- __word__ *(int)*: 0 indexed word position.
-- __from_right__ *(bool)*: __Optional__. If `True` will make 0 index the right most word. `False` by Default.
+- **word** *(int)*: 0 indexed word position.
+- **from_right** *(bool, optional)*: If `True` will make 0 index the right most word. `False` by Default.
 
 #### Returns
 
-- __*pyipcs.Hex*__: 0 indexed word at position `word`
+- ***pyipcs.Hex***: 0 indexed word at position `word`
 
 ---
 
-### Hex.get_doubleword(*doubleword*, *from_right*)
+### Hex.get_doubleword
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### get_doubleword(*doubleword*, *from_right=False*)
 
 #### Description
 
 - Get 0 indexed doubleword. Default 0 index is from left side of hex string.
 
-#### Args
+#### Parameters
 
-- __doubleword__ *(int)*: 0 indexed doubleword position.
-- __from_right__ *(bool)*: __Optional__. If `True` will make 0 index the right most doubleword. `False` by Default.
+- **doubleword** *(int)*: 0 indexed doubleword position.
+- **from_right** *(bool, optional)*: If `True` will make 0 index the right most doubleword. `False` by Default.
 
 #### Returns
 
-- __*pyipcs.Hex*__: 0 indexed doubleword at position `doubleword`
+- ***pyipcs.Hex***: 0 indexed doubleword at position `doubleword`
 
 ---
 
-### Hex.to_int()
+### Hex.to_int
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### to_int()
 
 #### Description
 
@@ -434,13 +464,17 @@ __Bases:__ *object*
 
 #### Returns
 
-- __*int*__: hex integer
+- ***int***: Hex integer.
 
 ---
 
-### Hex.to_str()
+### Hex.to_str
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### to_str()
 
 #### Description
 
@@ -448,69 +482,85 @@ __Bases:__ *object*
 
 #### Returns
 
-- __*str*__: hex string
+- ***str***: Hex string.
 
 ---
 
-### Hex.to_char_str()
+### Hex.to_char_str
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### to_char_str(*encoding="ibm1047"*)
 
 #### Description
 
 - Convert hex to character string.
-- If there is an error reading the hex string to characters, will return empty string('').
+- If there is an error reading the hex string to characters, will return empty string(`""`).
 
-#### Args
+#### Parameters
 
-- __encoding__ *(str)*: __Optional__. Encoding to use to decode hex string. Default is `'ibm1047'`.
+- **encoding** *(str, optional)*: Encoding to use to decode hex string. Default is `"ibm1047"`.
 
 #### Returns
 
-- __*str*__: character string
+- ***str***: Character string.
 
 ---
 
-### Hex.concat(*other*)
+### Hex.concat
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### concat(*other*)
 
 #### Description
 
-- Concatenate with other `Hex` Object
+- Concatenate with other `Hex` Object.
 
-#### Args
+#### Parameters
 
-- __other__ *(pyipcs.Hex|Iterable)*: other `Hex` object or Iterable of `Hex` objects to concatenate to the end of the current `Hex` object. Disregard sign of this variable in concatenation.
+- **other** *(pyipcs.Hex|Iterable)*: other `Hex` object or Iterable of `Hex` objects to concatenate to the end of the current `Hex` object. Disregard sign of this variable in concatenation.
 
 #### Returns
 
-- __*pyipcs.Hex*__: Concatenated `Hex` Object
+- ***pyipcs.Hex***: Concatenated `Hex` Object.
 
 ---
 
-### Hex.resize(*new_bit_length*)
+### Hex.resize
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### resize(*new_bit_length*)
 
 #### Description
 
 - Convert hex string to new bit length.
 - Will either pad hex string with 0s or truncate string at bit length.
 
-#### Args
+#### Parameters
 
-- __new_bit_length__ *(int)*: new length of string in bits.
+- **new_bit_length** *(int)*: New length of string in bits.
 
 #### Returns
 
-- __*pyipcs.Hex*__: hex with new bit length.
+- ***pyipcs.Hex***: Hex with new bit length.
 
 ---
 
-### Hex.bit_len_no_pad()
+### Hex.bit_len_no_pad
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### bit_len_no_pad()
 
 #### Description
 
@@ -518,13 +568,17 @@ __Bases:__ *object*
 
 #### Returns
 
-- __*int*__: Length in bits of hex string, not including leading 0s
+- ***int***: Length in bits of hex string, not including leading 0s.
 
 ---
 
-### Hex.bit_len()
+### Hex.bit_len
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### bit_len()
 
 #### Description
 
@@ -532,127 +586,138 @@ __Bases:__ *object*
 
 #### Returns
 
-- __*int*__: Length in bits of hex string, including leading 0s
+- ***int***: Length in bits of hex string, including leading 0s.
 
 ---
 
-### Hex.turn_on_bit(*bit_position*, *from_right*)
+### Hex.turn_on_bit
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### turn_on_bit(*bit_position*, *from_right=False*)
 
 #### Description
 
 - Turn on bit at 0 indexed bit position. Default 0 index is from left side of hex string.
 
-#### Args
+#### Parameters
 
-- __bit_position__ *(int)*: 0 indexed bit position.
-- __from_right__ *(bool)*: __Optional__. If `True` will make 0 index the right most bit. `False` by Default.
+- **bit_position** *(int)*: 0 indexed bit position.
+- **from_right** *(bool, optional)*: If `True` will make 0 index the right most bit. `False` by Default.
 
 #### Returns
 
-- __*pyipcs.Hex*__: hex with bit at bit_position on
+- ***pyipcs.Hex***: Hex with bit at bit_position on
 
 ---
 
-### Hex.turn_off_bit(*bit_position*, *from_right*)
+### Hex.turn_off_bit
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### turn_off_bit(*bit_position*, *from_right=False*)
 
 #### Description
 
-- Turn off bit at 0 indexed bit position. Default 0 index is from left side of hex string
+- Turn off bit at 0 indexed bit position. Default 0 index is from left side of hex string.
 
-#### Args
+#### Parameters
 
-- __bit_position__ *(int)*: 0 indexed bit position
-- __from_right__ *(bool)*: __Optional__. If `True` will make 0 index the right most bit. `False` by Default
+- **bit_position** *(int)*: 0 indexed bit position.
+- **from_right** *(bool, optional)*: If `True` will make 0 index the right most bit. `False` by Default
 
 #### Returns
 
-- __*pyipcs.Hex*__: hex with bit at bit_position off
+- ***pyipcs.Hex***: Hex with bit at bit_position off.
 
 ---
 
-### Hex.check_bit(*bit_position*, *from_right*)
+### Hex.check_bit
 
-- __[Back to Hex Methods](#hex-methods)__
+- **[Back to Hex Methods](#hex-methods)**
+
+---
+
+### check_bit(*bit_position*, *from_right=False*)
 
 #### Description
 
 - Check bit at 0 indexed bit position. Default 0 index is from left side of hex string.
 
-#### Args
+#### Parameters
 
-- __bit_position__ *(int)*: 0 indexed bit position.
-- __from_right__ *(bool)*: __Optional__. If `True` will make 0 index the right most bit. `False` by Default.
+- **bit_position** *(int)*: 0 indexed bit position.
+- **from_right** *(bool, optional)*: If `True` will make 0 index the right most bit. `False` by Default.
 
 #### Returns
 
-- __*bool*__: `True` if bit is on, `False` if it is off
+- ***bool***: `True` if bit is on, `False` if it is off.
 
 ---
 ---
 
 ## IpcsSession Object
 
-- __[Back to Top](#pyipcs-readme)__
-- __[Methods](#ipcssession-methods)__
+- **[Back to Top](#pyipcs-readme)**
+- **[Methods](#ipcssession-methods)**
+- **[IpcsAllocations Object](#ipcsallocations-object)**
+- **[DumpDirectory Object](#dumpdirectory-object)**
+- **[SetDef Custom Subcmd Object](#setdef-custom-subcmd-object)**
 
 ---
 
-### *class* pyipcs.IpcsSession(*hlq*, *directory*, *allocations*)
+### *class* pyipcs.IpcsSession(*hlq=None*, *directory=None*, *allocations={"IPCSPARM": ["SYS1.PARMLIB"], "SYSPROC": ["SYS1.SBLSCLI0"],}*)
 
-__Bases:__ *object*
+**Bases:** *object*
 
-#### Description
+### Description
 
-- Manages TSO allocations, temporary EXECs and DDIRs, and controls settings for IPCS Session.
+- Manages TSO allocations, session EXECs and DDIRs, and controls settings for IPCS Session.
 
-#### Args
+### Parameters
 
-- __hlq__ *(str|None)*: __Optional__. High level qualifier where opened pyIPCS session is or will be under. pyIPCS session includes z/OS MVS datasets for pyIPCS EXECs and DDIRs. High level qualifier has a max length of 16 characters. By default is `None` which will set the high level qualifier as your userid.
-<br>
+- **hlq** *(str|None, optional)*: High level qualifier where opened pyIPCS session is or will be under. pyIPCS session includes z/OS MVS datasets for pyIPCS EXECs and DDIRs. High level qualifier has a max length of 16 characters excluding `"."`. By default is `None` which will set the high level qualifier as your userid.
 
-- __directory__ *(str|None)*: __Optional__. File system directory where IPCS session directories and files will be placed. By default is `None` which will set the directory as the current working directory of executed file.
-<br>
+- **directory** *(str|None, optional)*: File system directory where IPCS session directories and files will be placed. By default is `None` which will set the directory as the current working directory of executed file.
 
-- __allocations__ *(dict[str,str|list[str]])*: __Optional__. Dictionary of allocations where keys are DD names and values are string data set allocation requests or lists of cataloged datasets. The default allocations are dataset SYS1.PARMLIB for DD name IPCSPARM and dataset SYS1.SBLSCLI0 for DD name SYSPROC.
+- **allocations** *(dict[str,str|list[str]], optional)*: Dictionary of allocations where keys are DD names and values are string data set allocation requests or lists of cataloged datasets. The default allocations are dataset SYS1.PARMLIB for DD name IPCSPARM and dataset SYS1.SBLSCLI0 for DD name SYSPROC.
 
-#### Attributes
+### Attributes
 
-- __userid__ *(str)*: z/OS system userid for current user.
-- __hlq__ *(str)*: High level qualifier where opened pyIPCS session is or will be under. pyIPCS session includes z/OS MVS datasets for pyIPCS EXECs and DDIRs.
-- __directory__ *(str)*: File system directory where IPCS session directories and files will be placed. These include subcommand output files and other logs.
-- __active__ *(bool)*: `True` if IPCS session is active, `False` if not active.
-- __ddir__ *(str|None)*: DDIR that IPCS will use to run subcommands. `None` if session is not active.
+- **userid** *(str)*: z/OS system userid for current user.
+- **hlq** *(str)*: High level qualifier where opened pyIPCS session is or will be under. pyIPCS session includes z/OS MVS datasets for pyIPCS EXECs and DDIRs.
+- **directory** *(str)*: File system directory where IPCS session directories and files will be placed. These include subcommand output files and other logs.
+- **active** *(bool)*: `True` if IPCS session is active, `False` if not active.
+- **aloc** *(pyipcs.IpcsAllocations)*: Manages TSO allocations for your IPCS session. [IpcsAllocations Object](#ipcsallocations-object).
+- **ddir** *(pyipcs.DumpDirectory)*: Manages dump directory(DDIR) functionality for your IPCS session. [DumpDirectory Object](#dumpdirectory-object).
+- **uid** *(str|None)*: Unique ID for open pyIPCS session. `None` if pyIPCS session is not active.
+- **hlq_full** *(str|None)*: Full high level qualifier for open pyIPCS session. `None` if pyIPCS session is not active.
+- **directory_full** (str|None): Full directory where pyIPCS files for the open session will be placed. `None` if pyIPCS session is not active.
 
 ---
 
 ### IpcsSession Methods
 
-- __[Back to IpcsSession Object](#ipcssession-object)__
-- __[open](#ipcssessionopen)__
-- __[close](#ipcssessionclose)__
-- __[get_allocations](#ipcssessionget_allocations)__
-- __[set_allocation](#ipcssessionset_allocationdd_name-specification)__
-- __[update_allocations](#ipcssessionupdate_allocationsnew_allocations-clear_old_allocations)__
-- __[ddir_defaults](#ipcssessionddir_defaultskwargs)__
-- __[create_ddir](#ipcssessioncreate_ddirddir-kwargs)__
-- __[create_session_ddir](#ipcssessioncreate_session_ddirkwargs)__
-- __[set_ddir](#ipcssessionset_ddirddir)__
-- __[get_defaults](#ipcssessionget_defaults)__
-- __[set_defaults](#ipcssessionset_defaultsconfirm-dsname-nodsname-asid-dspname-other)__
-- __[init_dump](#ipcssessioninit_dumpdsname-ddir)__
-- __[set_dump](#ipcssessionset_dumpdump)__
-- __[dsname_in_ddir](#ipcssessiondsname_in_ddirdsname)__
-- __[evaluate](#ipcssessionevaluatehex_address-dec_offset-dec_length)__
+- **[Back to IpcsSession Object](#ipcssession-object)**
+- **[open](#ipcssessionopen)**
+- **[close](#ipcssessionclose)**
+- **[init_dump](#ipcssessioninit_dump)**
+- **[set_dump](#ipcssessionset_dump)**
+- **[evaluate](#ipcssessionevaluate)**
 
 ---
 
-### IpcsSession.open()
+### IpcsSession.open
 
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
+- **[Back to IpcsSession Methods](#ipcssession-methods)**
+
+---
+
+### open()
 
 #### Description
 
@@ -661,13 +726,17 @@ __Bases:__ *object*
 
 #### Returns
 
-- __*None*__
+- ***None***
 
 ---
 
-### IpcsSession.close()
+### IpcsSession.close
 
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
+- **[Back to IpcsSession Methods](#ipcssession-methods)**
+
+---
+
+### close()
 
 #### Description
 
@@ -676,205 +745,17 @@ __Bases:__ *object*
 
 #### Returns
 
-- __*None*__
+- ***None***
 
 ---
 
-### IpcsSession.get_allocations()
+### IpcsSession.init_dump
 
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
-
-#### Description
-
-- Get allocations for your TSO environment.
-
-#### Returns
-
-- __*dict[str,str|list[str]]*__: Returns dictionary of all allocations where keys are DD names and values are string data set allocation requests or lists of cataloged datasets
+- **[Back to IpcsSession Methods](#ipcssession-methods)**
 
 ---
 
-### IpcsSession.set_allocation(*dd_name*, *specification*)
-
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
-
-#### Description
-
-- Set a TSO allocation.
-- If the specification is an empty list or empty string, will remove or not include DD name-specification pair within allocations
-
-#### Args
-
-- __dd_name__ *(str)*
-- __specifications__ *(str|list[str])*: string data set allocation request or list of cataloged datasets
-
-#### Returns
-
-- __*None*__
-
----
-
-### IpcsSession.update_allocations(*new_allocations*, *clear_old_allocations*)
-
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
-
-#### Description
-
-- Update multiple TSO allocations.
-
-#### Args
-
-- __new_allocations__ *(dict[str,str|list[str]])*: Dictionary of allocations where keys are DD names and values are string data set allocation requests or lists of cataloged datasets.
-- __clear_old_allocations__ *(bool)*: __Optional__. If `True`, will clear all old allocations before setting new allocations. Default is `True`.
-
-#### Returns
-
-- __*None*__
-
----
-
-### IpcsSession.ddir_defaults(***kwargs*)
-
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
-
-#### Description
-
-- Returns default parameters for dump directory creation.
-- Input arguments to edit defaults.
-- Returns `BLSCDDIR` CLIST parameters where keys are `BLSCDDIR` parameters and the values are `BLSCDDIR` parameter values.
-- [BLSCDDIR Documentation](https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory)
-
-#### Args
-
-- __dataclas__ *(str)*: __Optional__. Specifies the data class for the new directory. If you omit this parameter, there is no data class specified for the new directory.
-- __mgmtclas__ *(str)*: __Optional__. Specifies the management class for the new directory. If you omit this parameter, there is no management class specified for the new directory.
-- __ndxcisz__ *(int)*: __Optional__. Specifies the control interval size for the index portion of the new directory. If you omit this parameter, the IBM-supplied default is 4096 bytes.
-- __records__ *(int)*: __Optional__. Specifies the number of records you want the directory to accommodate. If you omit this parameter, the IBM-supplied default is 5000; your installation's default might vary.
-- __storclas__ *(str)*: __Optional__. Specifies the storage class for the new directory. If you omit this parameter, there is no storage class specified for the new directory.
-- __volume__ *(str)*: __Optional__. Specifies the VSAM volume on which the directory should reside. If you omit DATACLAS, MGMTCLAS, STORCLAS, and VOLUME, the IBM-supplied default is VSAM01. Otherwise, there is no IBM-supplied default.
-- __blscddir_params__ *(str)*: __Optional__. String of `BLSCDDIR` parameters. Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
-
-#### Returns
-
-- __*dict*__: Keys are `BLSCDDIR` parameters and the values are `BLSCDDIR` parameter values.
-
----
-
-### IpcsSession.create_ddir(*ddir*, ***kwargs*)
-
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
-
-#### Description
-
-- Create dump directory. Uses `BLSCDDIR` CLIST to create DDIR.
-- Adding additional keyword arguments will override pyIPCS DDIR defaults.
-- [BLSCDDIR Documentation](https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory)
-
-#### Args
-
-- __ddir__ *(str)*: Dump directory that will be created.
-- __dataclas__ *(str)*: __Optional__.
-- __mgmtclas__ *(str)*: __Optional__.
-- __ndxcisz__ *(int)*: __Optional__.
-- __records__ *(int)*: __Optional__.
-- __storclas__ *(str)*: __Optional__.
-- __volume__ *(str)*: __Optional__.
-- __blscddir_params__ *(str)*: __Optional__. String of `BLSCDDIR` parameters. Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
-
-#### Returns
-
-- __*None*__
-
----
-
-### IpcsSession.create_session_ddir(***kwargs*)
-
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
-
-#### Description
-
-- Create pyIPCS session dump directory. Will be deleted on session close.
-- Adding additional keyword arguments will override pyIPCS DDIR defaults.
-- [BLSCDDIR Documentation](https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory)
-
-#### Args
-
-- __dataclas__ *(str)*: __Optional__.
-- __mgmtclas__ *(str)*: __Optional__.
-- __ndxcisz__ *(int)*: __Optional__.
-- __records__ *(int)*: __Optional__.
-- __storclas__ *(str)*: __Optional__.
-- __volume__ *(str)*: __Optional__.
-- __blscddir_params__ *(str)*: __Optional__. String of `BLSCDDIR` parameters. Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
-
-#### Returns
-
-- __*str*__: pyIPCS session DDIR dataset name
-
----
-
-### IpcsSession.set_ddir(*ddir*)
-
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
-
-#### Description
-
-- Set `ddir` as the current dump directory for the session.
-
-#### Args
-
-__ddir__ *(str)*: Dump directory will be set as the sessions DDIR
-
-#### Returns
-
-- __*None*__
-
----
-
-### IpcsSession.get_defaults()
-
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
-
-#### Description
-
-- Run `SETDEF LIST` to get IPCS defaults.
-
-#### Returns
-
-- __*pyipcs.SetDef*__: Custom `SETDEF` Subcmd Object. `outfile` parameter is set to `False` for string output.
-
----
-
-### IpcsSession.set_defaults(*confirm*, *dsname*, *nodsname*, *asid*, *dspname*, *setdef_params*)
-
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
-
-#### Description
-
-- Runs `SETDEF` with `LIST` parameter and other parameters to set IPCS defaults
-- [SETDEF subcommand](https://www.ibm.com/docs/en/zos/3.1.0?topic=subcommands-setdef-subcommand-set-defaults)
-- [Address processing parameters](https://www.ibm.com/docs/en/zos/3.1.0?topic=parameter-address-processing-parameters)
-- Only Global Defaults impact the pyIPCS session.
-
-#### Args
-
-- __confirm__ *(bool|None)*: __Optional__. `True` for `CONFIRM` parameter. `False` for `NOCONFIRM` parameter. Default is `None` to not include parameter in subcommand.
-- __dsname__ *(str|None)*: __Optional__. String dataset name to be used for `DSNAME` parameter. Default is `None` to not include parameter in subcommand.
-- __nodsname__ *(bool)*: __Optional__. `True` for `NODSNAME` parameter. Default is `False` to not include parameter in subcommand.
-- __asid__ *(pyipcs.Hex|str|int|None)*: __Optional__. pyipcs.Hex object or string or int to be used for `ASID` parameter. Default is `None` to not include parameter in subcommand.
-- __dspname__ *(str|None)*: __Optional__.
-    String dataspace name to be used for `DSPNAME` parameter. Default is `None` to not include parameter in subcommand.
-- __setdef_params__ *(str|None)*: __Optional__. String of `SETDEF` parameters. Write parameters as you would in regular IPCS (ex: `'ACTIVE LENGTH(4)'`). Default is `None` to not include in subcommand.
-
-#### Returns
-
-- __*pyipcs.SetDef*__: Custom `SETDEF` Subcmd Object. `outfile` parameter is set to `False` for string output.
-
----
-
-### IpcsSession.init_dump(*dsname*, *ddir*)
-
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
+### init_dump(*dsname*, *ddir=""*, *use_cur_ddir=False*)
 
 #### Description
 
@@ -882,59 +763,48 @@ __ddir__ *(str)*: Dump directory will be set as the sessions DDIR
 - Will set IPCS session DDIR to `ddir`.
 - Will set IPCS default `DSNAME` to `dsname`
 
-#### Args
+#### Parameters
 
-- __dsname__ *(str)*: Dump dataset name.
-- __ddir__ *(str)*: __Optional__. Dump directory. If not specified, dump will be initialized under temporary DDIR.'
-- __use_cur_ddir__ *(bool)*: __Optional__. Use current session DDIR. Will use the IpcsSession attribute `ddir` to initialize the dump under. This will take precedence over this function's `ddir` parameter. Default is `False`.
+- **dsname** *(str)*: Dump dataset name.
+- **ddir** *(str, optional)*: Dump directory. If an empty string, dump will be initialized under temporary DDIR.
+- **use_cur_ddir** *(bool, optional)*: Use current session DDIR. Will use the IpcsSession attribute `ddir` to initialize the dump under. This will take precedence over this function's `ddir` parameter. Default is `False`.
 
 #### Returns
 
-- __*pyipcs.Dump*__
+- ***pyipcs.Dump***
 
 ---
 
-### IpcsSession.set_dump(*dump*)
+### IpcsSession.set_dump
 
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
+- **[Back to IpcsSession Methods](#ipcssession-methods)**
+
+---
+
+### set_dump(*dump*)
 
 #### Description
 
 - Set IPCS session DDIR to Dump object DDIR.
 - Set IPCS default `DSNAME` to Dump object dataset name.
 
-#### Args
+#### Parameters
 
-- __dump__ *(pyipcs.Dump)*
-
-#### Returns
-
-- __*None*__
-
----
-
-### IpcsSession.dsname_in_ddir(*dsname*)
-
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
-
-#### Description
-
-- Check if dataset is a source described in the current session DDIR.
-- Used to check if a dump dataset was initialized under the current DDIR.
-
-#### Args
-
-- __dsname__ *(str)*: Dataset name.
+- **dump** *(pyipcs.Dump)*
 
 #### Returns
 
-- __*bool*__: `True` if dataset name a source described in the current DDIR, `False` if not.
+- ***None***
 
 ---
 
-### IpcsSession.evaluate(*hex_address*, *dec_offset*, *dec_length*)
+### IpcsSession.evaluate
 
-- __[Back to IpcsSession Methods](#ipcssession-methods)__
+- **[Back to IpcsSession Methods](#ipcssession-methods)**
+
+---
+
+### evaluate(*hex_address*, *dec_offset*, *dec_length*)
 
 #### Description
 
@@ -942,364 +812,814 @@ __ddir__ *(str)*: Dump directory will be set as the sessions DDIR
 - Make sure to set correct defaults `DSNAME`, `ASID`, and `DSPNAME` prior to calling this method.
 - [EVALUATE Subcommand](https://www.ibm.com/docs/en/zos/3.1.0?topic=instruction-evaluate-subcommand)
 
-#### Args
+#### Parameters
 
-- __hex_address__ *(pyipcs.Hex|str|int)*: Starting hex address to read from
-- __dec_offset__ *(int)*: Byte offset from the starting address in decimal
-- __dec_length__ *(int)*: Byte length of data to access in decimal
+- **hex_address** *(pyipcs.Hex|str|int)*: Starting hex address to read from.
+- **dec_offset** *(int)*: Byte offset from the starting address in decimal.
+- **dec_length** *(int)*: Byte length of data to access in decimal.
 
 #### Returns
 
-- __*pyipcs.Hex*__: Hex object representing the data at the specified address
+- ***pyipcs.Hex***: Hex object representing the data at the specified address.
+
+---
+---
+
+## IpcsAllocations Object
+
+- **[Back to Top](#pyipcs-readme)**
+- **[Back to IpcsSession Object](#ipcssession-object)**
+- **[Methods](#ipcsallocations-methods)**
+
+---
+
+**Bases:** *object*
+
+### Description
+
+- Manages TSO allocations for IPCS Session.
+
+---
+
+### IpcsAllocations Methods
+
+- **[Back to IpcsAllocations Object](#ipcsallocations-object)**
+- **[get](#ipcsallocationsget)**
+- **[set](#ipcsallocationsset)**
+- **[drop](#ipcsallocationsdrop)**
+- **[update](#ipcsallocationsupdate)**
+- **[clear](#ipcsallocationsclear)**
+
+---
+
+### IpcsAllocations.get
+
+- **[Back to IpcsAllocations Methods](#ipcsallocations-methods)**
+
+---
+
+### get()
+
+#### Description
+
+- Get TSO allocations for your IPCS session.
+
+#### Returns
+
+- ***dict[str,str|list[str]]***: Returns dictionary of all allocations where keys are DD names and values are string data set allocation requests or lists of cataloged datasets.
+
+---
+
+### IpcsAllocations.set
+
+- **[Back to IpcsAllocations Methods](#ipcsallocations-methods)**
+
+---
+
+### set(*dd_name*, *specification*, *extend=False*)
+
+#### Description
+
+- Set a single TSO allocation for your IPCS session.
+
+#### Parameters
+
+- **dd_name** *(str)*
+- specification *(str|list[str])*: String data set allocation request or list of cataloged datasets.
+- **extend** *(bool, optional)*: If `True` and DD name `dd_name` already exists, will add list of datasets from `specification` to `dd_name`. Default is `False`.
+
+#### Returns
+
+- ***None***
+
+---
+
+### IpcsAllocations.drop
+
+- **[Back to IpcsAllocations Methods](#ipcsallocations-methods)**
+
+---
+
+### drop(*dd_name*)
+
+#### Description
+
+- Remove a specific TSO allocation from your IPCS session by DD name if it exists.
+
+#### Parameters
+
+- **dd_name** *(str)*
+
+#### Returns
+
+- ***None***
+
+---
+
+### IpcsAllocations.update
+
+- **[Back to IpcsAllocations Methods](#ipcsallocations-methods)**
+
+---
+
+### update(*new_allocations*, *clear=True*, *extend=False*)
+
+#### Description
+
+- Update multiple TSO allocations for your IPCS session.
+
+#### Parameters
+
+- **new_allocations** *(dict[str,str|list[str]])*: Dictionary of allocations where keys are DD names and values are string data set allocation requests or lists of cataloged datasets.
+- **clear** *(bool, optional)*: If `True` will clear all allocations before update. Default is `True`.
+- **extend** *(bool, optional)*: If `True`, and `clear` is `False`, and DD name already exists, will add list of datasets from specification to DD name. Default is `False`.
+
+#### Returns
+
+- ***None***
+
+---
+
+### IpcsAllocations.clear
+
+- **[Back to IpcsAllocations Methods](#ipcsallocations-methods)**
+
+---
+
+### clear()
+
+#### Description
+
+- Clear all TSO allocations for your IPCS session.
+
+#### Returns
+
+- ***None***
+
+---
+---
+
+## DumpDirectory Object
+
+- **[Back to Top](#pyipcs-readme)**
+- **[Back to IpcsSession Object](#ipcssession-object)**
+- **[Methods](#dumpdirectory-methods)**
+- **[SetDef Custom Subcmd Object](#setdef-custom-subcmd-object)**
+
+---
+
+**Bases:** *object*
+
+### Description
+
+- Manages dump directory(DDIR) for IPCS Session
+
+### Attributes
+
+- **dsname** *(str|None)*: Dataset name of dump directory for your IPCS session. `None` if dump directory is not set.
+
+---
+
+### DumpDirectory Methods
+
+- **[Back to DumpDirectory Object](#dumpdirectory-object)**
+- **[use](#dumpdirectoryuse)**
+- **[create](#dumpdirectorycreate)**
+- **[create_tmp](#dumpdirectorycreate_tmp)**
+- **[presets](#dumpdirectorypresets)**
+- **[sources](#dumpdirectorysources)**
+- **[defaults](#dumpdirectorydefaults)**
+
+---
+
+### DumpDirectory.use
+
+- **[Back to DumpDirectory Methods](#dumpdirectory-methods)**
+
+---
+
+### use(*dsname*)
+
+#### Description
+
+- **dsname** *(str)*: Dump directory that will be set as the session's DDIR.
+
+#### Returns
+
+- ***None***
+
+---
+
+### DumpDirectory.create
+
+- **[Back to DumpDirectory Methods](#dumpdirectory-methods)**
+
+---
+
+### create(*dsname*, ***kwargs*)
+
+#### Description
+
+- Create dump directory.
+- Uses `BLSCDDIR` CLIST to create DDIR.
+- Adding additional keyword arguments will override pyIPCS DDIR presets.
+- [BLSCDDIR CLIST](https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory)
+
+#### Parameters
+
+- **dsname** *(str)*
+- **kwargs** *(dict, optional)*: Additional parameters (see other parameters)
+
+#### Other Parameters
+
+- **dataclas** *(str, optional)*
+- **mgmtclas** *(str, optional)*
+- **ndxcisz** *(int, optional)*
+- **records** *(int, optional)*
+- **storclas** *(str, optional)*
+- **volume** *(str, optional)*
+- **blscddir_params** *(str, optional)*: String of `BLSCDDIR` parameters. Write parameters as you would in regular IPCS (ex: `"NDXCISZ(4096)"`).
+
+#### Returns
+
+- ***None***
+
+---
+
+### DumpDirectory.create_tmp
+
+- **[Back to DumpDirectory Methods](#dumpdirectory-methods)**
+
+---
+
+### create_tmp(***kwargs*)
+
+#### Description
+
+- Create temporary dump directory. Will be deleted on IPCS session close.
+- Uses `BLSCDDIR` CLIST to create DDIR.
+- Adding additional keyword arguments will override pyIPCS DDIR presets.
+- [BLSCDDIR CLIST](https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory)
+
+#### Parameters
+
+- **kwargs** *(dict, optional)*: Additional parameters (see other parameters)
+
+#### Other Parameters
+
+- **dataclas** *(str, optional)*
+- **mgmtclas** *(str, optional)*
+- **ndxcisz** *(int, optional)*
+- **records** *(int, optional)*
+- **storclas** *(str, optional)*
+- **volume** *(str, optional)*
+- **blscddir_params** *(str, optional)*: String of `BLSCDDIR` parameters. Write parameters as you would in regular IPCS (ex: `"NDXCISZ(4096)"`).
+
+#### Returns
+
+- ***None***
+
+---
+
+### DumpDirectory.presets
+
+- **[Back to DumpDirectory Methods](#dumpdirectory-methods)**
+
+---
+
+### presets(***kwargs*)
+
+#### Description
+
+- Presets for dump directory creation.
+- Parameters that will be added to BLSCDDIR for pyIPCS dump directory creation.
+- Input optional parameters to change presets.
+- [BLSCDDIR CLIST](https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory)
+
+#### Parameters
+
+- **kwargs** *(dict, optional)*: Additional parameters (see other parameters)
+
+#### Other Parameters
+
+- **dataclas** *(str, optional)*: Specifies the data class for the new directory. If you omit this parameter, there is no data class specified for the new directory.
+- **mgmtclas** *(str, optional)*: Specifies the management class for the new directory. If you omit this parameter, there is no management class specified for the new directory.
+- **ndxcisz** *(int, optional)*: Specifies the control interval size for the index portion of the new directory. If you omit this parameter, the IBM-supplied default is 4096 bytes.
+- **records** *(int, optional)*: Specifies the number of records you want the directory to accommodate. If you omit this parameter, the IBM-supplied default is 5000; your installation's default might vary.
+- **storclas** *(str, optional)*: Specifies the storage class for the new directory. If you omit this parameter, there is no storage class specified for the new directory.
+- **volume** *(str, optional)*: Specifies the VSAM volume on which the directory should reside. If you omit DATACLAS, MGMTCLAS, STORCLAS, and VOLUME, the IBM-supplied default is VSAM01. Otherwise, there is no IBM-supplied default.
+- **blscddir_params** *(str, optional)*: String of `BLSCDDIR` parameters. Write parameters as you would in regular IPCS (ex: `"NDXCISZ(4096)"`).
+
+#### Returns
+
+- ***None***
+
+---
+
+### DumpDirectory.sources
+
+- **[Back to DumpDirectory Methods](#dumpdirectory-methods)**
+
+---
+
+### sources()
+
+#### Description
+
+- Get dataset names of the sources described in the current dump directory of your IPCS session.
+- Uses the `LISTDUMP` IPCS subcommand.
+- [LISTDUMP Subcommand](https://www.ibm.com/docs/en/zos/3.2.0?topic=subcommands-listdump-subcommand-list-dumps-in-dump-directory)
+
+#### Returns
+
+- ***list[str]***: Returns list of dataset names of the sources described in current the dump directory of your IPCS session.
+
+---
+
+### DumpDirectory.defaults
+
+- **[Back to DumpDirectory Methods](#dumpdirectory-methods)**
+
+---
+
+### defaults(***kwargs*)
+
+#### Description
+
+- Get/Set default values for certain parameters on IPCS subcommands for your IPCS session.
+- Uses the `SETDEF LIST` IPCS subcommand.
+- IPCS uses the new default value for both your current session and any subsequent sessions in which you use the same user dump directory, until you change the value.
+- Note that pyIPCS only sets global defaults.
+- [SETDEF Subcommand](https://www.ibm.com/docs/en/zos/3.1.0?topic=subcommands-setdef-subcommand-set-defaults)
+
+#### Parameters
+
+- **kwargs** *(dict, optional)*: Additional parameters (see other parameters)
+
+#### Other Parameters
+
+- **confirm** *(bool, optional)*: `True` for `CONFIRM` parameter. `False` for `NOCONFIRM` parameter.
+- **dsname** *(str|None, optional)*: String dataset name to be used for `DSNAME` parameter. `None` for `NODSNAME` parameter.
+- **display** *(list[str], optional)*:  List of sub parameters to be used for `DISPLAY` parameter. Possible values in the list can include `"MACHINE"`, `"REMARK"`, `"REQUEST"`, `"STORAGE"`, `"SYMBOL"`, `"ALIGN"`, `"NOMACHINE"`, `"NOREMARK"`, `"NOREQUEST"`, `"NOSTORAGE"`, `"NOSYMBOL"`, `"NOALIGN"`.
+- **flag** *(str, optional)*: String severity to be used for `FLAG` parameter. Possible string options include `ERROR`, `INFORMATIONAL`, `SERIOUS`|`SEVERE`, `TERMINATING`, `WARNING`.
+- **length** (pyipcs.Hex|str|int, optional): pyipcs.Hex object or string or int to be used for `LENGTH` parameter.
+- **pds** (bool, optional): `True` for `PDS` parameter. `False` for `NOPDS` parameter.
+- **asid** *(pyipcs.Hex|str|int, optional)*: pyipcs.Hex object or string or int to be used for `ASID` parameter.
+- **dspname** *(str, optional)*: String dataspace name to be used for `DSPNAME` parameter.
+- **setdef_params** *(str, optional)*: String of `SETDEF` parameters. Write parameters as you would in regular IPCS (ex: `"ACTIVE LENGTH(4)"`).
+
+#### Returns
+
+- ***pyipcs.SetDef***: Custom `SETDEF` Subcmd Object. [SetDef Custom Subcmd Object](#setdef-custom-subcmd-object)
+
+---
+---
+
+## SetDef Custom Subcmd Object
+
+- **[Back to Top](#pyipcs-readme)**
+- **[Back to IpcsSession Object](#ipcssession-object)**
+- **[Back to DumpDirectory Object](#dumpdirectory-object)**
+
+---
+
+**Bases:** *pyipcs.Subcmd*
+
+### Description
+
+- SetDef Custom Subcmd Object
+- Runs `SETDEF` with `LIST` parameter and other parameters
+- [SETDEF subcommand](https://www.ibm.com/docs/en/zos/3.1.0?topic=subcommands-setdef-subcommand-set-defaults)
+- [Address processing parameters](https://www.ibm.com/docs/en/zos/3.1.0?topic=parameter-address-processing-parameters)
+- Can generate SetDef object using `pyipcs.IpcsSession.ddir.defaults(..)`
+- Only Global Defaults impact the pyIPCS session.
+
+### Attributes
+
+- **data** *(dict)*: Global Defaults. Keys may not appear if information is unknown or unavailable.
+  - **"confirm"** *(bool)*: `True` for `CONFIRM`. `False` for `NOCONFIRM`.
+  - **"dsname"** *(str|None)*: String dataset name for parameter `DSNAME`. `None` for `NODSNAME`.
+  - **"display"** *(list[str]|None)*: List of sub parameters for `DISPLAY` parameter. `None` if `DISPLAY` is not in output. Possible values in the list can include `"MACHINE"`, `"REMARK"`, `"REQUEST"`, `"STORAGE"`, `"SYMBOL"`, `"ALIGN"`, `"NOMACHINE"`, `"NOREMARK"`, `"NOREQUEST"`, `"NOSTORAGE"`, `"NOSYMBOL"`, `"NOALIGN"`.
+  - **"flag"** *(str|None)*: String severity for parameter `FLAG`. `None` if `FLAG` is not in output. Possible string options include `"ERROR"`, `"INFORMATIONAL"`, `"SERIOUS"|"SEVERE"`, `"TERMINATING"`, `"WARNING"`.
+  - **"length"** *(pyipcs.Hex|None)*: pyipcs.Hex object for parameter `LENGTH`. `None` if `LENGTH` is not in output.
+  - **"pds"** *(bool)*: `True` for `PDS`. `False` for `NOPDS`.
+  - **"asid"** *(pyipcs.Hex|None)*: pyipcs.Hex object for parameter `ASID`. `None` if `ASID` is not in output.
+  - **"dspname"** *(str|None)*: String dataspace name for parameter `DSPNAME`. `None` if `DSPNAME` is not in output.
+
+---
+---
+
+## DumpHeader Object
+
+- **[Back to Top](#pyipcs-readme)**
+- **[Dump Object](#dump-object)**
+
+---
+
+### *class* pyipcs.DumpHeader(*dsname*)
+
+**Bases:** *dict*
+
+### Description
+
+- Custom Dictionary with info about a dump from the dump header.
+- Does not require dump initialization to instantiate object.
+- Reference dump header either with `header = DumpHeader(YOUR.DUMP.DSNAME)` or referencing `pyipcs.Dump.header`. [Dump Object](#dump-object)
+- Keys may not appear if information is unknown or unavailable.
+
+### Parameters
+
+- **dsname** *(str)*: Dump Dataset Name.
+
+### Keys
+
+- **"dump_type"** *(str)*: `"SAD"`, `"SVCD"`, `"TDMP"`, `"SYSM"`, or `"SLIP"`
+- **"sysname"** *(str)*
+- **"date_local"** *(str)*
+- **"time_local"** *(str)*
+- **"title"** *(str)*
+- **"original_dump_dsn"** *(str)*
+- **"version"** *(int)*: For example z/OS version `3` release `1`
+- **"release"** *(int)*: For example z/OS version `3` release `1`
+- **"sdrsn"** *(str)*
+- **"complete_dump"** *(bool)*
+- **"home_jobname"** *(str)*
+- **"primary"** *(pyipcs.Hex)*
+- **"secondary"** *(pyipcs.Hex)*
+- **"home"** *(pyipcs.Hex)*
+- **"sdwa_asid"** *(pyipcs.Hex)*
+- **"sdwa_address"** *(pyipcs.Hex)*
+- **"blocks_allocated_decimal"** *(int)*
+- **"remote_sysname"** *(str)*: Appears only if `remote_dump=True`
+- **"remote_dump"** *(bool)*
+- **"processor_serial_number"** *(str)*
+- **"processor_model_number"** *(str)*
+
+### Notes
+
+- The following keys are unknown or unavailable if `dump_type="SAD"`:
+  - **"home_jobname"**
+  - **"primary"**
+  - **"secondary"**
+  - **"home"**
+  - **"sdwa_asid"**
+  - **"sdwa_address"**
+  - **"blocks_allocated_decimal"**
+  - **"remote_sysname"**
+  - **"remote_dump"**
 
 ---
 ---
 
 ## Dump Object
 
-- __[Back to Top](#pyipcs-readme)__
-- __[Dump Methods](#dump-methods)__
+- **[Back to Top](#pyipcs-readme)**
+- **[Dump Methods](#dump-methods)**
 
 ---
----
 
-### *class* pyipcs.Dump(*session*, *dsname*, *ddir*)
+**Bases:** *object*
 
-__Bases:__ *object*
-
-#### Description
+### Description
 
 - Initializes a z/OS dump and stores general information.
 - Can create a Dump object using `pyipcs.IpcsSession.init_dump()`
-<br>
 
-- __On Dump object initialization:__
-  - Sets regular or temporary DDIR for dump and parses out general info about dump from various subcommands
-  - Initializes/Sets dump `dsname` under dump directory `ddir`.
-  - Will set IPCS `session` DDIR to `ddir`.
-  - Will set IPCS default `DSNAME` to `dsname`
+### Attributes
 
-#### Args
-
-- __session__ *(pyipcs.IpcsSession)*: IPCS Session.
-- __dsname__ *(str)*: Dump dataset name.
-- __ddir__ *(str)*: __Optional__. Dump directory. If not specified, dump will be initialized under temporary DDIR which will be deleted on session close.
-- __use_cur_ddir__ *(bool)*: __Optional__. Use current session DDIR. Will use the IpcsSession attribute `ddir` to initialize the dump under. This will take precedence over this function's `ddir` parameter. Default is `False`.
-
-#### Attributes
-
-- __dsname__ *(str)*: Dump dataset name.
-- __ddir__ *(str|None)*: Dump directory when dump was initialized.
-- __data__ *(dict)*: Dictionary containing general data about the dump. Editable by user to store additional info about a dump. __If Dump object cannot find or parse one of the `data` dictionary items below, the item will not be included in the `data` dictionary.__
-  - `'dump_type'` (str): 'SAD', 'SVCD', 'TDMP', 'SYSM', or 'SLIP'
-  - `'sysname'` *(str)*
-  - `'date_local'` *(str)*
-  - `'time_local'` *(str)*
-  - `'title'` *(str)*
-  - `'original_dump_dsn'` *(str)*
-  - `'version'` *(int)*: For example z/OS version `3` release `1`
-  - `'release'` *(int)*: For example z/OS version `3` release `1`
-  - `'sdrsn'` *(str)*
-  - `'complete_dump'` *(bool)*
-  - `'home_jobname'` *(str)*: Not included if `'dump_type'=='SAD'`.
-  - `'primary'` *(pyipcs.Hex)*: Not included if `'dump_type'=='SAD'`.
-  - `'secondary'` *(pyipcs.Hex)*: Not included if `'dump_type'=='SAD'`.
-  - `'home'` *(pyipcs.Hex)*: Not included if `'dump_type'=='SAD'`.
-  - `'sdwa_asid'` *(pyipcs.Hex)*: Not included if `'dump_type'=='SAD'`.
-  - `'sdwa_address'` *(pyipcs.Hex)*: Not included if `'dump_type'=='SAD'`.
-  - `'blocks_allocated_decimal'` *(int)*: Not included if `'dump_type'=='SAD'`.
-  - `'remote_sysname'` *(str)*: Included only if `'remote_dump'==True`. Not included if `'dump_type'=='SAD'`.
-  - `'remote_dump'` *(bool)*: Not included if `'dump_type'=='SAD'`.
-  - `'processor_serial_number'` *(str)*
-  - `'processor_model_number'` *(str)*
-  - `'sliptrap'` *(str)*: Included in `data` dictionary if `'dump_type'=='SLIP'`. Obtained from `LIST SLIPTRAP` subcommand.
-  - `'ipl_date_local'` *(str)*: Included in 'data' dictionary if CSA is dumped. Obtained from `IPLDATA` subcommand.
-  - `'ipl_time_local'` *(str)*: Included in 'data' dictionary if CSA is dumped. Obtained from `IPLDATA` subcommand.
-  - `'asids_dumped'` *(list[pyipcs.Hex])*: list of ASIDs that were dumped. Obtained from `CBF RTCT` subcommand.
-  - `'asids_all'` *(list[dict])*: Info about all asids on the system at the time of the dump. Dictionaries contain the hex ASID on the system, the string jobname, and the ASCB address. Obtained from `SELECT ALL` subcommand:
-    - `'asid'` (pyipcs.Hex)
-    - `'jobname'` *(str)*
-    - `'ascb_addr'` *(pyipcs.Hex)*
-  - `'storage_areas'` *(list[dict])*: Info about dumped storage areas. Obtained from `LISTDUMP` subcommand with parameters `DSNAME` and `SELECT`:
-    - `'asid'` (pyipcs.Hex)
-    - `'total_bytes'` *(pyipcs.Hex|None)* : Total number of bytes dumped for ASID in hex. `None` if total_bytes for ASID is not defined in `LISTDUMP`.
-    - `'sumdump'` *(pyipcs.Hex)*: Number of SUMMARY DUMP Data bytes dumped in hex.
-    - `'dataspaces'` *(dict)*:`{ str(Dataspace Name) : pyipcs.Hex(Number of bytes dumped for dataspace in hex) }`
+- **dsname** *(str)*: Dump dataset name.
+- **ddir** *(str)*: Dump directory when dump was initialized.
+- **header** *(pyipcs.DumpHeader)*: Custom dictionary object containing information about the dump from the dump header. [DumpHeader Object](#dumpheader-object)
+- **data** *(dict)*: Dictionary containing general information about the dump from various subcommands. Editable by user to store additional info about a dump. Keys may not appear if information is unknown or unavailable.
+  - **"sliptrap"** *(str)*: Included in `data` dictionary if the dump is a SLIP dump. Obtained from `LIST SLIPTRAP` subcommand.
+  - **"ipl_date_local"** *(str)*: Known if CSA is dumped.
+      Obtained from `IPLDATA` subcommand.
+  - **"ipl_time_local"** *(str)*: Known if CSA is dumped. Obtained from `IPLDATA` subcommand.
+  - **"asids_dumped"** *(list[pyipcs.Hex])*: List of ASIDs that were dumped. Obtained from `CBF RTCT` subcommand.
+  - **"asids_all"** *(list[dict])*: Info about all asids on the system at the time of the dump. List of dictionaries containing the hex asid, string jobname, and ASCB address. Obtained from `SELECT ALL` subcommand.
+    - **"asid"** *(pyipcs.Hex)*
+    - **"jobname"** *(str)*
+    - **"ascb_addr"** *(pyipcs.Hex)*
+  - **"storage_areas"** *(list[dict])*: Info about dumped storage areas. Contains dataspace information. Obtained from `LISTDUMP` subcommand with `DSNAME` and `SELECT` parameters.
+    - **"asid"** *(pyipcs.Hex)*
+    - **"total_bytes"** *(pyipcs.Hex|None)*: Total number of bytes dumped for ASID in hex. `None` if total_bytes for ASID is not defined in `LISTDUMP`.
+    - **"sumdump"** *(pyipcs.Hex)*: Number of SUMMARY DUMP Data bytes dumped in hex.
+    - **"dataspaces"** *(dict)*: Dictionary where the keys are the string dataspace names. Values are `Hex` objects containing the number of bytes dumped for dataspace.
 
 ---
 
 ### Dump Methods
 
-- __[Back to Dump Object](#dump-object)__
-- __[asid_to_jobname](#dumpasid_to_jobnameasid)__
-- __[jobname_to_asid](#dumpjobname_to_asidjobname)__
-- __[asid_to_ascb_addr](#dumpasid_to_ascbaddrasid)__
+- **[Back to Dump Object](#dump-object)**
+- **[asid_to_jobname](dumpasid_to_jobname)**
+- **[jobname_to_asid](dumpjobname_to_asid)**
+- **[asid_to_ascb_addr](dumpasid_to_ascb_addr)**
 
 ---
 
-### Dump.asid_to_jobname(*asid*)
+### Dump.asid_to_jobname
 
-- __[Back to Dump Methods](#dump-methods)__
+- **[Back to Dump Methods](#dump-methods)**
+
+---
+
+### asid_to_jobname(*asid*)
 
 #### Description
 
 - Get Jobname from ASID.
-- Obtained info from `SELECT ALL` subcommand
+- Obtained info from `SELECT ALL` subcommand.
 
-#### Args
+#### Parameters
 
-- __asid__ *(pyipcs.Hex|str|int)*
+- **asid** *(pyipcs.Hex|str|int)*
 
 #### Returns
 
-- __*str|None*__: Jobname associated with ASID or `None` if ASID is not found
+- ***str|None***: Jobname associated with ASID or `None` if ASID is not found.
 
 ---
 
-### Dump.jobname_to_asid(*jobname*)
+### Dump.jobname_to_asid
 
-- __[Back to Dump Methods](#dump-methods)__
+- **[Back to Dump Methods](#dump-methods)**
+
+---
+
+### jobname_to_asid(*jobname*)
 
 #### Description
 
 - Get ASID from Jobname.
-- Obtained info from `SELECT ALL` subcommand
+- Obtained info from `SELECT ALL` subcommand.
 
-#### Args
+#### Parameters
 
-- __jobname__ *(str)*
+- **jobname** *(str)*
 
 #### Returns
 
-- __*list[pyipcs.Hex]*__: List of ASIDs associated with `jobname`
+- ***list[pyipcs.Hex]***: List of ASIDs associated with `jobname`.
 
 ---
 
-### Dump.asid_to_ascbaddr(*asid*)
+### Dump.asid_to_ascb_addr
 
-- __[Back to Dump Methods](#dump-methods)__
+- **[Back to Dump Methods](#dump-methods)**
+
+---
+
+### asid_to_ascb_addr(*asid*)
 
 #### Description
 
 - Get ASCB address from ASID.
-- Obtained info from `SELECT ALL` subcommand
+- Obtained info from `SELECT ALL` subcommand.
 
-#### Args
+#### Parameters
 
-- __asid__ *(pyipcs.Hex|str|int)*
+- **asid** *(pyipcs.Hex|str|int)*
 
 #### Returns
 
-- __*pyipcs.Hex|None*__: ASCB address associated with ASID or `None` if ASID is not found
+- ***pyipcs.Hex|None***: ASCB address associated with ASID or `None` if ASID is not found.
 
 ---
 ---
 
 ## Subcmd Object
 
-- __[Back to Top](#pyipcs-readme)__
-- __[Extracting and Parsing Subcommand Output](#extracting-and-parsing-subcommand-output)__
-- __[Subcmd Methods](#subcmd-methods)__
+- **[Back to Top](#pyipcs-readme)**
+- **[Extracting and Parsing Subcommand Output](#extracting-and-parsing-subcommand-output)**
+- **[Subcmd Methods](#subcmd-methods)**
+- **[Creating Custom Subcmd Objects](#creating-custom-subcmd-objects)**
 
 ---
 
-### *class* pyipcs.Subcmd(*session*, *subcmd*, *outfile*, *keep_file*, *auth*)
+### *class* pyipcs.Subcmd(*session*, *subcmd*, *outfile=False*, *keep_file=False*, *auth=False*)
 
-__Bases:__ *object*
+**Bases:** *object*
 
 #### Description
 
 - Runs IPCS subcommand and stores output in string or file.
 
-#### Args
+#### Parameters
 
-- __session__ *(pyipcs.IpcsSession)*
-- __subcmd__ *(str)*: IPCS subcommand to run.
-- __outfile__ *(bool)*: __Optional__. If `True`, will create and store output in directory `[pyipcs.IpcsSession.directory]/pyipcs_session/[time of session open]/subcmd_output/`. File would then be specified in `outfile` attribute of Subcmd object. If `False`, stores output in string specified in `output` attribute of Subcmd object. Default is `False`.
-- __keep_file__ *(bool)*: __Optional__. If `True` preserves subcommand output file after program execution. If `False` deletes subcommand output file after program execution. Default is `False`.
-- __auth__ *(bool)*: __Optional__. If `True`, subcommand will be run from an authorized environment. Default is `False`.
-
+- **session** *(pyipcs.IpcsSession)*
+- **subcmd** *(str)*: IPCS subcommand to run.
+- **outfile** *(bool, optional)*: If `True`, will create and store output in directory `[pyipcs.IpcsSession.directory_full]/subcmd_output/`. File would then be specified in `outfile` attribute of Subcmd object. If `False`, stores output in string specified in `output` attribute of Subcmd object. Default is `False`.
+- **keep_file** *(bool, optional)*: If `True` preserves subcommand output file after program execution. If `False` deletes subcommand output file after program execution. Default is `False`.
+- **auth** *(bool, optional)*: If `True`, subcommand will be run from an authorized environment. Default is `False`.
 
 #### Attributes
 
-- __subcmd__ *(str)*: IPCS subcommand that was ran
-- __outfile__ *(str|None)*: File containing subcommand output. `None` if `outfile` parameter in constructor was set to `False` or if file was deleted with `pyipcs.Subcmd.delete_file()` method.
-- __output__ *(str)*: Returns string containing the entire subcommand output.
-- __keep_file__ *(bool)*: If `True` preserves subcommand output file after program execution. If `False` deletes subcommand output file after program execution. Editable by user.
-- __rc__ *(int)*: Return code from running subcommand.
-- __data__ *(dict)*: Editable by user to store additional info about a IPCS subcommand. Initially empty.
+- **subcmd** *(str)*: IPCS subcommand that was ran.
+- **outfile** *(str|None)*: File containing subcommand output. `None` if `outfile` parameter in constructor was set to `False` or if file was deleted with `pyipcs.Subcmd.delete_file()` method.
+- **output** *(str)*: Returns string containing the entire subcommand output.
+- **keep_file** *(bool)*: If `True` preserves subcommand output file after program execution. If `False` deletes subcommand output file after program execution. Editable by user.
+- **rc** *(int)*: Return code from running subcommand.
+- **data** *(dict)*: Editable by user to store additional info about a IPCS subcommand. Initially empty.
 
 ---
 
 ### Extracting and Parsing Subcommand Output
 
-- __[Back to Subcmd Object](#subcmd-object)__
+- **[Back to Subcmd Object](#subcmd-object)**
 
 ---
 
-#### Refer to User Guide Section - [Subcmd Indexing, Find, and Get Field Methods](./USER_GUIDE.md#subcmd-indexing-find-and-get-field-methods)
+- **There are a few methods of extracting data from subcommand output**
+  - **Find Methods**: Find the index of a particular string within subcommand output.
+    - `Subcmd.find`
+    - `Subcmd.rfind`
+  - **Get Field Methods**: Get a particular value within subcommand output based on a label that precedes the value.
+    - `Subcmd.get_field`
+    - `Subcmd.get_field2`
+    - `Subcmd.rget_field`
+    - `Subcmd.rget_field2`
+  - **Direct Indexing**
 
-- __*Provides More Detailed Explanation*__
-
-<br>
-
-- __Indexing:__
-
-```python
-subcmd = Subcmd(session, "STATUS REGISTERS")
-# indexed_output = string of portion of subcommand output
-indexed_output = subcmd[10:20]
-```
-
-- __Find and Get Field Methods:__
-  - *Listed in __[Subcmd Methods](#subcmd-methods)__*
+    ```python
+    subcmd = Subcmd(session, "STATUS REGISTERS")
+    # indexed_output = string of portion of subcommand output
+    indexed_output = subcmd[10:20]
+    ```
 
 ---
 
 ### Subcmd Methods
 
-- __[Back to Subcmd Object](#subcmd-object)__
-- __[find](#subcmdfindsubstring-start-end)__
-- __[rfind](#subcmdrfindsubstring-start-end)__
-- __[get_field](#subcmdget_fieldlabel-end_string-separator-start-end-to_hex)__
-- __[get_field2](#subcmdget_field2label-length-separator-start-end-to_hex)__
-- __[rget_field](#subcmdrget_fieldlabel-end_string-separator-start-end-to_hex)__
-- __[rget_field2](#subcmdrget_field2label-length-separator-start-end-to_hex)__
-- __[delete_file](#subcmddelete_file)__
+- **[Back to Subcmd Object](#subcmd-object)**
+- **[find](#subcmdfind)**
+- **[rfind](#subcmdrfind)**
+- **[get_field](#subcmdget_field)**
+- **[get_field2](#subcmdget_field2)**
+- **[rget_field](#subcmdrget_field)**
+- **[rget_field2](#subcmdrget_field2)**
+- **[delete_file](#subcmddelete_file)**
 
 ---
 
-### Subcmd.find(*substring*, *start*, *end*)
+### Subcmd.find
 
-- __[Back to Subcmd Methods](#subcmd-methods)__
+- **[Back to Subcmd Methods](#subcmd-methods)**
+
+---
+
+### find(*substring*, *start=0*, *end=None*)
 
 #### Description
 
 - Find the first occurrence of a substring. Returns `-1` if the value is not found.
 
-#### Args
+#### Parameters
 
-- __substring__ *(str)*: Substring to search for.
-- __start__ *(int)*: __Optional__. Index where to start the search. Default is `0`.
-- __end__ *(int|None)*: __Optional__. Index where to end the search. Default is `None` for the end of the output.
+- **substring** *(str)*: Substring to search for.
+- **start** *(int, optional)*: Index where to start the search. Default is `0`.
+- **end** *(int|None, optional)*: Index where to end the search. Default is `None` for the end of the output.
 
 #### Returns
 
-- __*int*__: Output index where substring was found. `-1` if substring was not found.
+- ***int***: Output index where substring was found. `-1` if substring was not found.
 
 ---
 
-### Subcmd.rfind(*substring*, *start*, *end*)
+### Subcmd.rfind
 
-- __[Back to Subcmd Methods](#subcmd-methods)__
+- **[Back to Subcmd Methods](#subcmd-methods)**
+
+---
+
+### rfind(*substring*, *start=0*, *end=None*)
 
 #### Description
 
 - Find the last occurrence of a substring. Returns `-1` if the value is not found.
 
-#### Args
+#### Parameters
 
-- __substring__ *(str)*: Substring to search for
-- __start__ *(int)*: __Optional__. Index where to end the reverse search. Default is `0`.
-- __end__ *(int|None)*: __Optional__. Index where to start the reverse search. Default is `None` for the end of the output.
+- **substring** *(str)*: Substring to search for.
+- **start** *(int, optional)*: Index where to end the reverse search. Default is `0`.
+- **end** *(int|None, optional)*: Index where to start the reverse search. Default is `None` for the end of the output.
 
 #### Returns
 
-- __*int*__: Output index where substring was found. `-1` if substring was not found.
+- ***int***: Output index where substring was found. `-1` if substring was not found.
 
 ---
 
-### Subcmd.get_field(*label*, *end_string*, *separator*, *start*, *end*, *to_hex*)
+### Subcmd.get_field
 
-- __[Back to Subcmd Methods](#subcmd-methods)__
+- **[Back to Subcmd Methods](#subcmd-methods)**
+
+---
+
+### get_field(*label*, *end_string*, *separator=""*, *start=0*, *end=None*, *to_hex=False*)
 
 #### Description
 
 - Attempts to get the field value from the output based on a label, separator, and end string.
 
-#### Args
+#### Parameters
 
-- __label__ *(str)*: The label of the field.
-- __end_string__ *(str)*: End string that indicates end of value.
-- __separator__ *(str)*: __Optional__. The separator between the label and the value.
-- __start__ *(int)*: __Optional__. Index where to start the search. Default is `0`.
-- __end__ *(int|None)*: __Optional__. Index where to end the search. Default is `None` for the end of the output.
-- __to_hex__ *(bool)*: __Optional__. Return value as pyipcs.Hex if `to_hex` is `True`. Default is `False` for returning a string.
+- **label** *(str)*: The label of the field.
+- **end_string** *(str)*: End string that indicates the end of the value.
+- **separator** *(str, optional)*: The separator between the label and the value.
+- **start** *(int, optional)*: Index where to start the search. Default is `0`.
+- **end** *(int|None, optional)*: Index where to end the search. Default is `None` for the end of the output.
+- **to_hex** *(bool, optional)*: Return value as pyipcs.Hex if `to_hex` is `True`. Default is `False` for returning a string.
 
 #### Returns
 
-- __*list*__: A list `[value (str|pyipcs.Hex), start (int), end (int)]` where `subcmd[start:end] == value`. `[None, -1, -1]` if field is not found.
+- ***list***: A list `[value (str|pyipcs.Hex), start (int), end (int)]` where `subcmd[start:end] == value`. `[None, -1, -1]` if field is not found.
 
 ---
 
-### Subcmd.get_field2(*label*, *length*, *separator*, *start*, *end*, *to_hex*)
+### Subcmd.get_field2
 
-- __[Back to Subcmd Methods](#subcmd-methods)__
+- **[Back to Subcmd Methods](#subcmd-methods)**
+
+---
+
+### get_field2(*label*, *length*, *separator=""*, *start=0*, *end=None*, *to_hex=False*)
 
 #### Description
 
 - Attempts to get the field value from the output based on a label, separator, and field length.
 
-#### Args
+#### Parameters
 
-- __label__ *(str)*: The label of the field.
-- __length__ *(int)*: Length of value to get.
-- __separator__ *(str)*: __Optional__. The separator between the label and the value.
-- __start__ *(int)*: __Optional__. Index where to start the search. Default is `0`.
-- __end__ *(int|None)*: __Optional__. Index where to end the search. Default is `None` for the end of the output.
-- __to_hex__ *(bool)*: __Optional__. Return value as pyipcs.Hex if `to_hex` is `True`. Default is `False` for returning a string.
+- **label** *(str)*: The label of the field.
+- **length** *(int)*: Length of the value to get.
+- **separator** *(str, optional)*: The separator between the label and the value.
+- **start** *(int, optional)*: Index where to start the search. Default is `0`.
+- **end** *(int|None, optional)*: Index where to end the search. Default is `None` for the end of the output.
+- **to_hex** *(bool, optional)*: Return value as pyipcs.Hex if `to_hex` is `True`. Default is `False` for returning a string.
 
 #### Returns
 
-- __*list*__: A list `[value (str|pyipcs.Hex), start (int), end (int)]` where `subcmd[start:end] == value`. `[None, -1, -1]` if field is not found.
+- ***list***: A list `[value (str|pyipcs.Hex), start (int), end (int)]` where `subcmd[start:end] == value`. `[None, -1, -1]` if field is not found.
 
 ---
 
-#### Subcmd.rget_field(*label*, *end_string*, *separator*, *start*, *end*, *to_hex*)
+### Subcmd.rget_field
 
-- __[Back to Subcmd Methods](#subcmd-methods)__
+- **[Back to Subcmd Methods](#subcmd-methods)**
+
+---
+
+### rget_field(*label*, *end_string*, *separator=""*, *start=0*, *end=None*, *to_hex=False*)
 
 #### Description
 
 - Attempts to get the field value in a reverse search from the output based on a label, separator, and end string.
 
-#### Args
+#### Parameters
 
-- __label__ *(str)*: The label of the field.
-- __end_string__ (str): End string that indicates end of value.
-- __separator__ *(str)*: __Optional__. The separator between the label and the value.
-- __start__ *(int)*: __Optional__. Index where to end the reverse search. Default is `0`.
-- __end__ *(int|None)*: __Optional__. Index where to start the reverse search. Default is `None` for the end of the output.
-- __to_hex__ *(bool)*: __Optional__. Return value as pyipcs.Hex if `to_hex` is `True`. Default is `False` for returning a string.
+- **label** *(str)*: The label of the field.
+- **end_string** (str): End string that indicates the end of the value.
+- **separator** *(str, optional)*: The separator between the label and the value.
+- **start** *(int, optional)*: Index where to end the reverse search. Default is `0`.
+- **end** *(int|None, optional)*: Index where to start the reverse search. Default is `None` for the end of the output.
+- **to_hex** *(bool, optional)*: Return value as pyipcs.Hex if `to_hex` is `True`. Default is `False` for returning a string.
 
 #### Returns
 
-- __*list*__: A list `[value (str|pyipcs.Hex), start (int), end (int)]` where `subcmd[start:end] == value`. `[None, -1, -1]` if field is not found.
+- ***list***: A list `[value (str|pyipcs.Hex), start (int), end (int)]` where `subcmd[start:end] == value`. `[None, -1, -1]` if field is not found.
 
 ---
 
-#### Subcmd.rget_field2(*label*, *length*, *separator*, *start*, *end*, *to_hex*)
+### Subcmd.rget_field2
 
-- __[Back to Subcmd Methods](#subcmd-methods)__
+- **[Back to Subcmd Methods](#subcmd-methods)**
+
+---
+
+### rget_field2(*label*, *length*, *separator=""*, *start=0*, *end=None*, *to_hex=False*)
 
 #### Description
 
 - Attempts to get the field value in a reverse search from the output based on a label, separator, and field length.
 
-#### Args
+#### Parameters
 
-- __label__ *(str)*: The label of the field.
-- __length__ *(int)*: Length of value to get.
-- __separator__ *(str)*: __Optional__. The separator between the label and the value.
-- __start__ *(int)*: __Optional__. Index where to end the reverse search. Default is `0`.
-- __end__ *(int|None)*: __Optional__. Index where to start the reverse search. Default is `None` for the end of the output.
-- __to_hex__ *(bool)*. __Optional__. Return value as pyipcs.Hex if `to_hex` is `True`. Default is `False` for returning a string.
+- **label** *(str)*: The label of the field.
+- **length** *(int)*: Length of the value to get.
+- **separator** *(str, optional)*: The separator between the label and the value.
+- **start** *(int, optional)*: Index where to end the reverse search. Default is `0`.
+- **end** *(int|None, optional)*: Index where to start the reverse search. Default is `None` for the end of the output.
+- **to_hex** *(bool,optional)*. Return value as pyipcs.Hex if `to_hex` is `True`. Default is `False` for returning a string.
 
 ---
 
-#### Subcmd.delete_file()
+### Subcmd.delete_file
 
-- __[Back to Subcmd Methods](#subcmd-methods)__
+- **[Back to Subcmd Methods](#subcmd-methods)**
+
+---
+
+### delete_file()
 
 #### Description
 
@@ -1307,22 +1627,21 @@ indexed_output = subcmd[10:20]
 
 #### Returns
 
-- __*None*__
+- ***None***
 
 ---
 ---
 
 ## Creating Custom Subcmd Objects
 
-- __[Back to Top](#pyipcs-readme)__
+- **[Back to Top](#pyipcs-readme)**
+- **[Back to Subcmd Object](#subcmd-object)**
 
 ---
 
-- pyIPCS allows users to create custom `Subcmd` objects for specific issues and subcommands.
-<br>
+- pyIPCS allows users to create custom `Subcmd` objects for specific subcommands and or specific issues.
 
 - Users can use the `data` attribute of the `Subcmd` objects to store additional info.
-<br>
 
 ### Creating a Custom Subcmd Object for IPCS Subcommand `YOUR SUBCMD`
 
@@ -1331,103 +1650,50 @@ from pyipcs import IpcsSession, Subcmd
 
 class YourSubcmd(Subcmd):
 
-    def __init__(
-        self, 
-        session:IpcsSession, 
-        outfile:bool=False,
-        keep_file:bool=False,
-    ) -> None:
+    def __init__(self, session:IpcsSession) -> None:
 
         # Call constructor from original Subcmd object
-        super().__init__(
-            session,
-            "YOUR SUBCMD",
-            outfile=outfile,
-            keep_file=keep_file,   
-        )
+        super().__init__(session, "YOUR SUBCMD")
 
         # Store additional info in data dict attribute
-        self.data["new_subcmd_data_key"] = "new_subcmd_data_value"  
+        self.data["data_key"] = "data_value"  
 
 
 session = IpcsSession()
 session.open()
 
 # String dataset name of z/OS dump
+
 dsname = ...
 
 dump = session.init_dump(dsname)
 
 # Run 'YOUR SUBCMD' with custom Subcmd object
+
 your_subcmd = YourSubcmd(session)
 
-# Will print 'new_subcmd_data_value'
-print(your_subcmd.data["new_subcmd_data_key"])
+# Will print 'data_value'
+
+print(your_subcmd.data["data_key"])
 
 session.close()
+
 ```
-
----
----
-
-## SetDef Custom Subcmd Object
-
-- __[Back to Top](#pyipcs-readme)__
-
----
-
-### *class* pyipcs.SetDef(*session*, *confirm*, *dsname*, *nodsname*, *asid*, *dspname*, *setdef_params*, *outfile*, *keep_file*)
-
-__Bases:__ *pyipcs.Subcmd*
-
-#### Description
-
-- Runs SETDEF with LIST parameter and other parameters
-- [SETDEF subcommand](https://www.ibm.com/docs/en/zos/3.1.0?topic=subcommands-setdef-subcommand-set-defaults)
-- [Address processing parameters](https://www.ibm.com/docs/en/zos/3.1.0?topic=parameter-address-processing-parameters)
-- Can create a pyipcs.SetDef object using `pyipcs.IpcsSession.get_defaults()` and `pyipcs.IpcsSession.set_defaults()`
-- Only Global Defaults impact the pyIPCS session.
-
-#### Args
-
-- __session__ *(pyipcs.IpcsSession)*
-- __confirm__ *(bool|None)*: __Optional__. `True` for `CONFIRM` parameter. `False` for `NOCONFIRM` parameter. Default is `None` to not include parameter in subcommand.
-- __dsname__ *(str|None)*: __Optional__. String dataset name to be used for `DSNAME` parameter. Default is `None` to not include parameter in subcommand.
-- __nodsname__ *(bool)*: __Optional__. `True` for `NODSNAME` parameter. Default is `False` to not include parameter in subcommand.
-- __asid__ *(pyipcs.Hex|str|int|None)*: __Optional__. pyipcs.Hex object or string or int to be used for `ASID` parameter. Default is `None` to not include parameter in subcommand.
-- __dspname__ *(str|None)*: __Optional__. String dataspace name to be used for `DSPNAME` parameter. Default is `None` to not include parameter in subcommand.
-- __setdef_params__ *(str|None)*: __Optional__. String of `SETDEF` parameters. Write parameters as you would in regular IPCS (ex: `'ACTIVE LENGTH(4)'`). Default is `None` to not include in subcommand.
-- __outfile__ *(bool)*: __Optional__.
-- __keep_file__ *(bool)*: __Optional__.
-
-#### Attributes
-
-- __subcmd__ *(str)*: `SETDEF` subcommand that was ran
-- __outfile__ *(str|None)*
-- __output__ *(str|None)*
-- __keep_file__ *(bool)*
-- __rc__ *(int)*
-- __data__ *(dict)*: Global Defaults. If Global Defaults are not found in the output the `data` dictionary will be empty.
-  - `'confirm'` *(bool)*: `True` for parameter `CONFIRM`. `False` for parameter `NOCONFIRM`.
-  - `'dsname'` *(str|None)*: String dataset name for parameter DSNAME. `None` for parameter `NODSNAME`.
-  - `'asid'` *(pyipcs.Hex|None)*: pyipcs.Hex object for parameter `ASID`. `None` if parameter `ASID` is not included.
-  - `'dspname'` *(str|None)*: String dataspace name for parameter `DSPNAME`. `None` if parameter `DSPNAME` is not included.
 
 ---
 ---
 
 ## Util Functions
 
-- __[Back to Top](#pyipcs-readme)__
-- __[is_dump](#pyipcsutilis_dumpdsname)__
-- __[dump_header_data](#pyipcsutildump_header_datadsname)__
-- __[psw_scrunch](#pyipcsutilpsw_scrunchpsw)__
-- __[psw_parse](#pyipcsutilpsw_parsepsw)__
-- __[opcode](#pyipcsutilopcodesession-instr)__
-- __[addr_key](#pyipcsutiladdr_keysession-storage_addr)__
-- __[addr_fetch_protected](#pyipcsutiladdr_fetch_protectedsession-storage_addr)__
-- __[is_hex](#pyipcsutilis_hexhex_str)__
-- __[IpcsJsonEncoder](#class-pyipcsutilipcsjsonencoder)__
+- **[Back to Top](#pyipcs-readme)**
+- **[is_dump](#pyipcsutilis_dump)**
+- **[psw_scrunch](#pyipcsutilpsw_scrunch)**
+- **[psw_parse](#pyipcsutilpsw_parse)**
+- **[opcode](#pyipcsutilopcode)**
+- **[addr_key](#pyipcsutiladdr_key)**
+- **[addr_fetch_protected](#pyipcsutiladdr_fetch_protected)**
+- **[is_hex](#pyipcsutilis_hex)**
+- **[IpcsJsonEncoder](#pyipcsutilipcsjsonencoder)**
 
 ---
 
@@ -1439,130 +1705,112 @@ from pyipcs.util import *
 
 ---
 
-### pyipcs.util.is_dump(*dsname*)
+### pyipcs.util.is_dump
 
-- __[Back To Util Functions](#util-functions)__
+- **[Back To Util Functions](#util-functions)**
+
+---
+
+### is_dump(*dsname*)
 
 #### Description
 
 - Determine whether dataset is a z/OS dump
+- Will recall dataset if it exists.
 
-#### Args
+#### Parameters
 
-- __dsname__ *(str)*: z/OS dataset name
-
-#### Returns
-
-- __*bool*__
-
----
-
-### pyipcs.util.dump_header_data(*dsname*)
-
-- __[Back To Util Functions](#util-functions)__
-
-#### Description
-
-- Obtain info about z/OS dump from dump header without the need to create a Dump object
-
-#### Args
-
-- __dsname__ *(str)*: z/OS dataset name
+- **dsname** *(str)*: z/OS dataset name
 
 #### Returns
 
-- __*dict*__: Info about z/OS dump obtained from dump header
-  - `'dump_type'` (str): 'SAD', 'SVCD', 'TDMP', 'SYSM', or 'SLIP'
-  - `'sysname'` *(str)*
-  - `'date_local'` *(str)*
-  - `'time_local'` *(str)*
-  - `'title'` *(str)*
-  - `'original_dump_dsn'` *(str)*
-  - `'version'` *(int)*: For example z/OS version `3` release `1`
-  - `'release'` *(int)*: For example z/OS version `3` release `1`
-  - `'sdrsn'` *(str)*
-  - `'complete_dump'` *(bool)*
-  - `'home_jobname'` *(str)*: Not included if `'dump_type'=='SAD'`.
-  - `'primary'` *(pyipcs.Hex)*: Not included if `'dump_type'=='SAD'`.
-  - `'secondary'` *(pyipcs.Hex)*: Not included if `'dump_type'=='SAD'`.
-  - `'home'` *(pyipcs.Hex)*: Not included if `'dump_type'=='SAD'`.
-  - `'sdwa_asid'` *(pyipcs.Hex)*: Not included if `'dump_type'=='SAD'`.
-  - `'sdwa_address'` *(pyipcs.Hex)*: Not included if `'dump_type'=='SAD'`.
-  - `'blocks_allocated_decimal'` *(int)*: Not included if `'dump_type'=='SAD'`.
-  - `'remote_sysname'` *(str)*: Included only if `'remote_dump'==True`. Not included if `'dump_type'=='SAD'`.
-  - `'remote_dump'` *(bool)*: Not included if `'dump_type'=='SAD'`.
-  - `'processor_serial_number'` *(str)*
-  - `'processor_model_number'` *(str)*
+- ***bool***
 
 ---
 
-### pyipcs.util.psw_scrunch(*psw*)
+### pyipcs.util.psw_scrunch
 
-- __[Back To Util Functions](#util-functions)__
+- **[Back To Util Functions](#util-functions)**
+
+---
+
+### psw_scrunch(*psw*)
 
 #### Description
 
 - Scrunch 128 bit PSW to 64 bits
 - If 64 bit PSW is inputted as argument return PSW as is
 
-#### Args
+#### Parameters
 
-- __psw__ *(pyipcs.Hex)*: 128 bit PSW or 64 bit PSW
+- **psw** *(pyipcs.Hex)*: 128 bit PSW or 64 bit PSW
 
 #### Returns
 
-- __*pyipcs.Hex*__: 64 bit PSW
+- ***pyipcs.Hex***: 64 bit PSW
 
 ---
 
-### pyipcs.util.psw_parse(*psw*)
+### pyipcs.util.psw_parse
 
-- __[Back To Util Functions](#util-functions)__
+- **[Back To Util Functions](#util-functions)**
+
+---
+
+### psw_parse(*psw*)
 
 #### Description
 
-- Obtain data from PSW
+- Obtain data from PSW.
 
-#### Args
+#### Parameters
 
-- __psw__ *(pyipcs.Hex)*: 128 bit PSW or 64 bit PSW
+- **psw** *(pyipcs.Hex)*: 128 bit PSW or 64 bit PSW.
 
 #### Returns
 
-- __*dict*__: data from PSW
-  - `'enabled'` *(bool|None)*: `True` for Enabled for I/O and External Interrupts if bit 6 and 7 are on. `False` for Disabled for I/O and External Interrupts if they are both off. `None` if one of either bit 6 or 7 is on and one is off.
-  - `'key'` *(int)*: PSW key
-  - `'privileged'` *(bool)*: `True` for supervisor state(privileged). `False` for problem program state(unprivileged)
-  - `'asc_mode'` *(str)*: One of either `'PRIMARY'`, `'AR'`, `'SECONDARY'`, or `'HOME'`
-  - `'cc'` *(int)*: Condition code
-  - `'amode'` *(int|None)*: Either `24`, `31`, `64`, or `None` if invalid
-  - `'instr_addr'` *(pyipcs.Hex)*: Instruction address
+- ***dict***: data from PSW
+  - **"enabled"** *(bool|None)*:  `True` for Enabled for I/O and External Interrupts if bit 6 and 7 are on. `False` for Disabled for I/O and External Interrupts if they are both off. `None` if one of either bit 6 or 7 is on and one is off.
+  - **"key"** *(int)*: PSW key.
+  - **"privileged"** *(bool)*: `True` for supervisor state(privileged). `False` for problem program state(unprivileged)
+  - **"asc_mode"** *(str)*: One of either `"PRIMARY"`, `"AR"`, `"SECONDARY"`, or `"HOME"`.
+  - **"cc"** *(int)*: Condition code.
+  - **"amode"** *(int|None)*: Either `24`, `31`, `64`, or `None` if invalid.
+  - **"instr_addr"** *(pyipcs.Hex)*: Instruction address.
 
 ---
 
-### pyipcs.util.opcode(*session*, *instr*)
+### pyipcs.util.opcode
 
-- __[Back To Util Functions](#util-functions)__
+- **[Back To Util Functions](#util-functions)**
+
+---
+
+### opcode(*session*, *instr*)
 
 #### Description
 
-- Get mnemonic of instruction
-- Runs `OPCODE` subcommand
+- Get mnemonic of instruction.
+- Runs `OPCODE` subcommand.
 
-#### Args
+#### Parameters
 
-- __session__ *(pyipcs.Session)*
-- __instr__ *(str|int|pyipcs.Hex)*: Instruction to get mnemonic from
+- **session** *(pyipcs.Session)*
+- **instr** *(str|int|pyipcs.Hex)*: Instruction to get mnemonic from.
 
 #### Returns
 
-- __*str|None*__: Instruction mnemonic. Returns `None` if `OPCODE` subcommand returns with non-zero return code or mnemonic can't be found.
+- ***str|None***: Instruction mnemonic. Returns `None` if `OPCODE` subcommand returns with non-zero return code or mnemonic can't be found.
 
 ---
 
-### pyipcs.util.addr_key(*session*, *storage_addr*)
+### pyipcs.util.addr_key
 
-- __[Back To Util Functions](#util-functions)__
+- **[Back To Util Functions](#util-functions)**
+
+---
+
+### addr_key(*session*, *storage_addr*)
 
 #### Description
 
@@ -1570,61 +1818,73 @@ from pyipcs.util import *
 - Runs `LIST` subcommand with the `DISPLAY` parameter.
 - Make sure to set correct defaults `DSNAME`, `ASID`, and `DSPNAME` prior to calling this function.
 
-#### Args
+#### Parameters
 
-- __session__ *(pyipcs.IpcsSession)*
-- __storage_addr__ *(str|int|pyipcs.Hex)*: Storage Address
+- **session** *(pyipcs.IpcsSession)*
+- **storage_addr** *(str|int|pyipcs.Hex)*: Storage Address.
 
 #### Returns
 
-- __*int|None*__: Storage key. Returns `None` if `LIST` subcommand with the `DISPLAY` parameter subcommand returns with non-zero return code or key can't be determined.
+- ***int|None***: Storage key. Returns `None` if `LIST` subcommand with the `DISPLAY` parameter subcommand returns with non-zero return code or key can't be determined.
 
 ---
 
-### pyipcs.util.addr_fetch_protected(*session*, *storage_addr*)
+### pyipcs.util.addr_fetch_protected
 
-- __[Back To Util Functions](#util-functions)__
+- **[Back To Util Functions](#util-functions)**
+
+---
+
+### addr_fetch_protected(*session*, *storage_addr*)
 
 #### Description
 
-- Return if storage address is fetch protected
+- Return if storage address is fetch protected.
 - Runs `LIST` subcommand with the `DISPLAY` parameter.
 - Make sure to set correct defaults `DSNAME`, `ASID`, and `DSPNAME` prior to calling this function.
 
-#### Args
+#### Parameters
 
-- __session__ *(pyipcs.IpcsSession)*
-- __storage_addr__ *(str|int|pyipcs.Hex)*: Storage Address.
+- **session** *(pyipcs.IpcsSession)*
+- **storage_addr** *(str|int|pyipcs.Hex)*: Storage Address.
 
 #### Returns
 
-- __*bool*__: `True` if storage_addr is fetch protected, `False` if not. Returns `None` if `LIST` subcommand with the `DISPLAY` parameter subcommand returns with non-zero return code or fetch protected can't be determined.
+- ***bool***: `True` if storage_addr is fetch protected, `False` if not. Returns `None` if `LIST` subcommand with the `DISPLAY` parameter subcommand returns with non-zero return code or fetch protected can't be determined.
 
 ---
 
-### pyipcs.util.is_hex(*hex_str*)
+### pyipcs.util.is_hex
 
-- __[Back To Util Functions](#util-functions)__
+- **[Back To Util Functions](#util-functions)**
+
+---
+
+### is_hex(*hex_str*)
 
 #### Description
 
 - Check if string is hex
 
-#### Args
+#### Parameters
 
-- __hex_str__ *(str)*
+- **hex_str** *(str)*
 
 #### Returns
 
-- __*bool*__: `True` if string is hex, `False` if not
+- ***bool***: `True` if string is hex, `False` if not.
+
+---
+
+### pyipcs.util.IpcsJsonEncoder()
+
+- **[Back To Util Functions](#util-functions)**
 
 ---
 
 ### *class* pyipcs.util.IpcsJsonEncoder()
 
-__Bases:__ *json.JSONEncoder*
-
-- __[Back To Util Functions](#util-functions)__
+**Bases:** *json.JSONEncoder*
 
 #### Description
 
@@ -1636,15 +1896,15 @@ __Bases:__ *json.JSONEncoder*
 
 ## Converting pyIPCS Objects to JSON
 
-- __[Back to Top](#pyipcs-readme)__
+- **[Back to Top](#pyipcs-readme)**
 
 ---
 
-- pyIPCS objects can be converted to JSON using the [IpcsJsonEncoder](#class-pyipcsutilipcsjsonencoder) object from the `util` library.
+- pyIPCS objects can be converted to JSON using the [IpcsJsonEncoder](#pyipcsutilipcsjsonencoder) object from the `util` library.
 
 <br>
 
-- __Examples:__
+- **Examples:**
 
 ```python
 import json
@@ -1652,31 +1912,44 @@ from pyipcs import Hex, IpcsSession, Subcmd
 from pyipcs.util import IpcsJsonEncoder
 
 # Setup
+
 dsname = ...
 session = IpcsSession()
 dump = session.init_dump(dsname)
 subcmd = Subcmd(session, "STATUS REGISTERS")
 
 # Convert Hex, Dump, and Subcmd objects to JSON strings
-hex_json = json.dumps( { Hex("1"): Hex("2") }, cls=IpcsJsonEncoder)
+
+hex_json = json.dumps( { "Key": Hex("1") }, cls=IpcsJsonEncoder)
+
 dump_json = json.dumps(dump, cls=IpcsJsonEncoder)
+
 subcmd_json = json.dumps(subcmd, cls=IpcsJsonEncoder)
 
 # Write Subcmd JSON to file
+
 with open("output.json", "w") as f:
     json.dump(subcmd, f, cls=IpcsJsonEncoder)
+
 ```
 
-- `Hex` object keys and values get converted to a string representation for JSON
+- `Hex` JSON
 
-<br>
+```python
+{
+  "__ipcs_type__": "Hex"
+  "value" (str)
+}
+```
 
 - `Dump` JSON:
 
 ```python
 {
+  "__ipcs_type__": "Dump"
   "dsname" (str)
   "ddir" (str)
+  "header" (str)
   "data" (dict)
 }
 ```
@@ -1685,6 +1958,7 @@ with open("output.json", "w") as f:
 
 ```python
 {
+  "__ipcs_type__": "Subcmd"
   "subcmd" (str)
   "outfile" (str|None)
   "output" (str),

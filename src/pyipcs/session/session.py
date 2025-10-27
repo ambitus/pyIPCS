@@ -46,7 +46,7 @@ class IpcsSession:
         Manages TSO allocations for your IPCS session.
 
     ddir : pyipcs.DumpDirectory
-        Manages dump directory(DDIR) that is used during IPCS session.
+        Manages dump directory(DDIR) functionality for your IPCS session.
 
     uid : str | None
         Unique ID for open pyIPCS session. `None` if pyIPCS session is not active.
@@ -111,7 +111,7 @@ class IpcsSession:
         hlq : str|None, optional
             High level qualifier where opened pyIPCS session is or will be under.
             pyIPCS session includes z/OS MVS datasets for pyIPCS EXECs and DDIRs.
-            High level qualifier has a max length of 16 characters excluding `'.'`.
+            High level qualifier has a max length of 16 characters excluding `"."`.
             By default is `None` which will set the high level qualifier as your userid.
         
         directory : str|None, optional
@@ -243,7 +243,7 @@ class IpcsSession:
         
         ddir : str, optional
             Dump directory.
-            If empty, dump will be initialized under temporary DDIR.
+            If an empty string, dump will be initialized under temporary DDIR.
 
         use_cur_ddir : bool, optional
             Use current session DDIR.
@@ -281,7 +281,7 @@ class IpcsSession:
         self.ddir.use(dump.ddir)
 
         # Check that dump is still initialized under DDIR
-        if not self.dsname_in_ddir(dump.dsname):
+        if dump.dsname not in self.ddir.sources():
             raise RuntimeError(
                 f"Dump {dump.dsname} is not initialized under dump directory {dump.ddir}"
             )
@@ -292,33 +292,6 @@ class IpcsSession:
         # Run STATUS to finish setup
         Subcmd(self, "STATUS")
 
-    def dsname_in_ddir(self, dsname: str) -> bool:
-        """
-        Check if dataset is a source described in the current session DDIR.
-
-        Used to check if a dump dataset was initialized under the current DDIR.
-
-        Parameters
-        ----------
-        dsname : str
-            Dataset name.
-
-        Returns
-        -------
-        bool
-            `True` if dataset name a source described in the current DDIR, `False` if not.
-        """
-        if not isinstance(dsname, str):
-            raise ArgumentTypeError("dsname", dsname, str)
-        if not self.active:
-            raise SessionNotActiveError()
-
-        listdump = Subcmd(self, "LISTDUMP")
-        if listdump.rc != 0:
-            raise InvalidReturnCodeError(
-                listdump.subcmd, listdump.output, listdump.rc, 0
-            )
-        return f"DSNAME('{dsname}')" in listdump.output
 
     def evaluate(
         self,
@@ -337,18 +310,18 @@ class IpcsSession:
         Parameters
         ----------
         hex_address : pyipcs.Hex|str|int
-            Starting hex address to read from
+            Starting hex address to read from.
 
         dec_offset : int
-            Byte offset from the starting address in decimal
+            Byte offset from the starting address in decimal.
 
         dec_length : int
-            Byte length of data to access in decimal
+            Byte length of data to access in decimal.
         
         Returns
         -------
         pyipcs.Hex
-            Hex object representing the data at the specified address
+            Hex object representing the data at the specified address.
         """
         if not self.active:
             raise SessionNotActiveError()

@@ -8,25 +8,31 @@ import random
 import copy
 from zoautil_py import datasets, exceptions
 from ...tso_shell import tsocmd
-from ...error_handling import InvalidReturnCodeError, SessionNotActiveError, ArgumentTypeError
+from ...error_handling import (
+    InvalidReturnCodeError,
+    SessionNotActiveError,
+    ArgumentTypeError,
+)
 from ...util.zoautil_py_util import datasets_recall_exists
 from .setdef import SetDef
+from ...subcmd import Subcmd
 
 if TYPE_CHECKING:
     from ..session import IpcsSession
+
 
 class DumpDirectory:
     """
     Dump Directory Object
     
-    Manages dump directory(DDIR) for IPCS Session
+    Manages dump directory(DDIR) for IPCS Session.
 
     Attributes
     ----------
     dsname : str|None
-        Dataset name of dump directory for your IPCS session. 
+        Dataset name of dump directory for your IPCS session.
         `None` if dump directory is not set.
-    
+
     Methods
     -------
     __init__()
@@ -35,14 +41,18 @@ class DumpDirectory:
     use(dsname)
         Use a different dump directory as your current dump directory for your IPCS session.
 
-    create(dsname, use=True, **kwargs)
+    create(dsname, **kwargs)
         Create dump directory.
 
-    create_tmp(use=True, **kwargs)
+    create_tmp(**kwargs)
         Create temporary dump directory. Will be deleted on IPCS session close.
 
     presets(**kwargs)
         Presets for dump directory creation.
+
+    sources()
+        Get dataset names of the sources described 
+        in the current dump directory of your IPCS session.
 
     defaults(**kwargs)
         Get/Set default values for certain parameters on IPCS subcommands for your IPCS session.
@@ -86,7 +96,7 @@ class DumpDirectory:
         Parameters
         ----------
         dsname : str
-            Dump directory will be set as the session's DDIR.
+            Dump directory that will be set as the session's DDIR.
 
         Returns
         -------
@@ -108,8 +118,8 @@ class DumpDirectory:
 
     def create(self, dsname: str, **kwargs) -> None:
         """
-        Create dump directory. 
-        
+        Create dump directory.
+
         Uses `BLSCDDIR` CLIST to create DDIR.
         Adding additional keyword arguments will override pyIPCS DDIR presets.
 
@@ -139,7 +149,7 @@ class DumpDirectory:
 
         blscddir_params : str, optional
             String of `BLSCDDIR` parameters.
-            Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
+            Write parameters as you would in regular IPCS (ex: `"NDXCISZ(4096)"`).
 
         Returns
         -------
@@ -206,7 +216,7 @@ class DumpDirectory:
 
         blscddir_params : str, optional
             String of `BLSCDDIR` parameters.
-            Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
+            Write parameters as you would in regular IPCS (ex: `"NDXCISZ(4096)"`).
 
         Returns
         -------
@@ -241,7 +251,6 @@ class DumpDirectory:
 
         return tmp_ddir
 
-
     def presets(self, **kwargs) -> dict:
         """
         Presets for dump directory creation.
@@ -250,7 +259,7 @@ class DumpDirectory:
         Input optional parameters to change presets.
 
         https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory
-        
+
         Parameters
         ----------
         kwargs: dict, optional
@@ -259,50 +268,50 @@ class DumpDirectory:
         Other Parameters
         ----------------
         dataclas : str, optional
-            Specifies the data class for the new directory. 
+            Specifies the data class for the new directory.
             If you omit this parameter, there is no data class specified for the new directory.
 
         mgmtclas : str, optional
-            Specifies the management class for the new directory. 
-            If you omit this parameter, 
+            Specifies the management class for the new directory.
+            If you omit this parameter,
             there is no management class specified for the new directory.
 
         ndxcisz : int, optional
-            Specifies the control interval size for the index portion of the new directory. 
+            Specifies the control interval size for the index portion of the new directory.
             If you omit this parameter, the IBM-supplied default is 4096 bytes.
 
         records : int, optional
-            Specifies the number of records you want the directory to accommodate. 
-            If you omit this parameter, the IBM-supplied default is 5000; 
+            Specifies the number of records you want the directory to accommodate.
+            If you omit this parameter, the IBM-supplied default is 5000;
             your installation's default might vary.
 
         storclas : str, optional
-            Specifies the storage class for the new directory. 
-            If you omit this parameter, 
+            Specifies the storage class for the new directory.
+            If you omit this parameter,
             there is no storage class specified for the new directory.
 
         volume : str, optional
-            Specifies the VSAM volume on which the directory should reside. 
-            If you omit DATACLAS, MGMTCLAS, STORCLAS, and VOLUME, 
-            the IBM-supplied default is VSAM01. 
+            Specifies the VSAM volume on which the directory should reside.
+            If you omit DATACLAS, MGMTCLAS, STORCLAS, and VOLUME,
+            the IBM-supplied default is VSAM01.
             Otherwise, there is no IBM-supplied default.
 
         blscddir_params : str, optional
             String of `BLSCDDIR` parameters.
-            Write parameters as you would in regular IPCS (ex: `'NDXCISZ(4096)'`).
+            Write parameters as you would in regular IPCS (ex: `"NDXCISZ(4096)"`).
     
         Returns
         -------
         dict
             DDIR presets for dump creation for your IPCS session.
             Returned dictionary could contain the following presets as key-value pairs.
-            - 'dataclas' (str)
-            - 'mgmtclas' (str)
-            - 'ndxcisz' (int)
-            - 'records' (int)
-            - 'storclas' (str)
-            - 'volume' (str)
-            - 'blscddir_params' (str)
+            - **"dataclas"** (str)
+            - **"mgmtclas"** (str)
+            - **"ndxcisz"** (int)
+            - **"records"** (int)
+            - **"storclas"** (str)
+            - **"volume"** (str)
+            - **"blscddir_params"** (str)
         """
         # Add to presets if keyword argument was added
         for param, value in kwargs.items():
@@ -319,16 +328,51 @@ class DumpDirectory:
         # Return copy of presets to user
         return copy.deepcopy(self._presets)
 
+    def sources(self) -> list[str]:
+        """
+        Get dataset names of the sources described 
+        in the current dump directory of your IPCS session.
+
+        Uses the `LISTDUMP` IPCS subcommand.
+
+        https://www.ibm.com/docs/en/zos/3.2.0?topic=subcommands-listdump-subcommand-list-dumps-in-dump-directory
+
+        Returns
+        -------
+        list[str]
+            Returns list of dataset names of the sources described 
+            in the current dump directory of your IPCS session.
+        """
+
+        ddir_sources = []
+
+        listdump = Subcmd(self._session, "LISTDUMP")
+
+        if listdump.rc != 0:
+            raise InvalidReturnCodeError(
+                listdump.subcmd, listdump.output, listdump.rc, 0
+            )
+
+        dsname_start = listdump.find("DSNAME('")
+        while dsname_start != -1:
+            dsname_start += len("DSNAME('")
+            dsname_end = listdump.find("')", start=dsname_start)
+
+            ddir_sources.append(listdump[dsname_start:dsname_end])
+
+            dsname_start = listdump.find("DSNAME('", start=dsname_end)
+
+        return ddir_sources
 
     def defaults(self, **kwargs) -> SetDef:
         """
         Get/Set default values for certain parameters on IPCS subcommands for your IPCS session.
         Uses the `SETDEF LIST` IPCS subcommand.
 
-        IPCS uses the new default value for both your current session 
+        IPCS uses the new default value for both your current session
         and any subsequent sessions in which you use the same user dump directory,
         until you change the value.
-        
+
         Note that pyIPCS only sets global defaults.
 
         https://www.ibm.com/docs/en/zos/3.1.0?topic=subcommands-setdef-subcommand-set-defaults
@@ -346,15 +390,32 @@ class DumpDirectory:
         dsname : str|None, optional
             String dataset name to be used for `DSNAME` parameter. `None` for `NODSNAME` parameter.
 
+        display : list[str], optional
+            List of sub parameters to be used for `DISPLAY` parameter.
+            Possible values in the list can include
+            `"MACHINE"`, `"REMARK"`, `"REQUEST"`, `"STORAGE"`, `"SYMBOL"`, `"ALIGN"`,
+            `"NOMACHINE"`, `"NOREMARK"`, `"NOREQUEST"`, `"NOSTORAGE"`, `"NOSYMBOL"`, `"NOALIGN"`.
+
+        flag : str, optional
+            String severity to be used for `FLAG` parameter.
+            String options include `ERROR`, `INFORMATIONAL`, `SERIOUS`|`SEVERE`,
+            `TERMINATING`, `WARNING`.
+
+        length : pyipcs.Hex|str|int, optional
+            pyipcs.Hex object or string or int to be used for `LENGTH` parameter.
+
+        pds : bool, optional
+            `True` for `PDS` parameter. `False` for `NOPDS` parameter.
+
         asid : pyipcs.Hex|str|int, optional
             pyipcs.Hex object or string or int to be used for `ASID` parameter.
 
         dspname : str, optional
             String dataspace name to be used for `DSPNAME` parameter.
-            
+
         setdef_params : str, optional
             String of `SETDEF` parameters. 
-            Write parameters as you would in regular IPCS (ex: `'ACTIVE LENGTH(4)'`).
+            Write parameters as you would in regular IPCS (ex: `"ACTIVE LENGTH(4)"`).
         
         Returns
         -------
@@ -364,21 +425,18 @@ class DumpDirectory:
         setdef_obj = SetDef(self._session, **kwargs)
         if setdef_obj.rc != 0:
             raise InvalidReturnCodeError(
-                setdef_obj.subcmd,
-                setdef_obj.output,
-                setdef_obj.rc,
-                0
+                setdef_obj.subcmd, setdef_obj.output, setdef_obj.rc, 0
             )
         return setdef_obj
 
     @property
-    def dsname(self) -> str|None:
+    def dsname(self) -> str | None:
         """
         Attribute dsname
         """
         return self._dsname
 
-    def _delete(self, dsname : str) -> None:
+    def _delete(self, dsname: str) -> None:
         """
         Protected Function.
 

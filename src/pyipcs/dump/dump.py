@@ -108,8 +108,8 @@ class Dump:
 
         - **"total_bytes"** (pyipcs.Hex|None)
             Total number of bytes dumped for ASID in hex.
+            `None` if total_bytes for ASID is not defined in 'LISTDUMP'.
 
-            None if total_bytes for ASID is not defined in 'LISTDUMP'.
         - **"sumdump"** (pyipcs.Hex)
             Number of SUMMARY DUMP Data bytes dumped in hex.
 
@@ -278,6 +278,8 @@ class Dump:
         -------
         dict
             Dictionary representing Dump object
+            - **"__ipcs_type__"** *(str)*
+                `"Dump"`
             - **"dsname"** (str)
             - **"ddir"** (str)
             - **"header"** (dict)
@@ -308,7 +310,7 @@ class Dump:
         """
         Get Jobname from ASID.
 
-        Obtained info from `SELECT ALL` subcommand
+        Obtained info from `SELECT ALL` subcommand.
 
         Parameters
         ----------
@@ -317,7 +319,7 @@ class Dump:
         Returns
         -------
         str|None 
-            Jobname associated with ASID or `None` if ASID is not found
+            Jobname associated with ASID or `None` if ASID is not found.
         """
         if (
             not isinstance(asid, Hex)
@@ -339,7 +341,7 @@ class Dump:
         """
         Get ASID from Jobname.
 
-        Obtained info from `SELECT ALL` subcommand
+        Obtained info from `SELECT ALL` subcommand.
 
         Parameters
         ----------
@@ -348,7 +350,7 @@ class Dump:
         Returns
         --------
         list[pyipcs.Hex]
-            List of ASIDs associated with `jobname`
+            List of ASIDs associated with `jobname`.
         """
         if not isinstance(jobname, str):
             raise TypeError(
@@ -365,7 +367,7 @@ class Dump:
         """
         Get ASCB address from ASID.
 
-        Obtained info from `SELECT ALL` subcommand
+        Obtained info from `SELECT ALL` subcommand.
 
         Parameters
         ----------
@@ -374,7 +376,7 @@ class Dump:
         Returns
         -------
         pyipcs.Hex|None 
-            ASCB address associated with ASID or `None` if ASID is not found
+            ASCB address associated with ASID or `None` if ASID is not found.
         """
         if (
             not isinstance(asid, Hex)

@@ -2,6 +2,7 @@ conftest
 docstrings
 fixturenames
 getfixturevalue
+ipynb
 kwargs
 metafunc
 pylint

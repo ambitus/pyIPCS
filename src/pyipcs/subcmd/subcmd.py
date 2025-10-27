@@ -28,7 +28,7 @@ class Subcmd:
     Attributes
     ----------
     subcmd : str
-        IPCS subcommand that was ran
+        IPCS subcommand that was ran.
 
     outfile : str|None
         File containing subcommand output.
@@ -78,7 +78,7 @@ class Subcmd:
         based on a label, separator, and field length.
 
     delete_file()
-        Function to preemptively delete file associated with subcommand.
+        Method to preemptively delete file associated with subcommand.
         Will not be able to index into file output after completion.
 
     """
@@ -105,8 +105,7 @@ class Subcmd:
         
         outfile : bool, optional
             If `True`, will create and store output in directory
-            `[pyipcs.IpcsSession.directory]/pyipcs_session/...`
-            `...[time of session open]/subcmd_output/`.
+            `[pyipcs.IpcsSession.directory_full]/subcmd_output/`.
             File would then be specified in `outfile` attribute of Subcmd object.
             If `False`, stores output in string
             specified in `output` attribute of Subcmd object. Default is `False`.
@@ -204,6 +203,8 @@ class Subcmd:
         Returns
         -------
         dict: Dictionary representing Subcmd object
+            - **"__ipcs_type__"** *(str)*
+                `"Subcmd"`
             - **"subcmd"** (str)
             - **"outfile"** (str|None)
             - **"output"** (str)
@@ -332,7 +333,7 @@ class Subcmd:
         Parameters
         ----------
         substring : str
-            Substring to search for
+            Substring to search for.
 
         start : int, optional
             Index where to end the reverse search. Default is `0`.
@@ -344,7 +345,7 @@ class Subcmd:
         Returns
         -------
         int
-            Output index where substring was found. `-1` if substring was not found
+            Output index where substring was found. `-1` if substring was not found.
         """
         if not isinstance(substring, str):
             raise TypeError(
@@ -391,7 +392,7 @@ class Subcmd:
             The label of the field.
 
         end_string : str
-            End string that indicates end of value.
+            End string that indicates the end of the value.
 
         separator : str, optional
             The separator between the label and the value.
@@ -476,7 +477,7 @@ class Subcmd:
             The label of the field.
 
         length : int
-            Length of value to get.
+            Length of the value to get.
         
         separator : str, optional
             The separator between the label and the value.
@@ -555,7 +556,7 @@ class Subcmd:
             The label of the field.
 
         end_string : str
-            End string that indicates end of value.
+            End string that indicates the end of the value.
 
         separator : str, optional
             The separator between the label and the value.
@@ -640,7 +641,7 @@ class Subcmd:
             The label of the field.
 
         length : int
-            Length of value to get.
+            Length of the value to get.
 
         separator : str, optional
             The separator between the label and the value.
