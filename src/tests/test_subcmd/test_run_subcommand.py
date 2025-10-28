@@ -99,7 +99,7 @@ def test_run_subcmd_nodsname(open_session_default, mock_subcmd_list_nodsname, ou
             assert isinstance(nodsname_subcmd.rc, int)
 
             if outfile:
-                isinstance(nodsname_subcmd.outfile, str)
+                assert isinstance(nodsname_subcmd.outfile, str)
             else:
                 assert nodsname_subcmd.outfile is None
 

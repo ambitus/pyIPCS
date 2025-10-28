@@ -24,6 +24,7 @@ def zos_dataset(test_hlq):
     """
     test_dataset_name = f"{test_hlq}.TESTDATA"
     try:
+        datasets.create(name=test_dataset_name, dataset_type="SEQ")
         datasets.write(test_dataset_name, "PYIPCS TEST DATASET")
     except exceptions.DatasetWriteException as e:
         raise RuntimeError(

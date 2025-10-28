@@ -505,8 +505,10 @@ class IpcsSession:
         try:
             # Main Session Dataset
             # Write Initial DDIR to dataset
+            datasets.create(self.hlq_full, dataset_type="SEQ")
             datasets.write(self.hlq_full, content=init_ddir)
             # All IPCSEXEC execs
+            datasets.create(f"{self.hlq_full}.IPCSEXEC", dataset_type="PDSE")
             datasets.write(
                 self._ipcsexec_execs["IPACTIVE"],
                 content=IPACTIVE.format(
@@ -516,12 +518,13 @@ class IpcsSession:
             )
             datasets.write(
                 self._ipcsexec_execs["IPCSRUN"],
-                content=IPCSRUN,
+                content=IPCSRUN
             )
             # All SYSEXEC execs
+            datasets.create(f"{self.hlq_full}.SYSEXEC", dataset_type="PDSE")
             datasets.write(
                 self._sysexec_execs["IPCSEVAL"],
-                content=IPCSEVAL,
+                content=IPCSEVAL
             )
         except exceptions.DatasetWriteException as e:
             raise RuntimeError(

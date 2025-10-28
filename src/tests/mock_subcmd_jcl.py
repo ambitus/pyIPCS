@@ -94,11 +94,12 @@ def mock_subcmd_jcl(
         )
 
         # Create and write JCL to data set
-
+        datasets.create(name=JCL_TEMP_DSNAME,dataset_type="PDSE")
         datasets.write(dataset_name=JCL_TEMP_MEMBERNAME, content=jcl_str)
 
         # Create JCL output dataset
 
+        datasets.create(name=JCL_OUTPUT_DSNAME,dataset_type="SEQ", record_format="VB")
         datasets.write(dataset_name=JCL_OUTPUT_DSNAME, content="")
 
         # Submit job
