@@ -72,6 +72,22 @@ else:
 
 TEST_DUMPS = TEST_SETTINGS["TEST_DUMPS"]
 
+# =========================================
+# CHECK FOR NO LEFTOVER PYIPCS DATASETS
+# =========================================
+
+if (
+    datasets.list_dataset_names(USERID + ".PYIPCS.*", migrated=True)
+    or datasets.list_vsam_datasets(USERID + ".PYIPCS.*", migrated=True)
+    or datasets.list_dataset_names(TEST_HLQ + ".PYIPCS.*", migrated=True)
+    or datasets.list_vsam_datasets(TEST_HLQ + ".PYIPCS.*", migrated=True)
+):
+    raise RuntimeError(
+        "Cannot Run pyIPCS Tests - Leftover pyIPCS Datasets Located under User ID and TEST_HLQ"
+        + "\n\nPlease delete datasets with the following patterns:"
+        + f" {USERID}.PYIPCS.*, {TEST_HLQ}.PYIPCS.*"
+    )
+
 # ===================================
 # TEST FIXTURES/PARAMETERIZATION
 # ===================================
