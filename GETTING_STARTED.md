@@ -17,14 +17,14 @@
 2. **Complete Necessary Setup for IPCS on your z/OS Environment**
     - *[Getting Started with IPCS](https://www.ibm.com/docs/en/zos/3.1.0?topic=guide-getting-started-ipcs)*
 
-3. **Python 3.11 or Greater**
-    - *To run pyIPCS your Python version must be 3.11 or greater*
+3. **Python 3.12 or Greater**
+    - *To run pyIPCS your Python version must be 3.12 or greater*
     - *[IBM Open Enterprise SDK for Python](https://www.ibm.com/products/open-enterprise-python-zos)*
 
-4. **Install IBM Supported `zoautil_py` Python Package Version `1.3.x`**
-    - *[Installing and Configuring ZOAU](https://www.ibm.com/docs/en/zoau/1.3.0?topic=installing-zoau)*
-    - *[Install ZOAU Python APIs](https://www.ibm.com/docs/en/zoau/1.3.0?topic=installing-zoau#install-zoau-python-apis-optional)*
-    - *[ZOAU Python APIs](https://www.ibm.com/docs/en/zoau/1.3.0?topic=python-apis)*
+4. **Install IBM Supported `zoautil_py` Python Package Versions `1.4.x` or `1.3.x`**
+    - *[Installing and Configuring ZOAU](https://www.ibm.com/docs/en/zoau/1.4.x?topic=installing-zoau)*
+    - *[Install ZOAU Python APIs](https://www.ibm.com/docs/en/zoau/1.4.x?topic=installing-zoau#install-zoau-python-apis-optional)*
+    - *[ZOAU Python APIs](https://www.ibm.com/docs/en/zoau/1.4.x?topic=python-apis)*
 
 5. **Download Visual Studio Code and Install Zowe Explorer (Optional)**
     - *VS Code is the recommended IDE for Mainframe Development and pyIPCS*
