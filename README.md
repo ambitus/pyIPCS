@@ -670,7 +670,7 @@ session.close()
 
 ---
 
-### *class* pyipcs.IpcsSession(*hlq=None*, *directory=None*, *allocations={"IPCSPARM": ["SYS1.PARMLIB"], "SYSPROC": ["SYS1.SBLSCLI0"],}*)
+### *class* pyipcs.IpcsSession(*hlq=None*, *directory=None*, *allocations={"IPCSPARM": ["SYS1.PARMLIB"], "SYSPROC": ["SYS1.SBLSCLI0"]}*)
 
 **Bases:** *object*
 
@@ -1022,7 +1022,7 @@ session.close()
 
 - Create dump directory.
 - Uses `BLSCDDIR` CLIST to create DDIR.
-- Adding additional keyword arguments will override pyIPCS DDIR presets.
+- Adding additional keyword arguments will fully override pyIPCS DDIR presets.
 - [BLSCDDIR CLIST](https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory)
 
 #### Parameters
@@ -1058,7 +1058,7 @@ session.close()
 
 - Create temporary dump directory. Will be deleted on IPCS session close.
 - Uses `BLSCDDIR` CLIST to create DDIR.
-- Adding additional keyword arguments will override pyIPCS DDIR presets.
+- Adding additional keyword arguments will fully override pyIPCS DDIR presets.
 - [BLSCDDIR CLIST](https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory)
 
 #### Parameters
