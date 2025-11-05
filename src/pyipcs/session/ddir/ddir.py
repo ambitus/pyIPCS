@@ -121,7 +121,7 @@ class DumpDirectory:
         Create dump directory.
 
         Uses `BLSCDDIR` CLIST to create DDIR.
-        Adding additional keyword arguments will override pyIPCS DDIR presets.
+        Adding additional keyword arguments will fully override pyIPCS DDIR presets.
 
         https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory
 
@@ -164,13 +164,10 @@ class DumpDirectory:
         # Use keyword args provided otherwise use preset if it exists
         # ===================================================================
 
-        # Combine kwargs and existing presets
-        for param, value in self._presets.items():
-            if param not in kwargs:
-                kwargs[param] = value
+        params = kwargs if kwargs else self._presets
 
         # Add parameters to BLSCDDIR command
-        for param, value in kwargs.items():
+        for param, value in params.items():
             if param in self._BLSCDDIR_PARAMS:
                 if not isinstance(value, self._BLSCDDIR_PARAMS[param]):
                     raise ArgumentTypeError(param, value, self._BLSCDDIR_PARAMS[param])
@@ -191,7 +188,7 @@ class DumpDirectory:
         Create temporary dump directory. Will be deleted on IPCS session close.
 
         Uses `BLSCDDIR` CLIST to create DDIR.
-        Adding additional keyword arguments will override pyIPCS DDIR presets.
+        Adding additional keyword arguments will fully override pyIPCS DDIR presets.
 
         https://www.ibm.com/docs/en/zos/3.1.0?topic=execs-blscddir-clist-create-dump-directory
 
