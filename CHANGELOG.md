@@ -10,6 +10,12 @@
 
 ---
 
+## [1.2.1] - 1/12/2026
+
+### Fixed
+
+- Corrected commit authors and committers
+
 ## [1.2.0] - 11/5/2025
 
 ### Added

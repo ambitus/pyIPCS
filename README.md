@@ -21,7 +21,7 @@
 ---
 ---
 
-## pyIPCS Version: `1.2.0`
+## pyIPCS Version: `1.2.1`
 
 - **To check your current pyIPCS version:**
 
