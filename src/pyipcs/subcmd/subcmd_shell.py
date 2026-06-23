@@ -65,13 +65,15 @@ def construct_allocations(session: IpcsSession) -> dict[str, str | list[str]]:
     allocations_copy["IPCSEXEC"] = [session._ipcsexec_dsname]
     allocations_copy["SYSEXEC"] = [session._sysexec_dsname]
 
-    # Add in SYSEXEC from user allocations
+    # Add in SYSEXEC from user allocations, first datasets set the concatenation format
     if "SYSEXEC" in session.aloc.get():
         allocations_sysexec = copy.deepcopy(session.aloc.get()["SYSEXEC"])
         if isinstance(allocations_sysexec, str):
-            allocations_copy["SYSEXEC"].append(allocations_sysexec)
+            allocations_copy["SYSEXEC"] = [allocations_sysexec, session._sysexec_dsname]
         else:
-            allocations_copy["SYSEXEC"].extend(allocations_sysexec)
+            allocations_copy["SYSEXEC"] = allocations_sysexec + [session._sysexec_dsname]
+    else:
+        allocations_copy["SYSEXEC"] = [session._sysexec_dsname]
 
     return allocations_copy
 
