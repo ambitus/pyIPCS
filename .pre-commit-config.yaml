@@ -1,20 +1,52 @@
+default_install_hook_types: [pre-commit, commit-msg]
+
 repos:
     
   - repo: local
 
     hooks:
 
+      - id: check-git-user-name
+        name: Check git user.name is set
+        entry: >-
+          bash -c
+          'git config user.name | grep -q "." ||
+          (echo "ERROR: git user.name is not set. Run: git config --global user.name \"Your Name\"" && exit 1)'
+        language: system
+        stages: [pre-commit]
+        always_run: true
+        pass_filenames: false
+
+      - id: check-git-user-email
+        name: Check git user.email is set
+        entry: >-
+          bash -c
+          'git config user.email | grep -q "." ||
+          (echo "ERROR: git user.email is not set. Run: git config --global user.email \"you@example.com\"" && exit 1)'
+        language: system
+        stages: [pre-commit]
+        always_run: true
+        pass_filenames: false
+
       - id: pylint
         name: Pylint
-        entry: pylint --fail-under=10.0 --rcfile=.pylintrc
+        entry: >-
+          bash -c
+          'pylint --fail-under=10.0 --rcfile=.pylintrc "$@";
+          rc=$?;
+          [ $rc -ne 0 ] && (echo "ERROR: Pylint failed. Running black to auto-format the affected files. Review the changes, re-stage, and recommit." && black "$@");
+          exit $rc' --
         language: system
         types: [python]
         files: ^src/
         stages: [pre-commit]
 
-      - id: dco-check
-        name: Check DCO Signoff
-        entry: python3 dev/pre-commit/dco_check.py
+      - id: check-dco-signoff
+        name: Check for DCO Sign-off
+        entry: >-
+          bash -c
+          'grep -qE "^Signed-off-by: .+" "$1" ||
+          (echo "ERROR: Commit message is missing a DCO sign-off line. Add one with: git commit -s" && exit 1)' --
         language: system
         stages: [commit-msg]
         always_run: true

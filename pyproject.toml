@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyipcs"
-version = "1.2.1"
+version = "2.0.0"
 authors = [
   { name="John Gontaryk", email="johngontaryk@gmail.com" },
 ]
@@ -15,14 +15,15 @@ maintainers = [
   { name="Elliott Picker", email="elliott.picker@me.com" }
 ]
 description = "Python Library to interface with IPCS(Interactive Problem Control System)"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 classifiers = [
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Operating System :: POSIX :: Other",
-    "Topic :: System :: Hardware :: Mainframes",
+  "Topic :: System :: Hardware :: Mainframes",
+  "Operating System :: POSIX :: Other",
+  "License :: OSI Approved :: Apache Software License",
 ]
+
+[project.scripts]
+pyipcs = "pyipcs.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

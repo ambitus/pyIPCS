@@ -1,0 +1,10 @@
+pytest
+pre-commit
+# Code Formatting
+pylint
+black
+# Docs
+sphinx
+furo
+myst-parser
+sphinx-autodoc-typehints

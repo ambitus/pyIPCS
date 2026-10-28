@@ -1,12 +1,41 @@
-*.pyc
-logs/*
-.vscode/*
-*.csv
-Pipfile
-Pipfile.lock
-.env
-venv/*
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 *.whl
-src/pyipcs.egg-info/*
-build/*
-src/tests/settings.json
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.log
+
+# Generated documentation files
+docs/source/**/*.rst
