@@ -6,7 +6,7 @@ import pytest
 from zoautil_py import datasets
 
 from pyipcs._util import check_dataset_exists
-from pyipcs.ipcs import find_field, rfind_field, is_dump
+from pyipcs.ipcs import find_field, rfind_field, is_dump, opcode
 
 
 def test_is_dump_nonexistent(hlq):
@@ -131,3 +131,11 @@ def test_find_field_length_and_end_str(func):
     """Providing both length and end_str raises ValueError."""
     with pytest.raises(ValueError):
         func(TEXT, "key=", length=2, end_str=" ")
+
+
+def test_opcode_split_operation_code(default_ddir):
+    """OPCODE with split operation code X'E303' resolves to mnemonic LRAG."""
+    result = opcode(default_ddir, "E303")
+    assert result.data == "LRAG"
+    assert result.response.rc == 0
+    assert result.response.output is not None

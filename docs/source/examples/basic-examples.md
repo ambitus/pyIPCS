@@ -79,7 +79,7 @@ with IpcsDdir.temp_ddir() as ddir:
     print(f"Return code: {ipl.response.rc}")
 
     # Decode an opcode
-    mnemonic = ipcs.opcode(ddir, dump, "0A0A")
+    mnemonic = ipcs.opcode(ddir, "0A0A")
     print(f"Mnemonic: {mnemonic.data}")
 ```
 

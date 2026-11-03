@@ -360,14 +360,13 @@ def asids_dumped(
 
 
 def opcode(
-    ddir: IpcsDdir, dump: IpcsDump, instr: str
+    ddir: IpcsDdir, instr: str
 ) -> IpcsParsedResponse[Optional[str]]:
     """
     Run ``OPCODE`` and return the mnemonic for an instruction.
 
     Args:
         ddir: DDIR to run the subcommand against.
-        dump: Dump data set to run the subcommand against.
         instr: Hex string of the instruction opcode (e.g. ``"0A0A"``).
 
     Returns:
@@ -376,7 +375,8 @@ def opcode(
         ``data`` as ``None`` if the mnemonic could not be determined or the
         subcommand return code is greater than 0.
     """
-    response = ddir.run(f"OPCODE {instr}", dump=dump)
+    instr = instr.strip().upper()
+    response = ddir.run(f"OPCODE {instr}")
     if response.rc > 0 or response.output is None:
         return IpcsParsedResponse(data=None, response=response)
     if "IKJ56702I INVALID VARIABLE MNEMONIC OPTION" in response.output:
