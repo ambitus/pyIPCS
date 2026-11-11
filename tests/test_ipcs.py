@@ -10,10 +10,11 @@ from pyipcs.ipcs import find_field, rfind_field, is_dump, opcode
 
 
 def test_is_dump_nonexistent(hlq):
-    """A data set that does not exist is not a dump."""
+    """A data set that does not exist raises ValueError."""
     dsname = f"{hlq}.MISSING.DSN"
     assert not check_dataset_exists(dsname)
-    assert is_dump(dsname) is False
+    with pytest.raises(ValueError, match="does not exist"):
+        is_dump(dsname)
 
 
 def test_is_dump_non_dump_dataset(temp_dsname):
