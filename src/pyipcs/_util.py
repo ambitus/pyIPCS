@@ -129,8 +129,8 @@ def get_header_record(dump: IpcsDump) -> bytes | None:
     second_record = io.readrecord()
     # PRDAST - Address space type code
     # X'C840' / H = Header
-    if first_record[4:6].hex() == "C840":
+    if first_record[4:6].hex().upper() == "C840":
         return first_record
-    if second_record[4:6].hex() == "C840":
+    if second_record[4:6].hex().upper() == "C840":
         return second_record
     return None

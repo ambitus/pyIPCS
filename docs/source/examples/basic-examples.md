@@ -88,7 +88,7 @@ with IpcsDdir.temp_ddir() as ddir:
 `find_field` and `rfind_field` locate the text that follows a start string and return
 its `(begin, end)` indexes. `find_field` uses the first occurrence of the start string and
 `rfind_field` uses the last. The field ends after `length` characters, at the next
-`end_str`, or at the next space if neither is given. Use `start` and `end` to limit the
+`end_str`, or at the end of the text if neither is given. Use `start` and `end` to limit the
 part of the text that is searched.
 
 ```python
@@ -96,10 +96,10 @@ from pyipcs.ipcs import find_field, rfind_field
 
 text = "key=ABC def=XYZ key=123 end"
 
-begin, end = find_field(text, "key=")
+begin, end = find_field(text, "key=", end_str=" ")
 print(text[begin:end])  # ABC
 
-begin, end = rfind_field(text, "key=")
+begin, end = rfind_field(text, "key=", end_str=" ")
 print(text[begin:end])  # 123
 
 begin, end = find_field(text, "def=", length=2)
