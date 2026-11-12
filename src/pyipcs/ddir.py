@@ -506,10 +506,6 @@ class IpcsDdir:
             else:
                 local_defaults = f"DSNAME('{dump.dsname}') {local_defaults}"
 
-        tasklib_str = None
-        if self._tasklib:
-            tasklib_str = " ".join(f"'{dsname}'" for dsname in self._tasklib)
-
         return ipcs_subcmd(
             subcmd=subcmd,
             driver=self._driver,
@@ -517,7 +513,7 @@ class IpcsDdir:
             allocations=self._allocations,
             authorized=authorized,
             local_defaults=local_defaults,
-            tasklib=tasklib_str,
+            tasklib=self._tasklib,
             output=output,
         )
 

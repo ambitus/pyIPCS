@@ -19,7 +19,7 @@ def ipcs_subcmd(
     allocations: dict[str, str | list[str]],
     authorized: bool,
     local_defaults: Optional[str] = None,
-    tasklib: Optional[str] = None,
+    tasklib: Optional[list[str]] = None,
     output: Optional[IO[str]] = None,
 ) -> IpcsResponse:
     """
@@ -41,8 +41,9 @@ def ipcs_subcmd(
             over to future subcommands. May be a single string
             (e.g. ``'FLAG(WARNING) CONFIRM(NO)'``). Default is ``None`` to not
             run a ``SETDEF`` subcommand before running the specified subcommand.
-        tasklib: If non-empty, passed as ``TASKLIB(<tasklib>)`` on the
-            ``IPCS NOPARM`` call. Default is ``None``.
+        tasklib: If non-empty, list of data set names that are comma-separated
+            and passed as ``TASKLIB(<tasklib>)`` on the ``IPCS NOPARM`` call,
+            and also allocated to ``IPCSTLIB``. Default is ``None``.
         output: An open, writable text file object. When provided, subcommand
             output is written to this file instead of being returned as a string
             (``output`` attribute will be ``None`` in the returned
@@ -51,7 +52,9 @@ def ipcs_subcmd(
     Returns:
         IpcsResponse: Response from the IPCS subcommand.
     """
-    allocations = {**allocations, "IPCSDDIR": [ddir]}
+    allocations = {**allocations, "IPCSDDIR": [ddir], "IPCSDRIV": [driver]}
+    if tasklib:
+        allocations["IPCSTLIB"] = tasklib
 
     # Construct IPCS subcommand
     escaped_subcmd = subcmd.strip().replace("'", "''''")
@@ -62,7 +65,8 @@ def ipcs_subcmd(
         escaped_setdef = local_defaults.replace("'", "''''")
         extra_parms += f" SDL(''SETDEF NOLIST LOCAL {escaped_setdef}'')"
     if tasklib:
-        escaped_tl = tasklib.replace("'", "''''")
+        tasklib_str = ",".join(f"'{dsname}'" for dsname in tasklib)
+        escaped_tl = tasklib_str.replace("'", "''''")
         extra_parms += f" TL(''{escaped_tl}'')"
 
     cmd = f"ex '{driver}(IPCSRUN)' 'SUB(''{escaped_subcmd}''){extra_parms}'"
