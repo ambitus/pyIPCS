@@ -58,8 +58,8 @@ def find_field(
     Find the first field that follows a start string.
 
     The field is the text in between ``start_str`` and either ``length`` characters later
-    or the next occurrence of ``end_str``. If neither is given, the field ends at the next
-    space character.
+    or the next occurrence of ``end_str``. If neither is given, the field goes to the end
+    of the text.
 
     Args:
         text: String to search.
@@ -89,7 +89,9 @@ def find_field(
     if length is not None:
         stop = begin + length
         return (begin, stop if stop <= limit else -1)
-    return (begin, text.find(" " if end_str is None else end_str, begin, limit))
+    if end_str is not None:
+        return (begin, text.find(end_str, begin, limit))
+    return (begin, limit)
 
 
 def rfind_field(
@@ -133,7 +135,9 @@ def rfind_field(
     if length is not None:
         stop = begin + length
         return (begin, stop if stop <= limit else -1)
-    return (begin, text.find(" " if end_str is None else end_str, begin, limit))
+    if end_str is not None:
+        return (begin, text.find(end_str, begin, limit))
+    return (begin, limit)
 
 
 def sliptrap(
@@ -383,7 +387,7 @@ def opcode(
         return IpcsParsedResponse(data=None, response=response)
 
     begin, end = find_field(
-        response.output, f"Mnemonic for X'{instr}' is ", end_str="\n"
+        response.output, f"Mnemonic for X'{instr}' is "
     )
     if end == -1:
         return IpcsParsedResponse(data=None, response=response)

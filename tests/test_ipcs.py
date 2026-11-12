@@ -50,9 +50,9 @@ TEXT = "key=ABC def=XYZ key=123 end"
 @pytest.mark.parametrize(
     "kwargs, expected",
     [
-        # Default end is the next space
-        ({"start_str": "key="}, (4, 7)),
-        ({"start_str": "def="}, (12, 15)),
+        # Default end is the end of the text
+        ({"start_str": "key="}, (4, 27)),
+        ({"start_str": "def="}, (12, 27)),
         # length
         ({"start_str": "def=", "length": 2}, (12, 14)),
         ({"start_str": "key=", "length": 3}, (4, 7)),
@@ -63,14 +63,14 @@ TEXT = "key=ABC def=XYZ key=123 end"
         # start_str not found
         ({"start_str": "nope"}, (-1, -1)),
         ({"start_str": "nope", "length": 2}, (-1, -1)),
-        # No space after start_str, length past the end of text
-        ({"start_str": "end"}, (27, -1)),
+        # start_str at end of text, length past the end of text
+        ({"start_str": "end"}, (27, 27)),
         ({"start_str": "end", "length": 1}, (27, -1)),
         # start / end search bounds
-        ({"start_str": "key=", "start": 5}, (20, 23)),
+        ({"start_str": "key=", "start": 5}, (20, 27)),
         ({"start_str": "key=", "start": 17}, (-1, -1)),
-        ({"start_str": "key=", "end": 10}, (4, 7)),
-        ({"start_str": "key=", "end": 6}, (4, -1)),
+        ({"start_str": "key=", "end": 10}, (4, 10)),
+        ({"start_str": "key=", "end": 6}, (4, 6)),
         ({"start_str": "key=", "end": 3}, (-1, -1)),
         ({"start_str": "key=", "length": 3, "end": 7}, (4, 7)),
         ({"start_str": "key=", "length": 3, "end": 6}, (4, -1)),
@@ -85,9 +85,9 @@ def test_find_field(kwargs, expected):
 @pytest.mark.parametrize(
     "kwargs, expected",
     [
-        # Default end is the next space
-        ({"start_str": "key="}, (20, 23)),
-        ({"start_str": "def="}, (12, 15)),
+        # Default end is the end of the text
+        ({"start_str": "key="}, (20, 27)),
+        ({"start_str": "def="}, (12, 27)),
         # length
         ({"start_str": "key=", "length": 2}, (20, 22)),
         ({"start_str": "key=", "length": 4}, (20, 24)),
@@ -97,12 +97,12 @@ def test_find_field(kwargs, expected):
         ({"start_str": "key=", "end_str": "!"}, (20, -1)),
         # start_str not found
         ({"start_str": "nope"}, (-1, -1)),
-        # No space after start_str
-        ({"start_str": "end"}, (27, -1)),
+        # start_str at end of text
+        ({"start_str": "end"}, (27, 27)),
         # start / end search bounds
-        ({"start_str": "key=", "end": 19}, (4, 7)),
-        ({"start_str": "key=", "end": 22}, (20, -1)),
-        ({"start_str": "key=", "start": 16}, (20, 23)),
+        ({"start_str": "key=", "end": 19}, (4, 19)),
+        ({"start_str": "key=", "end": 22}, (20, 22)),
+        ({"start_str": "key=", "start": 16}, (20, 27)),
         ({"start_str": "key=", "start": 17}, (-1, -1)),
     ],
 )
@@ -113,12 +113,16 @@ def test_rfind_field(kwargs, expected):
 
 def test_find_field_slices_field():
     """The returned tuple slices out the text in between."""
-    begin, end = find_field(TEXT, "key=")
+    begin, end = find_field(TEXT, "key=", end_str=" ")
     assert TEXT[begin:end] == "ABC"
-    begin, end = rfind_field(TEXT, "key=")
+    begin, end = rfind_field(TEXT, "key=", end_str=" ")
     assert TEXT[begin:end] == "123"
     begin, end = find_field(TEXT, "def=", end_str=" key")
     assert TEXT[begin:end] == "XYZ"
+    begin, end = find_field(TEXT, "key=")
+    assert TEXT[begin:end] == "ABC def=XYZ key=123 end"
+    begin, end = rfind_field(TEXT, "key=")
+    assert TEXT[begin:end] == "123 end"
 
 
 def test_find_field_empty_text():
