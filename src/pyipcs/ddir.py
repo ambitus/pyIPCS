@@ -173,6 +173,7 @@ class IpcsDdir:
         hlq: Optional[str] = None,
         driver: Optional[str] = None,
         allocations: Optional[dict[str, str | list[str]]] = None,
+        tasklib: Optional[Iterable[str]] = None,
         ddir_parms: Optional[str | Iterable[str]] = None,
         delete: bool = True,
     ) -> Self:
@@ -192,6 +193,12 @@ class IpcsDdir:
             allocations: Dictionary of IPCS allocations where keys are DD names
                 and values are string data set allocation requests or lists of cataloged datasets.
                 Defaults to ``{"IPCSPARM": "SYS1.PARMLIB", "SYSPROC": "SYS1.SBLSCLI0"}``
+            tasklib: Iterable of fully-qualified data set names to search for
+                IPCS-authorized programs via ``IPCS TASKLIB(...)``.
+                Each data set name is enclosed in apostrophes and concatenated, e.g.
+                ``['IPCSU1.DEBUG.LOAD', 'IPCSU1.DIAGNOS.LOAD']`` becomes
+                ``TASKLIB('IPCSU1.DEBUG.LOAD' 'IPCSU1.DIAGNOS.LOAD')``.
+                Default is ``None`` (no ``TASKLIB`` specified).
             ddir_parms: Additional parameters to pass to the ``BLSCDDIR`` CLIST.
                 May be a single string (e.g. ``'RECORDS(4000) VOLUME(MYVOL)'``)
                 or an iterable of string parms (e.g. ``['RECORDS(4000)', 'VOLUME(MYVOL)']``).
@@ -239,6 +246,7 @@ class IpcsDdir:
             dsname,
             driver=driver,
             allocations=allocations,
+            tasklib=tasklib,
             ddir_parms=ddir_parms,
             delete=delete,
         )
