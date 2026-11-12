@@ -192,7 +192,7 @@ def ipl_time(ddir: IpcsDdir, dump: IpcsDump) -> IpcsParsedResponse[Optional[str]
 
     Returns:
         IpcsParsedResponse[str | None]: Parsed response containing the ISO 8601
-        datetime string (``YYYY-MM-DDTHH:MM:SS``) in ``data`` and the raw
+        datetime string (``YYYY-MM-DDTHH:MM:SS.mmm``) in ``data`` and the raw
         ``response``, or ``data`` as ``None`` if the information could not be
         determined or the subcommand return code is greater than 0.
     """
@@ -207,13 +207,15 @@ def ipl_time(ddir: IpcsDdir, dump: IpcsDump) -> IpcsParsedResponse[Optional[str]
 
     line = output[begin:end].strip()
 
-    # Line format: "HH:MM:SS on MM/DD/YYYY"
+    # Line format: "HH:MM:SS.mmm on MM/DD/YYYY"
     try:
         time_str, date_str = line.split(" on ")
         dt = datetime.datetime.strptime(
-            f"{date_str.strip()} {time_str.strip()}", "%m/%d/%Y %H:%M:%S"
+            f"{date_str.strip()} {time_str.strip()}", "%m/%d/%Y %H:%M:%S.%f"
         )
-        return IpcsParsedResponse(data=dt.isoformat(), response=response)
+        return IpcsParsedResponse(
+            data=dt.isoformat(timespec="milliseconds"), response=response
+        )
     except (ValueError, AttributeError):
         return IpcsParsedResponse(data=None, response=response)
 
